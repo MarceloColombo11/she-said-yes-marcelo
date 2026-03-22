@@ -30,24 +30,24 @@ export function InstagramEmbeds() {
 
   return (
     <>
-      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
         {INSTAGRAM_POSTS.map((url) => (
-          <div key={url} className="flex justify-center">
+          <div
+            key={url}
+            className="flex justify-center overflow-hidden rounded-lg min-w-0 [&_.instagram-media]:w-full! [&_.instagram-media]:max-w-full! [&_iframe]:max-w-full!"
+          >
             <blockquote
-              className="instagram-media min-w-0 max-w-full"
+              className="instagram-media w-full! max-w-[540px]! min-w-0!"
               data-instgrm-permalink={url}
               data-instgrm-version="14"
               style={{
                 background: "#FFF",
                 border: 0,
-                borderRadius: "3px",
+                borderRadius: "8px",
                 boxShadow:
                   "0 0 1px 0 rgba(0,0,0,0.5),0 1px 10px 0 rgba(0,0,0,0.15)",
-                margin: 1,
-                minWidth: "min(326px, 100%)",
-                maxWidth: 540,
+                margin: 0,
                 padding: 0,
-                width: "99.375%",
               }}
             />
           </div>
