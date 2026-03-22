@@ -1,0 +1,30 @@
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { RsvpModal } from "./RsvpModal";
+
+export function RsvpSection() {
+  const [modalOpen, setModalOpen] = useState(false);
+
+  return (
+    <div className="mx-auto max-w-2xl text-center">
+      <h2 className="font-heading text-4xl font-semibold text-brown">
+        Confirmação de Presença
+      </h2>
+      <p className="mt-6 text-olive/90 leading-relaxed">
+        Seria uma honra contar com sua presença neste dia tão especial. Por
+        favor, confirme sua presença até o dia 15 de novembro de 2026.
+      </p>
+      <Button
+        size="lg"
+        className="mt-8 bg-sage hover:bg-sage/90"
+        onClick={() => setModalOpen(true)}
+        aria-label="Abrir formulário de confirmação de presença"
+      >
+        Confirmar Presença
+      </Button>
+      <RsvpModal open={modalOpen} onOpenChange={setModalOpen} />
+    </div>
+  );
+}

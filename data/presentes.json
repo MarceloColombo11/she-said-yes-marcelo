@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "nome": "Caixa de Ferramentas",
+    "descricao": "Para construir nossa vida a dois. Um presente prático que nos ajudará em muitos projetos futuros.",
+    "valor": "R$ 150,00",
+    "chavePix": "SUA_CHAVE_PIX_AQUI",
+    "imagem": null
+  },
+  {
+    "id": "2",
+    "nome": "Jantar Romântico",
+    "descricao": "Um jantar especial para celebrar nossa lua de mel. Um momento só nosso para saborear o amor.",
+    "valor": "R$ 300,00",
+    "chavePix": "SUA_CHAVE_PIX_AQUI",
+    "imagem": null
+  },
+  {
+    "id": "3",
+    "nome": "Contribuição para a Lua de Mel",
+    "descricao": "Contribua para nossa viagem de lua de mel. Cada valor nos ajuda a realizar o sonho de viajar juntos.",
+    "valor": "A partir de R$ 50,00",
+    "chavePix": "SUA_CHAVE_PIX_AQUI",
+    "imagem": null
+  }
+]

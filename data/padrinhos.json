@@ -1,0 +1,12 @@
+[
+  {
+    "nome": "Nome do Padrinho 1",
+    "foto": "https://ui-avatars.com/api/?name=Padrinho+1&size=96&background=849652&color=faf9f6",
+    "texto": "Uma pessoa especial que nos acompanha em cada etapa."
+  },
+  {
+    "nome": "Nome do Padrinho 2",
+    "foto": "https://ui-avatars.com/api/?name=Padrinho+2&size=96&background=849652&color=faf9f6",
+    "texto": "Compartilha conosco os momentos mais importantes."
+  }
+]

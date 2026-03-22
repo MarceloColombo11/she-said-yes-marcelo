@@ -1,0 +1,12 @@
+[
+  {
+    "nome": "Nome da Dama 1",
+    "foto": "https://ui-avatars.com/api/?name=Dama+1&size=96&background=849652&color=faf9f6",
+    "texto": "Uma amiga querida que ilumina nossos dias."
+  },
+  {
+    "nome": "Nome da Dama 2",
+    "foto": "https://ui-avatars.com/api/?name=Dama+2&size=96&background=849652&color=faf9f6",
+    "texto": "Sempre presente nos momentos de alegria."
+  }
+]

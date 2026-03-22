@@ -1,0 +1,26 @@
+[
+  {
+    "hora": "16:30",
+    "titulo": "Início da Cerimônia",
+    "descricao": "Aqui se dá o início de um sonho que foi sonhado a três: Suelen, Marcelo e Deus.",
+    "icone": "church"
+  },
+  {
+    "hora": "17:30",
+    "titulo": "Cocktail",
+    "descricao": "Momento de confraternização com drinks e petiscos enquanto celebramos.",
+    "icone": "wine"
+  },
+  {
+    "hora": "19:00",
+    "titulo": "Recepção",
+    "descricao": "Jantar de gala para celebrarmos juntos esta noite inesquecível.",
+    "icone": "utensils"
+  },
+  {
+    "hora": "21:00",
+    "titulo": "Festa",
+    "descricao": "Pista de dança liberada! Vamos celebrar até o amanhecer.",
+    "icone": "music"
+  }
+]
