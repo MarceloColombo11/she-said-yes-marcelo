@@ -24,9 +24,9 @@ export function LocationSection() {
         <p className="mt-4 text-olive">Onde celebraremos nosso amor</p>
       </div>
 
-      <div className="grid gap-12 lg:grid-cols-2">
+      <div className="flex flex-col gap-12">
         <div className="space-y-6">
-          <div>
+          <div className="text-center">
             <h3 className="font-heading text-2xl font-semibold text-brown">
               {VENUE_NAME}
             </h3>
@@ -34,12 +34,12 @@ export function LocationSection() {
               {VENUE_DESCRIPTION}
             </p>
 
-            <div className="mt-6 space-y-3">
-              <div className="flex items-start gap-3">
-                <MapPin className="mt-0.5 size-5 shrink-0 text-sage" />
+            <div className="mt-6 flex flex-col items-center gap-3">
+              <div className="flex items-center justify-center gap-3">
+                <MapPin className="size-5 shrink-0 text-sage" />
                 <p className="text-olive/90">{VENUE_ADDRESS}</p>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center gap-3">
                 <Phone className="size-5 shrink-0 text-sage" />
                 <a
                   href={`tel:+55${VENUE_PHONE.replace(/\D/g, "")}`}
@@ -77,7 +77,7 @@ export function LocationSection() {
             </div>
           </a>
           <div>
-            <h4 className="mb-4 font-heading text-lg font-semibold text-brown">
+            <h4 className="mb-4 font-heading text-lg font-semibold text-brown text-center">
               Publicações do local
             </h4>
             <InstagramEmbeds />
