@@ -8,7 +8,7 @@ Site elegante e funcional para o casamento de Suelen e Marcelo. Data: **28 de no
 - **TypeScript**
 - **Tailwind CSS**
 - **Shadcn/ui**
-- **Google Maps API** (mapa)
+- **Google Maps Embed** (mapa, sem API key)
 - **Google Apps Script** (RSVP e upload de fotos)
 
 ## Como rodar
@@ -27,7 +27,6 @@ Acesse [http://localhost:3000](http://localhost:3000).
 
 | Variável | Descrição |
 |----------|-----------|
-| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Chave da API do Google Maps |
 | `NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_RSVP_URL` | URL da Web App de confirmação |
 | `NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_UPLOAD_URL` | URL da Web App de upload de fotos |
 | `NEXT_PUBLIC_WEDDING_DATE` | Data e hora (ex: 2026-11-28T16:30:00) |
@@ -45,7 +44,7 @@ Veja os comentários nos arquivos para instruções de implantação.
 
 - **Fotos**: adicione imagens em `public/images/` e atualize os JSONs em `data/`
 - **Presentes**: edite `data/presentes.json` (inclua a chave Pix real)
-- **Local**: atualize endereço e Instagram em `components/LocationSection.tsx` e `components/MapWidget.tsx`
+- **Local**: atualize endereço, telefone e Instagram em `components/LocationSection.tsx`
 - **Padrinhos/Damas**: edite `data/padrinhos.json`, `data/damas.json`, `data/convidados-honra.json`
 - **Programação**: edite `data/programacao.json`
 
