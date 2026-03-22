@@ -61,7 +61,7 @@ export function HonorSection({ title, subtitle, data }: HonorSectionProps) {
           {title}
         </h2>
         {subtitle && (
-          <p className="mt-4 text-olive/80">{subtitle}</p>
+          <p className="mt-4 text-olive">{subtitle}</p>
         )}
       </div>
 
@@ -81,7 +81,7 @@ export function HonorSection({ title, subtitle, data }: HonorSectionProps) {
             <h3 className="mt-4 font-heading text-lg font-semibold text-brown">
               {person.nome}
             </h3>
-            <p className="mt-2 text-center text-sm text-olive/80">
+            <p className="mt-2 text-center text-sm text-olive">
               {person.texto}
             </p>
           </div>

@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,15 +38,36 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
     restricoes: "",
   });
 
+  const validateNome = (nome: string) => {
+    const trimmed = nome.trim();
+    if (!trimmed) return "Por favor, informe seu nome completo.";
+    const parts = trimmed.split(/\s+/).filter(Boolean);
+    if (parts.length < 2) return "Por favor, informe nome e sobrenome.";
+    return null;
+  };
+
+  const validateEmail = (email: string) => {
+    if (!email.trim()) return null;
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!re.test(email)) return "Informe um e-mail válido.";
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.nome.trim()) {
-      toast.error("Por favor, informe seu nome completo.");
+    const nomeError = validateNome(formData.nome);
+    if (nomeError) {
+      toast.error(nomeError);
+      return;
+    }
+    const emailError = validateEmail(formData.email);
+    if (emailError) {
+      toast.error(emailError);
       return;
     }
 
     if (!RSVP_URL) {
-      toast.error("Configuração de confirmação indisponível. Tente novamente mais tarde.");
+      toast.error("Confirmação de presença em breve. Volte em alguns dias!");
       return;
     }
 
@@ -84,6 +106,9 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
           <DialogTitle className="font-heading text-brown">
             Confirmar Presença
           </DialogTitle>
+          <DialogDescription>
+            Preencha o formulário para confirmar sua presença no nosso casamento.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
@@ -122,13 +147,14 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
               disabled={loading}
             >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue placeholder="Selecione" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="0">0</SelectItem>
-                <SelectItem value="1">1</SelectItem>
-                <SelectItem value="2">2</SelectItem>
-                <SelectItem value="3">3 ou mais</SelectItem>
+                {Array.from({ length: 11 }, (_, i) => (
+                  <SelectItem key={i} value={String(i)}>
+                    {i}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

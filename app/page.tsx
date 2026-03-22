@@ -19,10 +19,10 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <main className="pt-16">
+      <main id="main" className="pt-20 md:pt-16">
         {/* 1. Home - Hero + Countdown */}
-        <section id="home" className="min-h-screen">
-          <div className="relative min-h-screen flex flex-col items-center justify-center bg-olive/10">
+        <section id="home" className="min-h-[100dvh]">
+          <div className="relative min-h-[100dvh] flex flex-col items-center justify-center bg-olive/10">
             {/* Hero background - substituir por imagem real do casal */}
             <div
               className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
@@ -49,27 +49,27 @@ export default function Home() {
         </section>
 
         {/* 2. Presentes */}
-        <section id="presentes" className="py-20 px-4 bg-cream">
+        <section id="presentes" className="py-16 md:py-20 lg:py-24 px-4 bg-cream">
           <GiftsSection presents={presentesData} />
         </section>
 
         {/* 3. Local */}
-        <section id="local" className="py-20 px-4 bg-cream/80">
+        <section id="local" className="py-16 md:py-20 lg:py-24 px-4 bg-cream">
           <LocationSection />
         </section>
 
         {/* 4. Confirmação */}
-        <section id="confirmacao" className="py-20 px-4 bg-cream">
+        <section id="confirmacao" className="py-16 md:py-20 lg:py-24 px-4 bg-cream">
           <RsvpSection />
         </section>
 
         {/* 5. Sobre Nós */}
-        <section id="sobre-nos" className="py-20 px-4 bg-cream/80">
+        <section id="sobre-nos" className="py-16 md:py-20 lg:py-24 px-4 bg-cream">
           <AboutSection />
         </section>
 
         {/* 6. Padrinhos */}
-        <section id="padrinhos" className="py-20 px-4 bg-cream">
+        <section id="padrinhos" className="py-16 md:py-20 lg:py-24 px-4 bg-cream">
           <HonorSection
             title="Padrinhos"
             subtitle="As pessoas que caminham conosco"
@@ -78,7 +78,7 @@ export default function Home() {
         </section>
 
         {/* 7. Convidados de Honra */}
-        <section id="convidados-honra" className="py-20 px-4 bg-cream/80">
+        <section id="convidados-honra" className="py-16 md:py-20 lg:py-24 px-4 bg-cream">
           <HonorSection
             title="Convidados de Honra"
             subtitle="Especiais para nós"
@@ -87,7 +87,7 @@ export default function Home() {
         </section>
 
         {/* 8. Damas de Honra */}
-        <section id="damas" className="py-20 px-4 bg-cream">
+        <section id="damas" className="py-16 md:py-20 lg:py-24 px-4 bg-cream">
           <HonorSection
             title="Damas de Honra"
             subtitle="Nossas queridas damas"
@@ -96,12 +96,12 @@ export default function Home() {
         </section>
 
         {/* 9. Programação */}
-        <section id="programacao" className="py-20 px-4 bg-cream/80">
+        <section id="programacao" className="py-16 md:py-20 lg:py-24 px-4 bg-cream">
           <TimelineSection events={programacaoData} />
         </section>
 
         {/* 10. Suba sua Foto */}
-        <section id="fotos" className="py-20 px-4 bg-cream">
+        <section id="fotos" className="py-16 md:py-20 lg:py-24 px-4 bg-cream">
           <PhotoUploadSection />
         </section>
       </main>

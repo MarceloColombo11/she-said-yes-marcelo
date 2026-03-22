@@ -27,7 +27,7 @@ export function AboutSection() {
         <h2 className="font-heading text-4xl font-semibold text-brown">
           Sobre Nós
         </h2>
-        <p className="mt-4 text-olive/80">Nossa história de amor</p>
+        <p className="mt-4 text-olive">Nossa história de amor</p>
       </div>
 
       <div className="grid gap-12 lg:grid-cols-2 lg:items-center">

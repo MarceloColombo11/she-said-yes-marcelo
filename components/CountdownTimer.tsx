@@ -51,16 +51,16 @@ export function CountdownTimer() {
   ];
 
   return (
-    <div className="flex flex-wrap justify-center gap-4">
+    <div className="flex flex-wrap justify-center gap-2 sm:gap-4">
       {cards.map(({ label, value }) => (
         <div
           key={label}
-          className="flex flex-col items-center rounded-lg border border-olive/30 bg-cream/90 px-6 py-4 shadow-md backdrop-blur-sm min-w-[80px]"
+          className="flex flex-col items-center rounded-lg border border-olive/30 bg-cream/90 px-4 py-3 sm:px-6 sm:py-4 shadow-md backdrop-blur-sm min-w-[70px] sm:min-w-[80px]"
         >
-          <span className="font-heading text-3xl md:text-4xl font-semibold text-brown">
+          <span className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold text-brown">
             {pad(value)}
           </span>
-          <span className="text-sm text-olive/80 mt-1">{label}</span>
+          <span className="text-xs sm:text-sm text-olive mt-1">{label}</span>
         </div>
       ))}
     </div>

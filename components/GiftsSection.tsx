@@ -23,12 +23,12 @@ export function GiftsSection({ presents }: GiftsSectionProps) {
         <h2 className="font-heading text-4xl font-semibold text-brown">
           Presentes
         </h2>
-        <p className="mt-4 text-olive/80">
+        <p className="mt-4 text-olive">
           Se preferir nos presentear, aqui estão algumas sugestões.
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
         {presents.map((presente) => (
           <GiftCard
             key={presente.id}

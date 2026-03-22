@@ -21,7 +21,7 @@ export function LocationSection() {
         <h2 className="font-heading text-4xl font-semibold text-brown">
           Local
         </h2>
-        <p className="mt-4 text-olive/80">Onde celebraremos nosso amor</p>
+        <p className="mt-4 text-olive">Onde celebraremos nosso amor</p>
       </div>
 
       <div className="grid gap-12 lg:grid-cols-2">
@@ -71,7 +71,7 @@ export function LocationSection() {
             </div>
             <div className="text-center">
               <p className="font-medium text-brown">@mirantegarden.jardimdosenhor</p>
-              <p className="mt-1 text-sm text-olive/80">
+              <p className="mt-1 text-sm text-olive">
                 Confira fotos e novidades
               </p>
             </div>

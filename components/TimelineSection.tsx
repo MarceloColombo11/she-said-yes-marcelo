@@ -14,7 +14,7 @@ export function TimelineSection({ events }: TimelineSectionProps) {
         <h2 className="font-heading text-4xl font-semibold text-brown">
           Programação
         </h2>
-        <p className="mt-4 text-olive/80">O que vai rolar no nosso dia</p>
+        <p className="mt-4 text-olive">O que vai rolar no nosso dia</p>
       </div>
       <Timeline events={events} />
     </div>

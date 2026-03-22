@@ -42,6 +42,12 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col font-sans">
+        <a
+          href="#main"
+          className="fixed left-4 top-4 z-[100] -translate-y-20 rounded-lg bg-sage px-4 py-2 text-white font-medium transition-transform focus:translate-y-0 focus:outline-none focus:ring-2 focus:ring-sage focus:ring-offset-2"
+        >
+          Pular para conteúdo
+        </a>
         {children}
         <Toaster />
       </body>

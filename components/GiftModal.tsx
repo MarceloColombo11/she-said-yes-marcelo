@@ -6,10 +6,12 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Copy, Check } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import type { Presente } from "./GiftCard";
 
 interface GiftModalProps {
@@ -25,6 +27,7 @@ export function GiftModal({ presente, open, onOpenChange }: GiftModalProps) {
     if (!presente?.chavePix) return;
     navigator.clipboard.writeText(presente.chavePix);
     setCopied(true);
+    toast.success("Chave copiada! Cole no app do seu banco.");
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -37,6 +40,10 @@ export function GiftModal({ presente, open, onOpenChange }: GiftModalProps) {
           <DialogTitle className="font-heading text-brown">
             {presente.nome}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Detalhes do presente e pagamento via Pix com QR Code e chave para
+            copiar.
+          </DialogDescription>
         </DialogHeader>
         <div className="space-y-6">
           <p className="text-olive/90">{presente.descricao}</p>
@@ -69,7 +76,7 @@ export function GiftModal({ presente, open, onOpenChange }: GiftModalProps) {
                 )}
               </Button>
             </div>
-            <p className="text-xs text-olive/70">
+            <p className="text-xs text-olive">
               Copie a chave e cole no app do seu banco para pagar via Pix.
             </p>
           </div>

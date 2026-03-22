@@ -64,7 +64,7 @@ export function PhotoUploadSection() {
     }
 
     if (!UPLOAD_URL) {
-      toast.error("Upload indisponível. Configure NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_UPLOAD_URL.");
+      toast.error("Envio de fotos em breve. Volte em alguns dias!");
       return;
     }
 
@@ -109,7 +109,7 @@ export function PhotoUploadSection() {
         <h2 className="font-heading text-4xl font-semibold text-brown">
           Suba sua Foto
         </h2>
-        <p className="mt-4 text-olive/80">
+        <p className="mt-4 text-olive">
           Compartilhe seus momentos conosco! Envie suas fotos do casamento.
         </p>
       </div>

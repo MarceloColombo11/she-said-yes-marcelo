@@ -12,13 +12,14 @@ export function RsvpSection() {
       <h2 className="font-heading text-4xl font-semibold text-brown">
         Confirmação de Presença
       </h2>
-      <p className="mt-6 text-olive/90 leading-relaxed">
+      <p className="mt-6 text-olive leading-relaxed">
         Seria uma honra contar com sua presença neste dia tão especial. Por
         favor, confirme sua presença até o dia 15 de novembro de 2026.
       </p>
       <Button
         size="lg"
-        className="mt-8 bg-sage hover:bg-sage/90"
+        variant="default"
+        className="mt-8"
         onClick={() => setModalOpen(true)}
         aria-label="Abrir formulário de confirmação de presença"
       >
