@@ -1,13 +1,14 @@
 "use client";
 
 import { Instagram, MapPin, Phone } from "lucide-react";
+import { InstagramEmbeds } from "./InstagramEmbeds";
 import { MapWidget } from "./MapWidget";
 
 // Substituir pelo nome real e Instagram do local
 const VENUE_NAME = "Mirante Garden";
 const VENUE_DESCRIPTION =
   "Um espaço encantador para celebrar nosso amor. Com vista para a cidade e ambiente acolhedor.";
-const VENUE_INSTAGRAM = "https://instagram.com/lugarexemplo";
+const VENUE_INSTAGRAM = "https://www.instagram.com/mirantegarden.jardimdosenhor";
 const VENUE_ADDRESS =
   "Estrada Geral da Fazendinha - Fazendinha, Biguaçu - SC, 88160-000";
 const VENUE_PHONE = "(48) 99949-4900";
@@ -52,24 +53,30 @@ export function LocationSection() {
           <MapWidget />
         </div>
 
-        <div className="flex flex-col items-center justify-center rounded-xl border border-olive/20 bg-cream/50 p-8">
+        <div className="space-y-8">
           <a
             href={VENUE_INSTAGRAM}
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex flex-col items-center gap-4 transition-opacity hover:opacity-80"
+            className="flex flex-col items-center gap-4 rounded-xl border border-olive/20 bg-cream/50 p-8 transition-opacity hover:opacity-80"
             aria-label="Ver perfil do local no Instagram"
           >
             <div className="flex size-20 items-center justify-center rounded-full bg-sage/20 text-sage">
               <Instagram className="size-10" />
             </div>
             <div className="text-center">
-              <p className="font-medium text-brown">Instagram do local</p>
+              <p className="font-medium text-brown">@mirantegarden.jardimdosenhor</p>
               <p className="mt-1 text-sm text-olive/80">
                 Confira fotos e novidades
               </p>
             </div>
           </a>
+          <div>
+            <h4 className="mb-4 font-heading text-lg font-semibold text-brown">
+              Publicações do local
+            </h4>
+            <InstagramEmbeds />
+          </div>
         </div>
       </div>
     </div>
