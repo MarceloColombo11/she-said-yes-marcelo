@@ -3,15 +3,25 @@
 import { MapPin, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Mirante Garden - Fazendinha, Biguaçu - SC
-const MAPS_PLACE_URL =
-  "https://www.google.com/maps/place/Mirante+Garden/@-27.4567737,-48.7005941,17z";
+// Mirante Garden - link para obter direções
+const DIRECTIONS_URL =
+  "https://www.google.com/maps/dir//Mirante+Garden,+Estrada+Geral+da+Fazendinha+-+Fazendinha,+Bigua%C3%A7u+-+SC,+88160-000";
+
 const EMBED_URL =
-  "https://www.google.com/maps?q=-27.4567737,-48.6980192&z=17&output=embed";
+  "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3540.400967922347!2d-48.700594124541496!3d-27.45677367632704!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9527530be692af6f%3A0x7a1b1042588b0df!2sMirante%20Garden!5e0!3m2!1sen!2sbr!4v1774201165659!5m2!1sen!2sbr";
 
 export function MapWidget() {
-  const openInMaps = () => {
-    window.open(MAPS_PLACE_URL, "_blank");
+  const openDirections = () => {
+    const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const destination = encodeURIComponent(
+      "Mirante Garden, Estrada Geral da Fazendinha - Fazendinha, Biguaçu - SC, 88160-000"
+    );
+    const url = isIOS
+      ? `maps://maps.apple.com/?daddr=${destination}`
+      : DIRECTIONS_URL;
+    window.open(url, "_blank");
   };
 
   return (
@@ -20,7 +30,7 @@ export function MapWidget() {
         <iframe
           src={EMBED_URL}
           width="100%"
-          height="300"
+          height="450"
           style={{ border: 0 }}
           allowFullScreen
           loading="lazy"
@@ -29,9 +39,9 @@ export function MapWidget() {
         />
       </div>
       <Button
-        onClick={openInMaps}
+        onClick={openDirections}
         className="w-full sm:w-auto"
-        aria-label="Abrir local no mapa"
+        aria-label="Obter direções para o local"
       >
         <MapPin className="mr-2 size-4" />
         Como chegar
