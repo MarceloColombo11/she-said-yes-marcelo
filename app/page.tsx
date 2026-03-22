@@ -33,7 +33,10 @@ export default function Home() {
             />
             <div className="absolute inset-0 bg-cream/60" />
             <div className="relative z-10 flex flex-col items-center justify-center px-4 py-20 text-center">
-              <h1 className="font-heading text-6xl md:text-8xl font-light text-brown mb-4">
+              <h1
+                className="text-6xl md:text-8xl font-light text-brown mb-4"
+                style={{ fontFamily: "var(--font-hello-paris)" }}
+              >
                 S & M
               </h1>
               <p className="text-olive text-lg md:text-xl mb-2">

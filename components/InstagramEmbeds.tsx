@@ -35,7 +35,6 @@ export function InstagramEmbeds() {
           <div key={url} className="flex justify-center">
             <blockquote
               className="instagram-media min-w-0 max-w-full"
-              data-instgrm-captioned
               data-instgrm-permalink={url}
               data-instgrm-version="14"
               style={{

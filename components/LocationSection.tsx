@@ -1,6 +1,6 @@
 "use client";
 
-import { Instagram, MapPin, Phone } from "lucide-react";
+import { MapPin, Phone } from "lucide-react";
 import { InstagramEmbeds } from "./InstagramEmbeds";
 import { MapWidget } from "./MapWidget";
 
@@ -12,6 +12,7 @@ const VENUE_INSTAGRAM = "https://www.instagram.com/mirantegarden.jardimdosenhor"
 const VENUE_ADDRESS =
   "Estrada Geral da Fazendinha - Fazendinha, Biguaçu - SC, 88160-000";
 const VENUE_PHONE = "(48) 99949-4900";
+const VENUE_LOGO = "/images/mirante-garden-logo.jpg";
 
 export function LocationSection() {
   return (
@@ -58,11 +59,15 @@ export function LocationSection() {
             href={VENUE_INSTAGRAM}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center gap-4 rounded-xl border border-olive/20 bg-cream/50 p-8 transition-opacity hover:opacity-80"
+            className="group flex flex-col items-center gap-4 rounded-xl border border-olive/20 bg-cream/50 p-8 transition-opacity hover:opacity-80"
             aria-label="Ver perfil do local no Instagram"
           >
-            <div className="flex size-20 items-center justify-center rounded-full bg-sage/20 text-sage">
-              <Instagram className="size-10" />
+            <div className="flex size-20 shrink-0 overflow-hidden rounded-full bg-cream shadow-[0_2px_12px_rgba(0,0,0,0.08)] transition-shadow duration-300 group-hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)]">
+              <img
+                src={VENUE_LOGO}
+                alt="Mirante Garden - Jardim do Senhor"
+                className="size-full object-cover"
+              />
             </div>
             <div className="text-center">
               <p className="font-medium text-brown">@mirantegarden.jardimdosenhor</p>

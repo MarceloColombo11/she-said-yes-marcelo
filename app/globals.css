@@ -10,6 +10,7 @@
   --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, monospace;
   --font-heading: var(--font-playfair), ui-serif, Georgia, serif;
+  --font-hello-paris: "Hello Paris Serif", var(--font-playfair), ui-serif, Georgia, serif;
   /* Paleta do casamento */
   --color-olive: #4a5335;
   --color-cream: #faf9f6;
