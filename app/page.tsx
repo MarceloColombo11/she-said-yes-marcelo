@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { FallingLeaves } from "@/components/FallingLeaves";
 import Monograma from "@/components/monograma";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { GiftsSection } from "@/components/GiftsSection";
@@ -24,7 +25,7 @@ export default function Home() {
             <main id="main" className="pt-20 md:pt-16">
                 {/* 1. Home - Hero + Countdown */}
                 <section id="home" className="min-h-[100dvh]">
-                    <div className="relative min-h-[100dvh] flex flex-col items-center justify-center bg-olive/10">
+                    <div className="relative min-h-[100dvh] flex flex-col items-center justify-center bg-olive/10 overflow-hidden">
                         {/* Hero background - substituir por imagem real do casal */}
                         <div
                             className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
@@ -34,6 +35,7 @@ export default function Home() {
                             }}
                         />
                         <div className="absolute inset-0 bg-cream/60" />
+                        <FallingLeaves />
                         <div className="relative z-10 flex flex-col items-center justify-center px-4 py-20 text-center">
                             <Monograma
                                 className="h-96 md:h-[36rem] w-auto mb-4 object-contain"

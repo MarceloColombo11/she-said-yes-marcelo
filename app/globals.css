@@ -135,6 +135,38 @@
   }
 }
 
+/* Efeito folhas caindo - física realista, GPU-accelerated */
+@keyframes leaf-fall {
+    0% {
+        transform: translateY(-10%) translateX(0) rotate(var(--rotate-0, 0deg));
+        opacity: 0.85;
+    }
+    25% {
+        transform: translateY(27.5vh) translateX(var(--sway-amplitude)) rotate(var(--rotate-25));
+        opacity: 0.85;
+    }
+    50% {
+        transform: translateY(65vh) translateX(0) rotate(var(--rotate-50));
+        opacity: 0.85;
+    }
+    75% {
+        transform: translateY(102.5vh) translateX(var(--sway-amplitude-neg)) rotate(var(--rotate-75));
+        opacity: 0.85;
+    }
+    85% {
+        opacity: 0.4;
+    }
+    100% {
+        transform: translateY(120vh) translateX(0) rotate(var(--rotate-end));
+        opacity: 0;
+    }
+}
+
+.animate-leaf-fall {
+    animation: leaf-fall linear infinite;
+    animation-fill-mode: backwards;
+}
+
 /* Safe area para dispositivos com notch/dynamic island */
 @utility pt-safe {
   padding-top: env(safe-area-inset-top);
