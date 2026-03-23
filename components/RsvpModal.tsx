@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -36,8 +35,8 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
-    acompanhantes: "0",
-    restricoes: "",
+    nomeAcompanhante: "",
+    microonibus: "" as "" | "sim" | "nao",
   });
   const [nomeError, setNomeError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
@@ -93,15 +92,15 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
         body: JSON.stringify({
           nome: formData.nome.trim(),
           email: formData.email.trim() || null,
-          acompanhantes: formData.acompanhantes,
-          restricoes: formData.restricoes.trim() || null,
+          nomeAcompanhante: formData.nomeAcompanhante.trim() || null,
+          microonibus: formData.microonibus || null,
         }),
       });
 
       const result = await response.json().catch(() => ({}));
       if (response.ok && result?.success !== false) {
         setSuccess(true);
-        setFormData({ nome: "", email: "", acompanhantes: "0", restricoes: "" });
+        setFormData({ nome: "", email: "", nomeAcompanhante: "", microonibus: "" });
       } else {
         toast.error(result?.error ?? "Erro ao confirmar. Tente novamente.");
       }
@@ -209,11 +208,25 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="rsvp-acompanhantes">Número de acompanhantes</Label>
+              <Label htmlFor="rsvp-nome-acompanhante">Nome do acompanhante</Label>
+              <Input
+                id="rsvp-nome-acompanhante"
+                value={formData.nomeAcompanhante}
+                onChange={(e) =>
+                  setFormData((p) => ({ ...p, nomeAcompanhante: e.target.value }))
+                }
+                placeholder="Nome completo do acompanhante (opcional)"
+                disabled={loading}
+                className="min-h-[44px]"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="rsvp-microonibus">Deseja microônibus?</Label>
               <Select
-                value={formData.acompanhantes}
+                value={formData.microonibus}
                 onValueChange={(v) =>
-                  setFormData((p) => ({ ...p, acompanhantes: v ?? "0" }))
+                  setFormData((p) => ({ ...p, microonibus: (v ?? "") as "" | "sim" | "nao" }))
                 }
                 disabled={loading}
               >
@@ -221,28 +234,13 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
                   <SelectValue placeholder="Selecione" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.from({ length: 11 }, (_, i) => (
-                    <SelectItem key={i} value={String(i)}>
-                      {i}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="sim">Sim</SelectItem>
+                  <SelectItem value="nao">Não</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="rsvp-restricoes">Restrições alimentares</Label>
-              <Textarea
-                id="rsvp-restricoes"
-                value={formData.restricoes}
-                onChange={(e) =>
-                  setFormData((p) => ({ ...p, restricoes: e.target.value }))
-                }
-                placeholder="Vegetariano, alergias, etc. (opcional)"
-                rows={3}
-                disabled={loading}
-                className="min-h-[88px]"
-              />
+              <span className="block text-sm text-muted-foreground">
+                O microônibus será por conta dos noivos.
+              </span>
             </div>
 
             <Button

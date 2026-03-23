@@ -96,7 +96,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { nome, email, acompanhantes, restricoes } = body;
+    const { nome, email, nomeAcompanhante, microonibus } = body;
 
     const trimmedNome = typeof nome === "string" ? nome.trim() : "";
     if (!trimmedNome) {
@@ -128,11 +128,12 @@ export async function POST(request: Request) {
     const payload = {
       nome: trimmedNome,
       email: trimmedEmail || null,
-      acompanhantes: typeof acompanhantes === "string" ? acompanhantes : "0",
-      restricoes:
-        typeof restricoes === "string" && restricoes.trim()
-          ? restricoes.trim()
+      nomeAcompanhante:
+        typeof nomeAcompanhante === "string" && nomeAcompanhante.trim()
+          ? nomeAcompanhante.trim()
           : null,
+      microonibus:
+        microonibus === "sim" || microonibus === "nao" ? microonibus : null,
     };
 
     const controller = new AbortController();

@@ -6,9 +6,9 @@
  *
  * Como usar:
  * 1. Abra a planilha no Google Sheets
- * 2. Extensões > Apps Script (isso vincula o script à planilha)
- * 3. Cole este código. O SPREADSHEET_ID deve bater com a planilha atual
- * 4. Execute a função "testarAcesso" (Run) para autorizar e testar
+ * 2. Linha 1 (headers): Data, Nome, Email, Nome do acompanhante, Microônibus
+ * 3. Extensões > Apps Script (vincula o script à planilha)
+ * 4. Cole este código, execute "testarAcesso" para autorizar
  * 5. Implante: Implantar > Nova implantação > Aplicativo da Web
  * 6. Execute como: Eu | Quem tem acesso: Qualquer pessoa
  * 7. Configure a URL em GOOGLE_APPS_SCRIPT_RSVP_URL
@@ -73,8 +73,8 @@ function doPost(e) {
       new Date(),
       data.nome || '',
       data.email || '',
-      data.acompanhantes || '0',
-      data.restricoes || ''
+      data.nomeAcompanhante || '',
+      data.microonibus || ''
     ]]);
     
     return ContentService
