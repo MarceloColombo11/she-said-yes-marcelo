@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 
-const UPLOAD_URL = process.env.GOOGLE_APPS_SCRIPT_UPLOAD_URL ?? "";
+const UPLOAD_URL =
+  process.env.GOOGLE_APPS_SCRIPT_UPLOAD_URL ||
+  process.env.NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_UPLOAD_URL ||
+  "";
 
 const MAX_BASE64_BYTES = 4 * 1024 * 1024; // 4 MB (Vercel body limit 4.5 MB)
 const BASE64_REGEX = /^[A-Za-z0-9+/]*=*$/;
