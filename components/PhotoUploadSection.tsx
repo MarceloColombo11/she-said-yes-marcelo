@@ -190,7 +190,6 @@ export function PhotoUploadSection() {
           isLoading={camera.isLoading}
           flashEnabled={camera.flashEnabled}
           flashSupported={camera.flashSupported}
-          hasMultipleCameras={camera.hasMultipleCameras}
           onClose={camera.close}
           onCapture={camera.capture}
           onSwitchFlash={camera.switchFlash}

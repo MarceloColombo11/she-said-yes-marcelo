@@ -31,6 +31,13 @@ export function useCameraCapture(onCapture: (file: File) => void) {
     setIsOpen(false);
   }, [stopStream]);
 
+  const checkMultipleCameras = useCallback(async () => {
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const videoDevices = devices.filter((d) => d.kind === "videoinput");
+    setHasMultipleCameras(videoDevices.length > 1);
+    return videoDevices.length > 1;
+  }, []);
+
   const startStream = useCallback(
     async (facingMode: FacingMode) => {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -54,9 +61,11 @@ export function useCameraCapture(onCapture: (file: File) => void) {
         }
       }
 
+      await checkMultipleCameras();
+
       return stream;
     },
-    []
+    [checkMultipleCameras]
   );
 
   const open = useCallback(
@@ -72,10 +81,6 @@ export function useCameraCapture(onCapture: (file: File) => void) {
       setCurrentFacingMode(facingMode);
 
       try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        const videoDevices = devices.filter((d) => d.kind === "videoinput");
-        setHasMultipleCameras(videoDevices.length > 1);
-
         await startStream(facingMode);
         setIsLoading(false);
         return true;

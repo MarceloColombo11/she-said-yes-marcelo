@@ -15,7 +15,6 @@ type CameraModalProps = {
   isLoading: boolean;
   flashEnabled: boolean;
   flashSupported: boolean;
-  hasMultipleCameras: boolean;
   onClose: () => void;
   onCapture: () => void;
   onSwitchFlash: () => void;
@@ -30,7 +29,6 @@ export function CameraModal({
   isLoading,
   flashEnabled,
   flashSupported,
-  hasMultipleCameras,
   onClose,
   onCapture,
   onSwitchFlash,
@@ -120,18 +118,16 @@ export function CameraModal({
             </Button>
 
             <div className="flex h-12 w-12 min-w-[48px] items-center justify-center">
-              {hasMultipleCameras ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onSwitchCamera}
-                  disabled={isLoading}
-                  className="h-12 w-12 min-h-[48px] min-w-[48px] rounded-full bg-white/80"
-                  aria-label="Trocar câmera"
-                >
-                  <SwitchCamera className="size-6" />
-                </Button>
-              ) : null}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onSwitchCamera}
+                disabled={isLoading}
+                className="h-12 w-12 min-h-[48px] min-w-[48px] rounded-full bg-white/80"
+                aria-label="Trocar câmera frontal/traseira"
+              >
+                <SwitchCamera className="size-6" />
+              </Button>
             </div>
           </div>
 
