@@ -9,10 +9,11 @@
  * 5. Implante: Implantar > Nova implantação > Tipo: Aplicativo da Web
  * 6. Execute como: Eu
  * 7. Quem tem acesso: Qualquer pessoa
- * 8. Copie a URL e configure em NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_UPLOAD_URL
+ * 8. Copie a URL e configure em GOOGLE_APPS_SCRIPT_UPLOAD_URL (no .env.local ou Vercel)
  */
 
-const PASTA_DRIVE_ID = '1HoHMOXOtWYBhvahp4ZzOdFgeSslLTJUm';
+// Substitua pelo ID da sua pasta do Google Drive
+const PASTA_DRIVE_ID = 'SEU_PASTA_DRIVE_ID';
 
 /**
  * Teste de implantação: abra a URL no navegador.

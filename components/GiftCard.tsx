@@ -8,7 +8,7 @@ export interface Presente {
   nome: string;
   descricao: string;
   valor?: string;
-  chavePix: string;
+  chavePix?: string;
   imagem?: string | null;
 }
 

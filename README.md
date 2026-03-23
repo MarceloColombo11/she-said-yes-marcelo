@@ -27,8 +27,8 @@ Acesse [http://localhost:3000](http://localhost:3000).
 
 | Variável | Descrição |
 |----------|-----------|
-| `NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_RSVP_URL` | URL da Web App de confirmação |
-| `NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_UPLOAD_URL` | URL da Web App de upload de fotos |
+| `GOOGLE_APPS_SCRIPT_RSVP_URL` | URL da Web App de confirmação (somente servidor) |
+| `GOOGLE_APPS_SCRIPT_UPLOAD_URL` | URL da Web App de upload de fotos (somente servidor) |
 | `NEXT_PUBLIC_WEDDING_DATE` | Data e hora (ex: 2026-11-28T16:30:00) |
 
 ## Scripts do Google Apps Script
@@ -48,7 +48,7 @@ Veja os comentários nos arquivos para instruções de implantação.
 - **Padrinhos/Damas**: edite `data/padrinhos.json`, `data/damas.json`, `data/convidados-honra.json`
 - **Programação**: edite `data/programacao.json`
 
-## Deploy
+## Deploy na Vercel
 
 O projeto pode ser implantado na Vercel:
 
@@ -56,4 +56,4 @@ O projeto pode ser implantado na Vercel:
 npm run build
 ```
 
-Configure as variáveis de ambiente no painel da Vercel.
+**Importante**: Configure `GOOGLE_APPS_SCRIPT_RSVP_URL` e `GOOGLE_APPS_SCRIPT_UPLOAD_URL` em **Project Settings > Environment Variables** no painel da Vercel. O `.env.local` é apenas para desenvolvimento local; em produção a Vercel usa as variáveis do projeto.

@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 
-const UPLOAD_URL =
-  process.env.GOOGLE_APPS_SCRIPT_UPLOAD_URL ||
-  process.env.NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_UPLOAD_URL ||
-  "";
+const UPLOAD_URL = process.env.GOOGLE_APPS_SCRIPT_UPLOAD_URL ?? "";
+
+const MAX_BASE64_BYTES = 4 * 1024 * 1024; // 4 MB (Vercel body limit 4.5 MB)
+const BASE64_REGEX = /^[A-Za-z0-9+/]*=*$/;
+const JPEG_MAGIC = Buffer.from([0xff, 0xd8, 0xff]);
 
 function parseGasResponse(text: string) {
   try {
@@ -25,9 +26,43 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { file: base64, filename } = body;
 
-    if (!base64) {
+    if (!base64 || typeof base64 !== "string") {
       return NextResponse.json(
         { success: false, error: "Arquivo não enviado" },
+        { status: 400 }
+      );
+    }
+
+    if (base64.length > MAX_BASE64_BYTES) {
+      return NextResponse.json(
+        { success: false, error: "Arquivo muito grande. O máximo é 4 MB." },
+        { status: 400 }
+      );
+    }
+
+    if (!BASE64_REGEX.test(base64)) {
+      return NextResponse.json(
+        { success: false, error: "Formato de arquivo inválido." },
+        { status: 400 }
+      );
+    }
+
+    let decoded: Buffer;
+    try {
+      decoded = Buffer.from(base64, "base64");
+    } catch {
+      return NextResponse.json(
+        { success: false, error: "Formato de arquivo inválido." },
+        { status: 400 }
+      );
+    }
+
+    if (
+      decoded.length < 3 ||
+      !decoded.subarray(0, 3).equals(JPEG_MAGIC)
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Apenas imagens JPEG são permitidas." },
         { status: 400 }
       );
     }

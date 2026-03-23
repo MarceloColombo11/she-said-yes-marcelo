@@ -8,9 +8,7 @@ import {
   validateImageFile,
 } from "@/lib/image-utils";
 
-const UPLOAD_URL = process.env.NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_UPLOAD_URL
-  ? "/api/upload-photo"
-  : "";
+const UPLOAD_ENDPOINT = "/api/upload-photo";
 
 export type UploadErrorType =
   | "no_file"
@@ -49,10 +47,6 @@ export function usePhotoUpload() {
         return false;
       }
 
-      if (!UPLOAD_URL) {
-        toast.error(getErrorMessage("not_configured"));
-        return false;
-      }
 
       const validation = validateImageFile(file);
       if (!validation.valid) {
@@ -69,7 +63,7 @@ export function usePhotoUpload() {
 
         const base64 = await fileToBase64(compressed);
 
-        const response = await fetch(UPLOAD_URL, {
+        const response = await fetch(UPLOAD_ENDPOINT, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -84,6 +78,11 @@ export function usePhotoUpload() {
           toast.success("Foto enviada com sucesso! Obrigado por compartilhar.");
           onSuccess?.();
           return true;
+        }
+
+        if (response.status === 503) {
+          toast.error(getErrorMessage("not_configured"));
+          return false;
         }
 
         toast.error(result?.error || getErrorMessage("server"));

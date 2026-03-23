@@ -22,7 +22,7 @@ import {
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
-const RSVP_URL = process.env.NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_RSVP_URL || "";
+const RSVP_ENDPOINT = "/api/rsvp";
 
 interface RsvpModalProps {
   open: boolean;
@@ -66,14 +66,9 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
       return;
     }
 
-    if (!RSVP_URL) {
-      toast.error("Confirmação de presença em breve. Volte em alguns dias!");
-      return;
-    }
-
     setLoading(true);
     try {
-      const response = await fetch(RSVP_URL, {
+      const response = await fetch(RSVP_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -90,7 +85,7 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
         setFormData({ nome: "", email: "", acompanhantes: "0", restricoes: "" });
         onOpenChange(false);
       } else {
-        toast.error("Erro ao confirmar. Tente novamente.");
+        toast.error(result?.error ?? "Erro ao confirmar. Tente novamente.");
       }
     } catch {
       toast.error("Erro de conexão. Verifique sua internet e tente novamente.");

@@ -54,7 +54,11 @@ export default function Home() {
                     id="presentes"
                     className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
                 >
-                    <GiftsSection presents={presentesData} />
+                    <GiftsSection
+                        presents={presentesData.map(
+                            ({ chavePix: _chavePix, ...p }) => p
+                        )}
+                    />
                 </section>
 
                 {/* 3. Local */}
