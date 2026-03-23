@@ -23,14 +23,14 @@ export const metadata: Metadata = {
             "Celebremos juntos o amor de Suelen e Marcelo. 28 de novembro de 2026.",
         images: [
             {
-                url: "/monograma.svg",
-                alt: "Monograma Suelen e Marcelo",
+                url: "/images/monograma-share.jpeg",
+                alt: "Monograma Suelen e Marcelo — 28 de novembro de 2026",
             },
         ],
     },
     twitter: {
         card: "summary_large_image",
-        images: ["/monograma.svg"],
+        images: ["/images/monograma-share.jpeg"],
     },
     icons: {
         icon: "/Monograma simples.svg",

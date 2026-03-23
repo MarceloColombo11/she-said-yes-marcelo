@@ -81,7 +81,7 @@ export default function Home() {
                 {/* 5. Sobre Nós */}
                 <section
                     id="sobre-nos"
-                    className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
+                    className="py-12 md:py-16 lg:py-20 px-4 bg-cream"
                 >
                     <AboutSection content={sobreNosData} />
                 </section>
