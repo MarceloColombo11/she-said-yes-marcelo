@@ -13,30 +13,29 @@ const dmSans = DM_Sans({
     subsets: ["latin"],
 });
 
-function resolveMetadataBase(): URL | undefined {
+function resolveMetadataBase(): URL {
     const site = process.env.NEXT_PUBLIC_SITE_URL?.trim();
     if (site) {
         try {
             return new URL(site);
         } catch {
-            return undefined;
+            // fall through to default
         }
     }
     const vercel = process.env.VERCEL_URL?.trim();
     if (vercel) {
         return new URL(`https://${vercel}`);
     }
-    return undefined;
+    const port = process.env.PORT || "3000";
+    return new URL(`http://localhost:${port}`);
 }
-
-const metadataBase = resolveMetadataBase();
 
 const shareTitle = "Suelen & Marcelo — 28.11.2026";
 const shareDescription =
     "Celebremos juntos o amor de Suelen e Marcelo. 28 de novembro de 2026.";
 
 export const metadata: Metadata = {
-    ...(metadataBase && { metadataBase }),
+    metadataBase: resolveMetadataBase(),
     title: shareTitle,
     description: shareDescription,
     openGraph: {
