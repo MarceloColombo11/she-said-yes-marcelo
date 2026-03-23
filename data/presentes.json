@@ -1,26 +1,130 @@
 [
-  {
-    "id": "1",
-    "nome": "Caixa de Ferramentas",
-    "descricao": "Para construir nossa vida a dois. Um presente prático que nos ajudará em muitos projetos futuros.",
-    "valor": "R$ 150,00",
-    "chavePix": "SUA_CHAVE_PIX_AQUI",
-    "imagem": null
-  },
-  {
-    "id": "2",
-    "nome": "Jantar Romântico",
-    "descricao": "Um jantar especial para celebrar nossa lua de mel. Um momento só nosso para saborear o amor.",
-    "valor": "R$ 300,00",
-    "chavePix": "SUA_CHAVE_PIX_AQUI",
-    "imagem": null
-  },
-  {
-    "id": "3",
-    "nome": "Contribuição para a Lua de Mel",
-    "descricao": "Contribua para nossa viagem de lua de mel. Cada valor nos ajuda a realizar o sonho de viajar juntos.",
-    "valor": "A partir de R$ 50,00",
-    "chavePix": "SUA_CHAVE_PIX_AQUI",
-    "imagem": null
-  }
+    {
+        "id": "1",
+        "nome": "Fundo de Emergência para o Próximo Para-choque",
+        "descricao": "A noiva é quase farmacêutica, mas no volante ela é um perigo biológico. Ajude a custear a próxima batidinha leve que o seguro não vai cobrir.",
+        "valor": "R$ 250,00",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c7035204000053039865406250.005802BR5924Marcelo Henrique Colombo6009SAO PAULO62140510EG4zTnWpda63045C2F",
+        "imagem": null
+    },
+    {
+        "id": "2",
+        "nome": "Cota 'Dobby é um Elfo Livre' (Pós-TCC)",
+        "descricao": "A noiva está a um passo de virar um Horcrux de tanto estresse com esse TCC. Esse valor é para o vinho e o sushi necessários para ela voltar a ser humana após a entrega.",
+        "valor": "R$ 150,00",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c7035204000053039865406150.005802BR5924Marcelo Henrique Colombo6009SAO PAULO62140510bJQHDT2Afs63047DDB",
+        "imagem": null
+    },
+    {
+        "id": "3",
+        "nome": "Assinatura vitalícia de IA (Pro cérebro do Noivo)",
+        "descricao": "O noivo já não tem cabelo para processar tanta informação. Ajude a pagar os prompts que fazem o trabalho dele enquanto ele joga e sofre pelo Fluminense.",
+        "valor": "R$ 100,00",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c7035204000053039865406100.005802BR5924Marcelo Henrique Colombo6009SAO PAULO62140510VWsvS6SmMH6304112D",
+        "imagem": null
+    },
+    {
+        "id": "4",
+        "nome": "Suborno para o Noivo aceitar o Salsicha",
+        "descricao": "A noiva quer um cachorro rebaixado, o noivo quer paz. Esse valor vai para o fundo de 'convencimento' (ou para comprar o protetor de sofá quando o dog chegar).",
+        "valor": "R$ 200,00",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c7035204000053039865406200.005802BR5924Marcelo Henrique Colombo6009SAO PAULO62140510ZFrw8ldXsZ6304975F",
+        "imagem": null
+    },
+    {
+        "id": "5",
+        "nome": "Passaporte para o Frio (Operação Maple Syrup)",
+        "descricao": "Ajude este casal cristão a chegar no Canadá antes que o noivo perca o resto dos fios de cabelo no calor do Brasil. Contribua para o visto e o casaco de urso.",
+        "valor": "R$ 300,00",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c7035204000053039865406300.005802BR5924Marcelo Henrique Colombo6009SAO PAULO62140510LOePCQzUxA6304B788",
+        "imagem": null
+    },
+    {
+        "id": "6",
+        "nome": "Batata Frita 'Low Carb' (Contém Ironia)",
+        "descricao": "O noivo precisa emagrecer, mas a batata frita é o único código que ele não aceita deletar. Patrocine esse deslize na dieta dele.",
+        "valor": "R$ 50,00",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c703520400005303986540550.005802BR5924Marcelo Henrique Colombo6009SAO PAULO62140510ftF5WwKHWw63041BF6",
+        "imagem": null
+    },
+    {
+        "id": "7",
+        "nome": "Kit Cerâmica 'Ghost': Versão Crente",
+        "descricao": "Para a noiva fazer vasos de cerâmica e o noivo apenas observar (para não sujar o teclado). Um momento romântico, artístico e com 0% de vadiagem.",
+        "valor": "R$ 120,00",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c7035204000053039865406120.005802BR5924Marcelo Henrique Colombo6009SAO PAULO621405100ugMwLyAlS630478E5",
+        "imagem": null
+    },
+    {
+        "id": "8",
+        "nome": "Cota 'Um Filho no Canadá (com dupla cidadania)'",
+        "descricao": "Investir no futuro herdeiro que vai falar inglês e não vai saber o que é um boleto em Real. Ajude a fundar a dinastia da família.",
+        "valor": "R$ 500,00",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c7035204000053039865406500.005802BR5924Marcelo Henrique Colombo6009SAO PAULO62140510X89Kn0vxIk63044D70",
+        "imagem": null
+    },
+    {
+        "id": "9",
+        "nome": "Seguro Anti-Risotto Queimado",
+        "descricao": "Nem todo risotto sai digno de restaurante italiano. Contribua para manter o padrão gastronômico (ou pelo menos o delivery).",
+        "valor": "R$ 90,00",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c703520400005303986540590.005802BR5924Marcelo Henrique Colombo6009SAO PAULO62140510PDB8zIBoPW630482F8",
+        "imagem": null
+    },
+    {
+        "id": "10",
+        "nome": "Fundo Calvície Premium",
+        "descricao": "Investimento direto no brilho natural do noivo. Pode virar hidratante, protetor solar ou só aceitação mesmo.",
+        "valor": "R$ 70,00",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c703520400005303986540570.005802BR5924Marcelo Henrique Colombo6009SAO PAULO62140510hg4p4sg3kV6304DA7F",
+        "imagem": null
+    },
+    {
+        "id": "11",
+        "nome": "Vinho da Noiva (Prioridade Máxima)",
+        "descricao": "Item essencial para sobrevivência da noiva durante TCC, casamento, lua de mel e vida em geral. Quanto mais, melhor.",
+        "valor": "R$ 130,00",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c7035204000053039865406130.005802BR5924Marcelo Henrique Colombo6009SAO PAULO621405104ZMGCV20hP6304A16D",
+        "imagem": null
+    },
+    {
+        "id": "12",
+        "nome": "Setup Gamer do Noivo",
+        "descricao": "Porque casar não significa parar de jogar. Ajude a manter FPS alto e responsabilidades emocionais bem baixas.",
+        "valor": "R$ 300,00",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c7035204000053039865406300.005802BR5924Marcelo Henrique Colombo6009SAO PAULO62140510vUfOny0wOq6304000F",
+        "imagem": null
+    },
+    {
+        "id": "13",
+        "nome": "Lua de Mel (porque ele não vai à lua de mel de graça)",
+        "descricao": "O noivo gasta uma fortuna por mês em assinatura de IA pra escrever código e mesmo assim precisamos de ajuda pra pagar a viagem. Contribua para que a gente vá finalmente a algum lugar diferente do quarto.",
+        "valor": "Contribuição segundo seu coração",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c7035204000053039865802BR5924Marcelo Henrique Colombo6009SAO PAULO621405102IZePogcce630484B9",
+        "imagem": null
+    },
+    {
+        "id": "14",
+        "nome": "Caixinha 'Compra uma Casa, não um Salsicha'",
+        "descricao": "A noiva quer MUITO um salsicha. O noivo não quer nem fudendo. Enquanto esse impasse histórico não se resolve, ajude o casal a comprar pelo menos uma casa onde possam discutir isso com mais espaço.",
+        "valor": "Contribuição segundo seu coração",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c7035204000053039865802BR5924Marcelo Henrique Colombo6009SAO PAULO621405102IZePogcce630484B9",
+        "imagem": null
+    },
+    {
+        "id": "15",
+        "nome": "Fundo Academia do Noivo (Sim, É Sério)",
+        "descricao": "Entre o videogame, o café e a batata frita, o noivo admite que precisa emagrecer. Ajude a custear uma academia que ele vai assinar com toda a intenção e talvez frequentar em janeiro.",
+        "valor": "R$ 100,00",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c7035204000053039865406100.005802BR5924Marcelo Henrique Colombo6009SAO PAULO62140510VWsvS6SmMH6304112D",
+        "imagem": null
+    },
+    {
+        "id": "16",
+        "nome": "Contribuição para o Casamento (O Evento em Si)",
+        "descricao": "Porque casar no Brasil em 2026 custa o equivalente a duas entradas no Canadá. Qualquer ajuda é bem-vinda e muito amada — até a do tio que ainda usa cheque.",
+        "valor": "Contribuição segundo seu coração",
+        "chavePix": "00020126580014BR.GOV.BCB.PIX0136bc82224d-5fa8-4ae8-9357-81722e74c7035204000053039865802BR5924Marcelo Henrique Colombo6009SAO PAULO621405102IZePogcce630484B9",
+        "imagem": null
+    }
 ]
