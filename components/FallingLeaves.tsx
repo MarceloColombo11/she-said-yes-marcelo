@@ -53,10 +53,13 @@ function generateLeaves(
 }
 
 export function FallingLeaves() {
+    const [mounted, setMounted] = useState(false);
     const [reducedMotion, setReducedMotion] = useState(false);
     const [isMobile, setIsMobile] = useState(true);
 
     useEffect(() => {
+        setMounted(true);
+
         const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
         const mobileQuery = window.matchMedia("(max-width: 767px)");
 
@@ -76,11 +79,12 @@ export function FallingLeaves() {
     }, []);
 
     const leaves = useMemo(() => {
+        if (!mounted) return [];
         const count = isMobile ? 7 : 14;
         const sizeMin = isMobile ? 12 : 16;
         const sizeMax = isMobile ? 24 : 32;
         return generateLeaves(count, sizeMin, sizeMax);
-    }, [isMobile]);
+    }, [mounted, isMobile]);
 
     if (reducedMotion) return null;
 

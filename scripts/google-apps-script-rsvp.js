@@ -1,32 +1,81 @@
 /**
  * Google Apps Script para receber confirmações de presença (RSVP)
- * 
+ *
+ * IMPORTANTE: Crie o script a partir da planilha (Extensões > Apps Script)
+ * para garantir acesso automático. Ou use o mesmo ID abaixo.
+ *
  * Como usar:
- * 1. Crie uma nova planilha no Google Sheets
- * 2. Acesse Extensões > Apps Script
- * 3. Cole este código e salve
- * 4. Na primeira execução, adicione os headers na linha 1 da planilha: Data, Nome, Email, Acompanhantes, Restrições
- * 5. Implante: Implantar > Nova implantação > Tipo: Aplicativo da Web
- * 6. Execute como: Eu
- * 7. Quem tem acesso: Qualquer pessoa
- * 8. Copie a URL e configure em NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_RSVP_URL
- * 
- * Para CORS: O Google Apps Script pode retornar erro de CORS em requisições de outros domínios.
- * Considere usar um proxy ou Cloud Function se necessário.
+ * 1. Abra a planilha no Google Sheets
+ * 2. Extensões > Apps Script (isso vincula o script à planilha)
+ * 3. Cole este código. O SPREADSHEET_ID deve bater com a planilha atual
+ * 4. Execute a função "testarAcesso" (Run) para autorizar e testar
+ * 5. Implante: Implantar > Nova implantação > Aplicativo da Web
+ * 6. Execute como: Eu | Quem tem acesso: Qualquer pessoa
+ * 7. Configure a URL em GOOGLE_APPS_SCRIPT_RSVP_URL
  */
+
+const SPREADSHEET_ID = "17KrG8rcCGgOIheSB1cj2Kaqr4frYq5fAe3-2Gbw8XaQ";
+
+/** GET: teste/autorização - abra a URL no navegador para autorizar o script */
+function doGet() {
+  try {
+    getSpreadsheet(); // força autorização de acesso à planilha
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: true, message: "RSVP ativo. Use POST para enviar confirmações." }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: false, error: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/** Execute esta função no editor para testar acesso (Run > testarAcesso) */
+function testarAcesso() {
+  try {
+    const ss = getSpreadsheet();
+    Logger.log("OK - Planilha: " + ss.getName());
+  } catch (e) {
+    Logger.log("ERRO: " + e.toString());
+  }
+}
+
+function getSpreadsheet() {
+  // Em Web App, getActiveSpreadsheet() retorna null — sempre usar openById
+  try {
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    if (!ss) throw new Error("Planilha não encontrada.");
+    return ss;
+  } catch (e) {
+    throw new Error(
+      "Não foi possível acessar a planilha " + SPREADSHEET_ID + ". " +
+      "Confira se o script e a planilha estão na mesma conta Google e execute 'testarAcesso' no editor para autorizar. " +
+      "Erro: " + (e.message || e.toString())
+    );
+  }
+}
 
 function doPost(e) {
   try {
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    if (!e || !e.postData || !e.postData.contents) {
+      throw new Error("Requisição inválida");
+    }
     const data = JSON.parse(e.postData.contents);
-    
-    sheet.appendRow([
+    const spreadsheet = getSpreadsheet();
+    const sheets = spreadsheet.getSheets();
+    if (!sheets || sheets.length === 0) throw new Error("Planilha sem abas.");
+    const sheet = sheets[0];
+    if (!sheet) throw new Error("Aba inválida.");
+
+    const lastRow = Math.max(sheet.getLastRow(), 0);
+    const nextRow = lastRow + 1;
+    sheet.getRange(nextRow, 1, 1, 5).setValues([[
       new Date(),
       data.nome || '',
       data.email || '',
       data.acompanhantes || '0',
       data.restricoes || ''
-    ]);
+    ]]);
     
     return ContentService
       .createTextOutput(JSON.stringify({ success: true }))

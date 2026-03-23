@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Heart, PartyPopper } from "lucide-react";
+import { fireConfettiCannon } from "@/lib/confetti";
 
 const RSVP_ENDPOINT = "/api/rsvp";
 
@@ -31,12 +32,30 @@ interface RsvpModalProps {
 
 export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
     acompanhantes: "0",
     restricoes: "",
   });
+  const [nomeError, setNomeError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const firstInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (open) {
+      setSuccess(false);
+      setNomeError(null);
+      setEmailError(null);
+      const t = setTimeout(() => firstInputRef.current?.focus({ preventScroll: true }), 50);
+      return () => clearTimeout(t);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (success) fireConfettiCannon();
+  }, [success]);
 
   const validateNome = (nome: string) => {
     const trimmed = nome.trim();
@@ -55,14 +74,14 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const nomeError = validateNome(formData.nome);
-    if (nomeError) {
-      toast.error(nomeError);
-      return;
-    }
-    const emailError = validateEmail(formData.email);
-    if (emailError) {
-      toast.error(emailError);
+    const nErr = validateNome(formData.nome);
+    const eErr = validateEmail(formData.email);
+    setNomeError(nErr);
+    setEmailError(eErr);
+
+    if (nErr || eErr) {
+      if (nErr) toast.error(nErr);
+      else if (eErr) toast.error(eErr);
       return;
     }
 
@@ -81,9 +100,8 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
 
       const result = await response.json().catch(() => ({}));
       if (response.ok && result?.success !== false) {
-        toast.success("Presença confirmada! Obrigado por nos honrar com sua presença.");
+        setSuccess(true);
         setFormData({ nome: "", email: "", acompanhantes: "0", restricoes: "" });
-        onOpenChange(false);
       } else {
         toast.error(result?.error ?? "Erro ao confirmar. Tente novamente.");
       }
@@ -94,89 +112,155 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
     }
   };
 
+  const handleClose = () => {
+    if (success) setSuccess(false);
+    onOpenChange(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent
+        className="max-h-[90dvh] max-w-md overflow-y-auto pb-safe sm:max-w-md"
+        aria-describedby={success ? "rsvp-success-desc" : "rsvp-form-desc"}
+        aria-busy={loading}
+      >
         <DialogHeader>
           <DialogTitle className="font-heading text-brown">
-            Confirmar Presença
+            {success ? "Presença confirmada!" : "Confirmar Presença"}
           </DialogTitle>
-          <DialogDescription>
-            Preencha o formulário para confirmar sua presença no nosso casamento.
+          <DialogDescription id={success ? "rsvp-success-desc" : "rsvp-form-desc"}>
+            {success
+              ? "Obrigado por nos honrar com sua presença neste dia tão especial!"
+              : "Preencha o formulário para confirmar sua presença no nosso casamento."}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="nome">Nome completo *</Label>
-            <Input
-              id="nome"
-              value={formData.nome}
-              onChange={(e) =>
-                setFormData((p) => ({ ...p, nome: e.target.value }))
-              }
-              placeholder="Seu nome completo"
-              required
-              disabled={loading}
-            />
+
+        {success ? (
+          <div className="flex flex-col items-center gap-6 py-4 animate-in fade-in-0 zoom-in-95 duration-300">
+            <div className="flex size-20 items-center justify-center rounded-full bg-sage/20 text-sage">
+              <Heart className="size-10 fill-sage" aria-hidden />
+            </div>
+            <p className="text-center font-heading text-lg text-brown">
+              Mal podemos esperar para celebrar com você!
+            </p>
+            <div className="flex items-center gap-2 text-olive">
+              <PartyPopper className="size-5" aria-hidden />
+              <span className="text-sm">Nos vemos em breve</span>
+            </div>
+            <Button
+              size="lg"
+              className="min-h-[44px] w-full min-w-[44px] rounded-xl bg-sage px-6 transition-transform active:scale-[0.98] hover:bg-sage/90"
+              onClick={handleClose}
+            >
+              Fechar
+            </Button>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData((p) => ({ ...p, email: e.target.value }))
-              }
-              placeholder="seu@email.com"
-              disabled={loading}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="acompanhantes">Número de acompanhantes</Label>
-            <Select
-              value={formData.acompanhantes}
-              onValueChange={(v) =>
-                setFormData((p) => ({ ...p, acompanhantes: v ?? "0" }))
-              }
+        ) : (
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-5 pb-2"
+            noValidate
+          >
+            <div className="space-y-2">
+              <Label htmlFor="rsvp-nome">Nome completo *</Label>
+              <Input
+                ref={firstInputRef}
+                id="rsvp-nome"
+                value={formData.nome}
+                onChange={(e) => {
+                  setFormData((p) => ({ ...p, nome: e.target.value }));
+                  if (nomeError) setNomeError(null);
+                }}
+                placeholder="Seu nome completo"
+                required
+                disabled={loading}
+                className="min-h-[44px]"
+                aria-describedby={nomeError ? "rsvp-nome-error" : undefined}
+                aria-invalid={!!nomeError}
+              />
+              {nomeError && (
+                <p id="rsvp-nome-error" className="text-sm text-destructive" role="alert">
+                  {nomeError}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="rsvp-email">E-mail</Label>
+              <Input
+                id="rsvp-email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => {
+                  setFormData((p) => ({ ...p, email: e.target.value }));
+                  if (emailError) setEmailError(null);
+                }}
+                placeholder="seu@email.com"
+                disabled={loading}
+                className="min-h-[44px]"
+                aria-describedby={emailError ? "rsvp-email-error" : undefined}
+                aria-invalid={!!emailError}
+              />
+              {emailError && (
+                <p id="rsvp-email-error" className="text-sm text-destructive" role="alert">
+                  {emailError}
+                </p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="rsvp-acompanhantes">Número de acompanhantes</Label>
+              <Select
+                value={formData.acompanhantes}
+                onValueChange={(v) =>
+                  setFormData((p) => ({ ...p, acompanhantes: v ?? "0" }))
+                }
+                disabled={loading}
+              >
+                <SelectTrigger className="min-h-[44px] w-full">
+                  <SelectValue placeholder="Selecione" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 11 }, (_, i) => (
+                    <SelectItem key={i} value={String(i)}>
+                      {i}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="rsvp-restricoes">Restrições alimentares</Label>
+              <Textarea
+                id="rsvp-restricoes"
+                value={formData.restricoes}
+                onChange={(e) =>
+                  setFormData((p) => ({ ...p, restricoes: e.target.value }))
+                }
+                placeholder="Vegetariano, alergias, etc. (opcional)"
+                rows={3}
+                disabled={loading}
+                className="min-h-[88px]"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full min-h-[44px] rounded-xl bg-sage py-3 text-base transition-transform active:scale-[0.98] hover:bg-sage/90 disabled:opacity-70"
               disabled={loading}
             >
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 11 }, (_, i) => (
-                  <SelectItem key={i} value={String(i)}>
-                    {i}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="restricoes">Restrições alimentares</Label>
-            <Textarea
-              id="restricoes"
-              value={formData.restricoes}
-              onChange={(e) =>
-                setFormData((p) => ({ ...p, restricoes: e.target.value }))
-              }
-              placeholder="Vegetariano, alergias, etc. (opcional)"
-              rows={3}
-              disabled={loading}
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="mr-2 size-4 animate-spin" />
-                Confirmando...
-              </>
-            ) : (
-              "Confirmar"
-            )}
-          </Button>
-        </form>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 size-5 animate-spin" aria-hidden />
+                  Confirmando...
+                </>
+              ) : (
+                "Confirmar presença"
+              )}
+            </Button>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
