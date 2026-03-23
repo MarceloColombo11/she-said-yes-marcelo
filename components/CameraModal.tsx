@@ -15,8 +15,11 @@ type CameraModalProps = {
   isLoading: boolean;
   flashEnabled: boolean;
   flashSupported: boolean;
+  capturedPreview: string | null;
   onClose: () => void;
   onCapture: () => void;
+  onConfirm: () => void;
+  onRetake: () => void;
   onSwitchFlash: () => void;
   onSwitchCamera: () => void;
   videoRef: (el: HTMLVideoElement | null) => void;
@@ -29,8 +32,11 @@ export function CameraModal({
   isLoading,
   flashEnabled,
   flashSupported,
+  capturedPreview,
   onClose,
   onCapture,
+  onConfirm,
+  onRetake,
   onSwitchFlash,
   onSwitchCamera,
   videoRef,
@@ -40,6 +46,8 @@ export function CameraModal({
     if (!next) onClose();
   };
 
+  const isPreviewMode = !!capturedPreview;
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent
@@ -48,7 +56,7 @@ export function CameraModal({
       >
         <DialogHeader className="flex flex-row items-center justify-between border-b border-olive/10 px-4 py-3 pb-safe">
           <DialogTitle className="font-heading text-base font-medium text-brown">
-            Tirar foto
+            {isPreviewMode ? "Confirmar foto" : "Tirar foto"}
           </DialogTitle>
           <Button
             variant="ghost"
@@ -66,78 +74,108 @@ export function CameraModal({
           aria-live="polite"
           aria-busy={isLoading}
         >
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center text-white">
-              <Loader2 className="size-12 animate-spin" aria-hidden />
-              <span className="sr-only">Aguarde a câmera carregar...</span>
-            </div>
-          )}
-          {!isLoading && (
-            <video
-              ref={videoRef}
-              autoPlay
-              muted
-              playsInline
-              onCanPlay={onVideoCanPlay}
-              className="h-full w-full object-cover"
-              aria-label="Visualização da câmera"
+          {isPreviewMode ? (
+            <img
+              src={capturedPreview}
+              alt="Preview da foto capturada"
+              className="h-full w-full object-contain"
             />
+          ) : (
+            <>
+              {isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center text-white">
+                  <Loader2 className="size-12 animate-spin" aria-hidden />
+                  <span className="sr-only">Aguarde a câmera carregar...</span>
+                </div>
+              )}
+              {!isLoading && (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  playsInline
+                  onCanPlay={onVideoCanPlay}
+                  className="h-full w-full object-cover"
+                  aria-label="Visualização da câmera"
+                />
+              )}
+            </>
           )}
         </div>
 
         <div className="flex flex-col gap-3 border-t border-olive/10 bg-cream/80 p-4 pb-safe">
-          <div className="flex items-center justify-between">
-            <div className="flex h-12 w-12 min-w-[48px] items-center justify-center">
-              {flashSupported ? (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onSwitchFlash}
-                  disabled={isLoading}
-                  className={`h-12 w-12 min-h-[48px] min-w-[48px] rounded-full ${
-                    flashEnabled ? "bg-amber-200/80 text-amber-800" : "bg-white/80"
-                  }`}
-                  aria-label={flashEnabled ? "Desligar flash" : "Ligar flash"}
-                >
-                  {flashEnabled ? (
-                    <Zap className="size-6 fill-amber-600" />
-                  ) : (
-                    <ZapOff className="size-6" />
-                  )}
-                </Button>
-              ) : null}
-            </div>
-
-            <Button
-              onClick={onCapture}
-              disabled={!isReady || isLoading}
-              className="h-14 w-14 min-h-[56px] min-w-[56px] shrink-0 rounded-full bg-sage p-0 hover:bg-sage/90"
-              aria-label="Capturar foto"
-            >
-              <span className="h-12 w-12 rounded-full border-4 border-white" />
-            </Button>
-
-            <div className="flex h-12 w-12 min-w-[48px] items-center justify-center">
+          {isPreviewMode ? (
+            <div className="flex gap-3">
               <Button
-                variant="ghost"
-                size="icon"
-                onClick={onSwitchCamera}
-                disabled={isLoading}
-                className="h-12 w-12 min-h-[48px] min-w-[48px] rounded-full bg-white/80"
-                aria-label="Trocar câmera frontal/traseira"
+                variant="outline"
+                onClick={onRetake}
+                className="min-h-[48px] flex-1 py-3"
               >
-                <SwitchCamera className="size-6" />
+                Tirar outra
+              </Button>
+              <Button
+                onClick={onConfirm}
+                className="min-h-[48px] flex-1 py-3"
+              >
+                Confirmar
               </Button>
             </div>
-          </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between">
+                <div className="flex h-12 w-12 min-w-[48px] items-center justify-center">
+                  {flashSupported ? (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={onSwitchFlash}
+                      disabled={isLoading}
+                      className={`h-12 w-12 min-h-[48px] min-w-[48px] rounded-full ${
+                        flashEnabled ? "bg-amber-200/80 text-amber-800" : "bg-white/80"
+                      }`}
+                      aria-label={flashEnabled ? "Desligar flash" : "Ligar flash"}
+                    >
+                      {flashEnabled ? (
+                        <Zap className="size-6 fill-amber-600" />
+                      ) : (
+                        <ZapOff className="size-6" />
+                      )}
+                    </Button>
+                  ) : null}
+                </div>
 
-          <Button
-            variant="outline"
-            onClick={onClose}
-            className="w-full py-3"
-          >
-            Cancelar
-          </Button>
+                <Button
+                  onClick={onCapture}
+                  disabled={!isReady || isLoading}
+                  className="h-14 w-14 min-h-[56px] min-w-[56px] shrink-0 rounded-full bg-sage p-0 hover:bg-sage/90"
+                  aria-label="Capturar foto"
+                >
+                  <span className="h-12 w-12 rounded-full border-4 border-white" />
+                </Button>
+
+                <div className="flex h-12 w-12 min-w-[48px] items-center justify-center">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onSwitchCamera}
+                    disabled={isLoading}
+                    className="h-12 w-12 min-h-[48px] min-w-[48px] rounded-full bg-white/80"
+                    aria-label="Trocar câmera frontal/traseira"
+                  >
+                    <SwitchCamera className="size-6" />
+                  </Button>
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className="w-full py-3"
+              >
+                Cancelar
+              </Button>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>

@@ -14,6 +14,8 @@ export function useCameraCapture(onCapture: (file: File) => void) {
   const [flashEnabled, setFlashEnabled] = useState(false);
   const [flashSupported, setFlashSupported] = useState(false);
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
+  const [capturedPreview, setCapturedPreview] = useState<string | null>(null);
+  const [capturedFile, setCapturedFile] = useState<File | null>(null);
 
   const streamRef = useRef<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -29,6 +31,8 @@ export function useCameraCapture(onCapture: (file: File) => void) {
     setIsReady(false);
     setIsLoading(false);
     setIsOpen(false);
+    setCapturedPreview(null);
+    setCapturedFile(null);
   }, [stopStream]);
 
   const checkMultipleCameras = useCallback(async () => {
@@ -166,6 +170,10 @@ export function useCameraCapture(onCapture: (file: File) => void) {
       return;
     }
 
+    if (currentFacingMode === "user") {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
     ctx.drawImage(video, 0, 0);
 
     canvas.toBlob(
@@ -177,13 +185,30 @@ export function useCameraCapture(onCapture: (file: File) => void) {
         const file = new File([blob], `foto-${Date.now()}.jpg`, {
           type: "image/jpeg",
         });
-        onCapture(file);
-        closeWithFlashOff();
+        const previewUrl = URL.createObjectURL(blob);
+        setCapturedPreview(previewUrl);
+        setCapturedFile(file);
       },
       "image/jpeg",
       0.9
     );
-  }, [onCapture, closeWithFlashOff]);
+  }, [currentFacingMode]);
+
+  const confirmCapture = useCallback(() => {
+    if (capturedFile) {
+      if (capturedPreview) URL.revokeObjectURL(capturedPreview);
+      onCapture(capturedFile);
+      setCapturedPreview(null);
+      setCapturedFile(null);
+      closeWithFlashOff();
+    }
+  }, [capturedFile, capturedPreview, onCapture, closeWithFlashOff]);
+
+  const retake = useCallback(() => {
+    if (capturedPreview) URL.revokeObjectURL(capturedPreview);
+    setCapturedPreview(null);
+    setCapturedFile(null);
+  }, []);
 
   const setVideoRef = useCallback((el: HTMLVideoElement | null) => {
     videoRef.current = el;
@@ -213,9 +238,13 @@ export function useCameraCapture(onCapture: (file: File) => void) {
     flashEnabled,
     flashSupported,
     hasMultipleCameras,
+    capturedPreview,
+    capturedFile,
     open,
     close: closeWithFlashOff,
     capture,
+    confirmCapture,
+    retake,
     switchCamera,
     switchFlash,
     setVideoRef,
