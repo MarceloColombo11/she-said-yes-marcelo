@@ -12,19 +12,35 @@
  * 8. Copie a URL e configure em NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_UPLOAD_URL
  */
 
-const PASTA_DRIVE_ID = 'COLOQUE_O_ID_DA_PASTA_AQUI';
+const PASTA_DRIVE_ID = '1HoHMOXOtWYBhvahp4ZzOdFgeSslLTJUm';
+
+/**
+ * Teste de implantação: abra a URL no navegador.
+ * Deve retornar {"ok":true}. Se funcionar, o upload via POST também deve funcionar.
+ */
+function doGet() {
+  return ContentService
+    .createTextOutput(JSON.stringify({ ok: true, message: 'Script ativo. Use POST para enviar fotos.' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
 
 function doPost(e) {
+  if (!e || !e.postData || !e.postData.contents) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ success: false, error: 'Requisição inválida' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
   try {
     const data = JSON.parse(e.postData.contents);
     const base64 = data.file;
-    const filename = data.filename || 'foto-' + Date.now() + '.jpg';
+    const filename = data.fileName || data.filename || 'foto-' + Date.now() + '.jpg';
+    const mimeType = data.mimeType || 'image/jpeg';
     
     if (!base64) {
       throw new Error('Arquivo não enviado');
     }
     
-    const blob = Utilities.newBlob(Utilities.base64Decode(base64), 'image/jpeg', filename);
+    const blob = Utilities.newBlob(Utilities.base64Decode(base64), mimeType, filename);
     const pasta = DriveApp.getFolderById(PASTA_DRIVE_ID);
     const arquivo = pasta.createFile(blob);
     

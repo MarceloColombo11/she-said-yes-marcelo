@@ -28,8 +28,8 @@ function getTimeLeft(): TimeLeft {
   };
 }
 
-function pad(num: number): string {
-  return num.toString().padStart(2, "0");
+function pad(num: number, length = 2): string {
+  return num.toString().padStart(length, "0");
 }
 
 export function CountdownTimer() {
@@ -55,10 +55,10 @@ export function CountdownTimer() {
       {cards.map(({ label, value }) => (
         <div
           key={label}
-          className="flex flex-col items-center rounded-lg border border-olive/30 bg-cream/90 px-4 py-3 sm:px-6 sm:py-4 shadow-md backdrop-blur-sm min-w-[70px] sm:min-w-[80px]"
+          className="flex flex-col items-center justify-center rounded-lg border border-olive/30 bg-cream/90 w-[80px] sm:w-[96px] py-3 sm:py-4 shadow-md backdrop-blur-sm shrink-0"
         >
-          <span className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold text-brown">
-            {pad(value)}
+          <span className="font-heading text-2xl sm:text-3xl md:text-4xl font-semibold text-brown tabular-nums inline-block w-[3ch] text-center">
+            {label === "Dias" ? pad(value, 3) : pad(value)}
           </span>
           <span className="text-xs sm:text-sm text-olive mt-1">{label}</span>
         </div>

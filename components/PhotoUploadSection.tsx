@@ -1,16 +1,20 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Upload, X, Loader2 } from "lucide-react";
+import { Loader2, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PhotoUploadZone } from "@/components/PhotoUploadZone";
+import { PhotoPreview } from "@/components/PhotoPreview";
+import { PhotoQRCode } from "@/components/PhotoQRCode";
+import { CameraModal } from "@/components/CameraModal";
+import { usePhotoUpload } from "@/hooks/usePhotoUpload";
+import { useCameraCapture } from "@/hooks/useCameraCapture";
+import { validateImageFile } from "@/lib/image-utils";
 import { toast } from "sonner";
-
-const UPLOAD_URL = process.env.NEXT_PUBLIC_GOOGLE_APPS_SCRIPT_UPLOAD_URL || "";
 
 export function PhotoUploadSection() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
   const resetForm = useCallback(() => {
@@ -18,14 +22,26 @@ export function PhotoUploadSection() {
     setPreview(null);
   }, []);
 
+  const { upload, loading, progress } = usePhotoUpload();
+
+  const handleCameraCapture = useCallback(
+    (capturedFile: File) => {
+      upload(capturedFile, () => {});
+    },
+    [upload]
+  );
+
+  const camera = useCameraCapture(handleCameraCapture);
+
   const handleFile = useCallback((f: File | null) => {
     if (!f) {
       setFile(null);
       setPreview(null);
       return;
     }
-    if (!f.type.startsWith("image/")) {
-      toast.error("Por favor, selecione apenas arquivos de imagem.");
+    const validation = validateImageFile(f);
+    if (!validation.valid) {
+      toast.error(validation.error);
       return;
     }
     setFile(f);
@@ -53,59 +69,28 @@ export function PhotoUploadSection() {
     setDragActive(false);
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleFile(e.target.files?.[0] ?? null);
-  };
-
   const handleSubmit = async () => {
-    if (!file) {
-      toast.error("Selecione uma imagem primeiro.");
-      return;
-    }
-
-    if (!UPLOAD_URL) {
-      toast.error("Envio de fotos em breve. Volte em alguns dias!");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const reader = new FileReader();
-      const base64 = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => {
-          const result = reader.result as string;
-          resolve(result.split(",")[1] || "");
-        };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-
-      const response = await fetch(UPLOAD_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          file: base64,
-          filename: file.name,
-        }),
-      });
-
-      const result = await response.json().catch(() => ({}));
-      if (response.ok && result?.success !== false) {
-        toast.success("Foto enviada com sucesso! Obrigado por compartilhar.");
-        resetForm();
-      } else {
-        toast.error("Erro ao enviar. Tente novamente.");
-      }
-    } catch {
-      toast.error("Erro de conexão. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
+    if (!file) return;
+    await upload(file, resetForm);
   };
+
+  const handleCameraOpen = useCallback(async () => {
+    await camera.open();
+  }, [camera.open]);
+
+  const progressMessage =
+    progress === "compressing"
+      ? "Comprimindo..."
+      : progress === "uploading"
+        ? "Enviando..."
+        : null;
+
+  const isUploadingFromGallery = loading && !!file;
+  const isUploadingFromCamera = loading && !file;
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <div className="mb-12 text-center">
+    <div className="mx-auto max-w-2xl space-y-8">
+      <div className="text-center">
         <h2 className="font-heading text-4xl font-semibold text-brown">
           Suba sua Foto
         </h2>
@@ -114,68 +99,100 @@ export function PhotoUploadSection() {
         </p>
       </div>
 
-      <div className="space-y-6 rounded-xl border border-olive/20 bg-white p-6 shadow-sm">
-        <div
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          className={`flex min-h-[200px] flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors ${
-            dragActive ? "border-sage bg-sage/10" : "border-olive/30 bg-cream/50"
-          }`}
-        >
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleInputChange}
-            className="hidden"
-            id="photo-upload"
-            disabled={loading}
-          />
-          {preview ? (
-            <div className="relative p-4">
-              <img
-                src={preview}
-                alt="Preview"
-                className="max-h-48 rounded-lg object-contain"
-              />
+      <div className="space-y-6" aria-live="polite" aria-busy={loading}>
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch">
+          <div className="flex flex-1 flex-col gap-6">
+            <div className="rounded-2xl border border-amber-200/60 bg-linear-to-b from-white to-cream/80 p-6 shadow-sm">
               <Button
-                variant="ghost"
-                size="icon"
-                className="absolute -right-2 -top-2 rounded-full bg-white shadow"
-                onClick={resetForm}
+                type="button"
+                onClick={handleCameraOpen}
                 disabled={loading}
-                aria-label="Remover imagem"
+                className="h-16 w-full min-h-[64px] gap-4 rounded-xl bg-sage py-4 text-lg font-medium text-white transition-colors hover:bg-sage/90 disabled:opacity-70"
               >
-                <X className="size-4" />
+                <Camera className="size-8" aria-hidden />
+                <span>Tirar foto</span>
+                {(isUploadingFromCamera || camera.isOpen) && (
+                  <Loader2 className="size-6 animate-spin" aria-hidden />
+                )}
               </Button>
+              <p className="mt-2 text-center text-sm text-olive/80">
+                Capture o momento e envie direto
+              </p>
             </div>
-          ) : (
-            <label
-              htmlFor="photo-upload"
-              className="flex cursor-pointer flex-col items-center gap-2 p-6"
+
+            <div
+              className={`flex flex-col rounded-2xl border-2 border-dashed transition-colors ${
+                dragActive ? "border-sage bg-sage/5" : "border-olive/20 bg-white"
+              }`}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
             >
-              <Upload className="size-12 text-olive/60" />
-              <span className="text-sm font-medium text-olive">
-                Arraste uma imagem ou clique para selecionar
-              </span>
-            </label>
-          )}
+              <p className="border-b border-olive/10 px-4 py-3 text-sm font-medium text-brown">
+                Ou envie da sua galeria
+              </p>
+              {preview && file ? (
+                <div className="p-4">
+                  <PhotoPreview
+                    preview={preview}
+                    fileName={file.name}
+                    fileSize={file.size}
+                    onRemove={resetForm}
+                    disabled={loading}
+                  />
+                </div>
+              ) : (
+                <PhotoUploadZone onFileSelect={handleFile} disabled={loading} />
+              )}
+            </div>
+
+            {preview && file && (
+              <div className="space-y-2">
+                {loading && (
+                  <div
+                    className="h-1 w-full overflow-hidden rounded-full bg-olive/10"
+                    role="progressbar"
+                    aria-valuetext={progressMessage ?? undefined}
+                    aria-busy
+                  >
+                    <div className="h-full w-1/3 animate-pulse rounded-full bg-sage" />
+                  </div>
+                )}
+                <Button
+                  onClick={handleSubmit}
+                  className="w-full"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <>
+                      <Loader2
+                        className="mr-2 size-4 animate-spin"
+                        aria-hidden
+                      />
+                      <span>{progressMessage ?? "Enviando..."}</span>
+                    </>
+                  ) : (
+                    "Enviar Foto"
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <div className="flex shrink-0 flex-col self-center lg:w-72 lg:self-start">
+            <PhotoQRCode />
+          </div>
         </div>
 
-        <Button
-          onClick={handleSubmit}
-          className="w-full"
-          disabled={!file || loading}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="mr-2 size-4 animate-spin" />
-              Enviando...
-            </>
-          ) : (
-            "Enviar Foto"
-          )}
-        </Button>
+        <CameraModal
+          open={camera.isOpen}
+          isReady={camera.isReady}
+          isLoading={camera.isLoading}
+          onClose={camera.close}
+          onCapture={camera.capture}
+          videoRef={camera.setVideoRef}
+          onVideoCanPlay={camera.handleVideoCanPlay}
+        />
       </div>
     </div>
   );
