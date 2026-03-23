@@ -3,16 +3,25 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { toast } from "sonner";
 
+export type FacingMode = "user" | "environment";
+
 export function useCameraCapture(onCapture: (file: File) => void) {
   const [isOpen, setIsOpen] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentFacingMode, setCurrentFacingMode] =
+    useState<FacingMode>("environment");
+  const [flashEnabled, setFlashEnabled] = useState(false);
+  const [flashSupported, setFlashSupported] = useState(false);
+  const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
+
   const streamRef = useRef<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const stopStream = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
+    setFlashEnabled(false);
   }, []);
 
   const close = useCallback(() => {
@@ -22,38 +31,116 @@ export function useCameraCapture(onCapture: (file: File) => void) {
     setIsOpen(false);
   }, [stopStream]);
 
-  const open = useCallback(async () => {
-    if (!navigator.mediaDevices?.getUserMedia) {
-      toast.error("Câmera não suportada neste navegador.");
-      return false;
-    }
-
-    setIsLoading(true);
-    setIsOpen(true);
-    setIsReady(false);
-
-    try {
+  const startStream = useCallback(
+    async (facingMode: FacingMode) => {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: "environment",
+          facingMode,
           width: { ideal: 1280 },
           height: { ideal: 720 },
         },
       });
 
       streamRef.current = stream;
+
+      const videoTrack = stream.getVideoTracks()[0];
+      if (videoTrack) {
+        const caps = videoTrack.getCapabilities();
+        const torchSupported =
+          "torch" in caps && typeof (caps as { torch?: boolean }).torch === "boolean";
+        setFlashSupported(torchSupported);
+        if (!torchSupported) {
+          setFlashEnabled(false);
+        }
+      }
+
+      return stream;
+    },
+    []
+  );
+
+  const open = useCallback(
+    async (facingMode: FacingMode = "environment") => {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        toast.error("Câmera não suportada neste navegador.");
+        return false;
+      }
+
+      setIsLoading(true);
+      setIsOpen(true);
+      setIsReady(false);
+      setCurrentFacingMode(facingMode);
+
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter((d) => d.kind === "videoinput");
+        setHasMultipleCameras(videoDevices.length > 1);
+
+        await startStream(facingMode);
+        setIsLoading(false);
+        return true;
+      } catch (err) {
+        close();
+        toast.error(
+          err instanceof Error && err.name === "NotAllowedError"
+            ? "Permissão de câmera negada."
+            : "Não foi possível acessar a câmera. Tente novamente."
+        );
+        return false;
+      }
+    },
+    [close, startStream]
+  );
+
+  const switchCamera = useCallback(async () => {
+    if (!streamRef.current || isLoading) return;
+
+    const nextMode: FacingMode =
+      currentFacingMode === "environment" ? "user" : "environment";
+
+    setIsLoading(true);
+    setIsReady(false);
+    stopStream();
+
+    try {
+      await startStream(nextMode);
+      setCurrentFacingMode(nextMode);
       setIsLoading(false);
-      return true;
     } catch (err) {
-      close();
-      toast.error(
-        err instanceof Error && err.name === "NotAllowedError"
-          ? "Permissão de câmera negada."
-          : "Não foi possível acessar a câmera. Tente novamente."
-      );
-      return false;
+      toast.error("Não foi possível trocar a câmera.");
+      setIsLoading(false);
     }
-  }, [close]);
+  }, [currentFacingMode, isLoading, startStream, stopStream]);
+
+  const switchFlash = useCallback(async () => {
+    const stream = streamRef.current;
+    if (!stream || !flashSupported) return;
+
+    const videoTrack = stream.getVideoTracks()[0];
+    if (!videoTrack) return;
+
+    const nextState = !flashEnabled;
+
+    try {
+      await videoTrack.applyConstraints({
+        advanced: [{ torch: nextState } as MediaTrackConstraintSet],
+      });
+      setFlashEnabled(nextState);
+    } catch {
+      setFlashEnabled(false);
+    }
+  }, [flashEnabled, flashSupported]);
+
+  const closeWithFlashOff = useCallback(() => {
+    const stream = streamRef.current;
+    if (stream && flashEnabled) {
+      const videoTrack = stream.getVideoTracks()[0];
+      videoTrack?.applyConstraints({
+        advanced: [{ torch: false } as MediaTrackConstraintSet],
+      }).catch(() => {});
+    }
+    close();
+  }, [close, flashEnabled]);
 
   const capture = useCallback(() => {
     const video = videoRef.current;
@@ -86,12 +173,12 @@ export function useCameraCapture(onCapture: (file: File) => void) {
           type: "image/jpeg",
         });
         onCapture(file);
-        close();
+        closeWithFlashOff();
       },
       "image/jpeg",
       0.9
     );
-  }, [onCapture, close]);
+  }, [onCapture, closeWithFlashOff]);
 
   const setVideoRef = useCallback((el: HTMLVideoElement | null) => {
     videoRef.current = el;
@@ -102,7 +189,9 @@ export function useCameraCapture(onCapture: (file: File) => void) {
   }, []);
 
   useEffect(() => {
-    return stopStream;
+    return () => {
+      stopStream();
+    };
   }, [stopStream]);
 
   useEffect(() => {
@@ -115,9 +204,15 @@ export function useCameraCapture(onCapture: (file: File) => void) {
     isOpen,
     isReady,
     isLoading,
+    currentFacingMode,
+    flashEnabled,
+    flashSupported,
+    hasMultipleCameras,
     open,
-    close,
+    close: closeWithFlashOff,
     capture,
+    switchCamera,
+    switchFlash,
     setVideoRef,
     handleVideoCanPlay,
     streamRef,

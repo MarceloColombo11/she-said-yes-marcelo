@@ -1,21 +1,25 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { Loader2, Zap, ZapOff, SwitchCamera, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 
 type CameraModalProps = {
   open: boolean;
   isReady: boolean;
   isLoading: boolean;
+  flashEnabled: boolean;
+  flashSupported: boolean;
+  hasMultipleCameras: boolean;
   onClose: () => void;
   onCapture: () => void;
+  onSwitchFlash: () => void;
+  onSwitchCamera: () => void;
   videoRef: (el: HTMLVideoElement | null) => void;
   onVideoCanPlay: () => void;
 };
@@ -24,8 +28,13 @@ export function CameraModal({
   open,
   isReady,
   isLoading,
+  flashEnabled,
+  flashSupported,
+  hasMultipleCameras,
   onClose,
   onCapture,
+  onSwitchFlash,
+  onSwitchCamera,
   videoRef,
   onVideoCanPlay,
 }: CameraModalProps) {
@@ -35,14 +44,27 @@ export function CameraModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-w-lg border-amber-200/40 shadow-lg sm:max-w-xl" showCloseButton={false}>
-        <DialogHeader>
-          <DialogTitle className="font-heading text-brown">
+      <DialogContent
+        className="flex max-h-[95dvh] w-full max-w-[calc(100%-1rem)] flex-col gap-0 overflow-hidden p-0 sm:max-h-[90dvh] sm:max-w-lg"
+        showCloseButton={false}
+      >
+        <DialogHeader className="flex flex-row items-center justify-between border-b border-olive/10 px-4 py-3 pb-safe">
+          <DialogTitle className="font-heading text-base font-medium text-brown">
             Tirar foto
           </DialogTitle>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="h-10 w-10 shrink-0 rounded-full"
+            aria-label="Fechar"
+          >
+            <X className="size-5" />
+          </Button>
         </DialogHeader>
+
         <div
-          className="relative aspect-video w-full overflow-hidden rounded-2xl border border-olive/10 bg-black"
+          className="relative flex min-h-[50dvh] flex-1 items-center justify-center overflow-hidden bg-black"
           aria-live="polite"
           aria-busy={isLoading}
         >
@@ -64,14 +86,63 @@ export function CameraModal({
             />
           )}
         </div>
-        <DialogFooter showCloseButton={false}>
-          <Button variant="outline" onClick={onClose}>
+
+        <div className="flex flex-col gap-3 border-t border-olive/10 bg-cream/80 p-4 pb-safe">
+          <div className="flex items-center justify-between">
+            <div className="flex h-12 w-12 min-w-[48px] items-center justify-center">
+              {flashSupported ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onSwitchFlash}
+                  disabled={isLoading}
+                  className={`h-12 w-12 min-h-[48px] min-w-[48px] rounded-full ${
+                    flashEnabled ? "bg-amber-200/80 text-amber-800" : "bg-white/80"
+                  }`}
+                  aria-label={flashEnabled ? "Desligar flash" : "Ligar flash"}
+                >
+                  {flashEnabled ? (
+                    <Zap className="size-6 fill-amber-600" />
+                  ) : (
+                    <ZapOff className="size-6" />
+                  )}
+                </Button>
+              ) : null}
+            </div>
+
+            <Button
+              onClick={onCapture}
+              disabled={!isReady || isLoading}
+              className="h-14 w-14 min-h-[56px] min-w-[56px] shrink-0 rounded-full bg-sage p-0 hover:bg-sage/90"
+              aria-label="Capturar foto"
+            >
+              <span className="h-12 w-12 rounded-full border-4 border-white" />
+            </Button>
+
+            <div className="flex h-12 w-12 min-w-[48px] items-center justify-center">
+              {hasMultipleCameras ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onSwitchCamera}
+                  disabled={isLoading}
+                  className="h-12 w-12 min-h-[48px] min-w-[48px] rounded-full bg-white/80"
+                  aria-label="Trocar câmera"
+                >
+                  <SwitchCamera className="size-6" />
+                </Button>
+              ) : null}
+            </div>
+          </div>
+
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="w-full py-3"
+          >
             Cancelar
           </Button>
-          <Button onClick={onCapture} disabled={!isReady || isLoading}>
-            Capturar
-          </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
