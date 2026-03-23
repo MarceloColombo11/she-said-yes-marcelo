@@ -52,35 +52,7 @@ export default function Home() {
                     </div>
                 </section>
 
-                {/* 2. Presentes */}
-                <section
-                    id="presentes"
-                    className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
-                >
-                    <GiftsSection
-                        presents={presentesData.map(
-                            ({ chavePix: _chavePix, ...p }) => p
-                        )}
-                    />
-                </section>
-
-                {/* 3. Local */}
-                <section
-                    id="local"
-                    className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
-                >
-                    <LocationSection />
-                </section>
-
-                {/* 4. Confirmação */}
-                <section
-                    id="confirmacao"
-                    className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
-                >
-                    <RsvpSection />
-                </section>
-
-                {/* 5. Sobre Nós */}
+                {/* 2. Sobre Nós */}
                 <section
                     id="sobre-nos"
                     className="py-12 md:py-16 lg:py-20 px-4 bg-cream"
@@ -88,7 +60,7 @@ export default function Home() {
                     <AboutSection content={sobreNosData} />
                 </section>
 
-                {/* 6. Padrinhos */}
+                {/* 3. Padrinhos */}
                 <section
                     id="padrinhos"
                     className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
@@ -100,7 +72,7 @@ export default function Home() {
                     />
                 </section>
 
-                {/* 7. Convidados de Honra */}
+                {/* 4. Convidados de Honra */}
                 <section
                     id="convidados-honra"
                     className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
@@ -112,7 +84,7 @@ export default function Home() {
                     />
                 </section>
 
-                {/* 8. Damas de Honra */}
+                {/* 5. Damas de Honra */}
                 <section
                     id="damas"
                     className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
@@ -124,12 +96,40 @@ export default function Home() {
                     />
                 </section>
 
-                {/* 9. Programação */}
+                {/* 6. Local */}
+                <section
+                    id="local"
+                    className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
+                >
+                    <LocationSection />
+                </section>
+
+                {/* 7. Confirmação */}
+                <section
+                    id="confirmacao"
+                    className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
+                >
+                    <RsvpSection />
+                </section>
+
+                {/* 8. Programação */}
                 <section
                     id="programacao"
                     className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
                 >
                     <TimelineSection events={programacaoData} />
+                </section>
+
+                {/* 9. Presentes */}
+                <section
+                    id="presentes"
+                    className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
+                >
+                    <GiftsSection
+                        presents={presentesData.map(
+                            ({ chavePix: _chavePix, ...p }) => p
+                        )}
+                    />
                 </section>
 
                 {/* 10. Suba sua Foto */}

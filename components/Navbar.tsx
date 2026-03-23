@@ -10,36 +10,36 @@ import { cn } from "@/lib/utils";
 
 const SECTION_IDS = [
     "home",
-    "presentes",
-    "local",
-    "confirmacao",
     "sobre-nos",
     "padrinhos",
     "convidados-honra",
     "damas",
+    "local",
+    "confirmacao",
     "programacao",
+    "presentes",
     "fotos",
 ] as const;
 
 const NAV_LINKS_DESKTOP = [
-    { href: "#presentes", label: "Presentes", sectionId: "presentes" },
-    { href: "#local", label: "Local", sectionId: "local" },
-    { href: "#confirmacao", label: "Confirmação", sectionId: "confirmacao" },
     { href: "#sobre-nos", label: "Sobre Nós", sectionId: "sobre-nos" },
     { href: "#padrinhos", label: "Comitiva", sectionId: "padrinhos" },
+    { href: "#local", label: "Local", sectionId: "local" },
+    { href: "#confirmacao", label: "Confirmação", sectionId: "confirmacao" },
     { href: "#programacao", label: "Programação", sectionId: "programacao" },
+    { href: "#presentes", label: "Presentes", sectionId: "presentes" },
     { href: "#fotos", label: "Fotos", sectionId: "fotos" },
 ];
 
 const NAV_LINKS_MOBILE_BEFORE_COMITIVA = [
     { href: "#home", label: "Home", sectionId: "home" },
-    { href: "#presentes", label: "Presentes", sectionId: "presentes" },
-    { href: "#local", label: "Local", sectionId: "local" },
-    { href: "#confirmacao", label: "Confirmar", sectionId: "confirmacao" },
     { href: "#sobre-nos", label: "Sobre Nós", sectionId: "sobre-nos" },
 ];
 const NAV_LINKS_MOBILE_AFTER_COMITIVA = [
+    { href: "#local", label: "Local", sectionId: "local" },
+    { href: "#confirmacao", label: "Confirmar", sectionId: "confirmacao" },
     { href: "#programacao", label: "Programação", sectionId: "programacao" },
+    { href: "#presentes", label: "Presentes", sectionId: "presentes" },
     { href: "#fotos", label: "Fotos", sectionId: "fotos" },
 ];
 
