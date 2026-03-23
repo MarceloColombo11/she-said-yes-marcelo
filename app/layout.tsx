@@ -13,23 +13,51 @@ const dmSans = DM_Sans({
     subsets: ["latin"],
 });
 
+function resolveMetadataBase(): URL | undefined {
+    const site = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+    if (site) {
+        try {
+            return new URL(site);
+        } catch {
+            return undefined;
+        }
+    }
+    const vercel = process.env.VERCEL_URL?.trim();
+    if (vercel) {
+        return new URL(`https://${vercel}`);
+    }
+    return undefined;
+}
+
+const metadataBase = resolveMetadataBase();
+
+const shareTitle = "Suelen & Marcelo — 28.11.2026";
+const shareDescription =
+    "Celebremos juntos o amor de Suelen e Marcelo. 28 de novembro de 2026.";
+
 export const metadata: Metadata = {
-    title: "Suelen & Marcelo — 28.11.2026",
-    description:
-        "Celebremos juntos o amor de Suelen e Marcelo. 28 de novembro de 2026.",
+    ...(metadataBase && { metadataBase }),
+    title: shareTitle,
+    description: shareDescription,
     openGraph: {
-        title: "Suelen & Marcelo — 28.11.2026",
-        description:
-            "Celebremos juntos o amor de Suelen e Marcelo. 28 de novembro de 2026.",
+        type: "website",
+        locale: "pt_BR",
+        siteName: "Suelen & Marcelo",
+        title: shareTitle,
+        description: shareDescription,
         images: [
             {
                 url: "/images/monograma-share.jpeg",
+                width: 1136,
+                height: 1600,
                 alt: "Monograma Suelen e Marcelo — 28 de novembro de 2026",
             },
         ],
     },
     twitter: {
         card: "summary_large_image",
+        title: shareTitle,
+        description: shareDescription,
         images: ["/images/monograma-share.jpeg"],
     },
     icons: {
