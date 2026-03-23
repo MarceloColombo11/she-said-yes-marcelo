@@ -15,6 +15,7 @@ import padrinhosData from "@/data/padrinhos.json";
 import damasData from "@/data/damas.json";
 import convidadosHonraData from "@/data/convidados-honra.json";
 import programacaoData from "@/data/programacao.json";
+import sobreNosData from "@/data/sobre-nos.json";
 
 export default function Home() {
     return (
@@ -82,7 +83,7 @@ export default function Home() {
                     id="sobre-nos"
                     className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
                 >
-                    <AboutSection />
+                    <AboutSection content={sobreNosData} />
                 </section>
 
                 {/* 6. Padrinhos */}
