@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useEffect, useState } from "react";
+import { useMemo, useLayoutEffect, useState } from "react";
 
 const PALETTE = [
     "rgba(74, 83, 53, 0.45)", // olive
@@ -37,10 +37,13 @@ function generateLeaves(
     return Array.from({ length: count }, () => {
         const clockwise = Math.random() > 0.5;
         const r = clockwise ? 1 : -1;
+        const duration = randomBetween(4000, 9000);
         return {
             left: randomBetween(0, 100),
-            delay: randomBetween(0, 8000),
-            duration: randomBetween(4000, 9000),
+            // Delay negativo: a animação já “começou” no passado, distribuindo
+            // as folhas na tela no primeiro frame (evita ficarem no topo até o delay).
+            delay: -randomBetween(0, duration * 0.88),
+            duration,
             size: randomBetween(sizeMin, sizeMax),
             color: pick(PALETTE),
             swayAmplitude: randomBetween(15, 45),
@@ -57,7 +60,7 @@ export function FallingLeaves() {
     const [reducedMotion, setReducedMotion] = useState(false);
     const [isMobile, setIsMobile] = useState(true);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         setMounted(true);
 
         const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");

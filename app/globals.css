@@ -164,7 +164,8 @@
 
 .animate-leaf-fall {
     animation: leaf-fall linear infinite;
-    animation-fill-mode: backwards;
+    /* Sem backwards: com delay positivo as folhas ficavam presas no 0% (topo). */
+    animation-fill-mode: none;
 }
 
 /* Safe area para dispositivos com notch/dynamic island */
