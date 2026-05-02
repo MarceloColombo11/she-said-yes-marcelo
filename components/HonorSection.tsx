@@ -118,7 +118,7 @@ export function HonorSection({ title, subtitle, data }: HonorSectionProps) {
                         <h3 className="mt-4 font-heading text-lg font-semibold text-brown">
                             {person.nome}
                         </h3>
-                        <p className="mt-2 w-full text-left text-pretty text-sm leading-relaxed text-olive whitespace-pre-line">
+                        <p className="mt-2 w-full text-center text-pretty text-sm leading-relaxed text-olive whitespace-pre-line">
                             {person.texto}
                         </p>
                     </div>
