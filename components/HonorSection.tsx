@@ -104,7 +104,7 @@ export function HonorSection({ title, subtitle, data }: HonorSectionProps) {
                     <div
                         key={person.nome}
                         className={cn(
-                            "flex w-full max-w-sm shrink-0 flex-col items-center rounded-xl border border-olive/20 bg-white p-6 shadow-sm transition-all duration-500",
+                            "flex w-full max-w-md shrink-0 flex-col items-center rounded-xl border border-olive/20 bg-white p-6 shadow-sm transition-all duration-500",
                             isVisible
                                 ? "translate-y-0 opacity-100"
                                 : "translate-y-8 opacity-0",
@@ -118,7 +118,7 @@ export function HonorSection({ title, subtitle, data }: HonorSectionProps) {
                         <h3 className="mt-4 font-heading text-lg font-semibold text-brown">
                             {person.nome}
                         </h3>
-                        <p className="mt-2 text-center text-sm text-olive">
+                        <p className="mt-2 w-full text-left text-pretty text-sm leading-relaxed text-olive whitespace-pre-line">
                             {person.texto}
                         </p>
                     </div>
