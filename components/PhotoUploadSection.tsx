@@ -185,6 +185,7 @@ export function PhotoUploadSection() {
         </div>
 
         <CameraModal
+          effectiveFacingMode={camera.effectiveFacingMode}
           open={camera.isOpen}
           isReady={camera.isReady}
           isLoading={camera.isLoading}

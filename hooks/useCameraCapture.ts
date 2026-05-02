@@ -11,6 +11,9 @@ export function useCameraCapture(onCapture: (file: File) => void) {
   const [isLoading, setIsLoading] = useState(false);
   const [currentFacingMode, setCurrentFacingMode] =
     useState<FacingMode>("environment");
+  /** Modo real do track (p.ex. notebook pede `environment` mas só existe webcam frontal). */
+  const [effectiveFacingMode, setEffectiveFacingMode] =
+    useState<FacingMode>("environment");
   const [flashEnabled, setFlashEnabled] = useState(false);
   const [flashSupported, setFlashSupported] = useState(false);
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
@@ -57,6 +60,20 @@ export function useCameraCapture(onCapture: (file: File) => void) {
       const videoTrack = stream.getVideoTracks()[0];
       if (videoTrack) {
         const caps = videoTrack.getCapabilities();
+        const settingsFacing = videoTrack.getSettings().facingMode;
+        const capsFacing = caps.facingMode;
+        let effective: FacingMode = facingMode;
+        if (settingsFacing === "user" || settingsFacing === "environment") {
+          effective = settingsFacing;
+        } else if (
+          Array.isArray(capsFacing) &&
+          capsFacing.length === 1 &&
+          (capsFacing[0] === "user" || capsFacing[0] === "environment")
+        ) {
+          effective = capsFacing[0];
+        }
+        setEffectiveFacingMode(effective);
+
         const torchSupported =
           "torch" in caps && typeof (caps as { torch?: boolean }).torch === "boolean";
         setFlashSupported(torchSupported);
@@ -170,7 +187,7 @@ export function useCameraCapture(onCapture: (file: File) => void) {
       return;
     }
 
-    if (currentFacingMode === "user") {
+    if (effectiveFacingMode === "user") {
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
     }
@@ -192,7 +209,7 @@ export function useCameraCapture(onCapture: (file: File) => void) {
       "image/jpeg",
       0.9
     );
-  }, [currentFacingMode]);
+  }, [effectiveFacingMode]);
 
   const confirmCapture = useCallback(() => {
     if (capturedFile) {
@@ -235,6 +252,7 @@ export function useCameraCapture(onCapture: (file: File) => void) {
     isReady,
     isLoading,
     currentFacingMode,
+    effectiveFacingMode,
     flashEnabled,
     flashSupported,
     hasMultipleCameras,

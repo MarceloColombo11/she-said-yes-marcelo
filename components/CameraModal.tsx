@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { Loader2, Zap, ZapOff, SwitchCamera, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,6 +11,8 @@ import {
 } from "@/components/ui/dialog";
 
 type CameraModalProps = {
+  /** Câmera frontal: o stream costuma vir espelhado; corrigimos o preview com scaleX(-1). */
+  effectiveFacingMode?: "user" | "environment";
   open: boolean;
   isReady: boolean;
   isLoading: boolean;
@@ -27,6 +30,7 @@ type CameraModalProps = {
 };
 
 export function CameraModal({
+  effectiveFacingMode = "environment",
   open,
   isReady,
   isLoading,
@@ -95,7 +99,10 @@ export function CameraModal({
                   muted
                   playsInline
                   onCanPlay={onVideoCanPlay}
-                  className="h-full w-full object-cover"
+                  className={cn(
+                    "h-full w-full object-cover",
+                    effectiveFacingMode === "user" && "-scale-x-100"
+                  )}
                   aria-label="Visualização da câmera"
                 />
               )}
