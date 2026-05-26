@@ -14,6 +14,12 @@ export interface HonorPerson {
     nome: string;
     foto: string;
     texto: string;
+    /** Escala da foto no avatar circular (padrão 1.75). */
+    fotoZoom?: number;
+    /** object-position CSS (ex.: "center 35%"). */
+    fotoObjectPosition?: string;
+    /** Deslocamento vertical em % após o zoom (positivo = abaixa a imagem). */
+    fotoOffsetY?: number;
 }
 
 function HonorAvatar({
@@ -33,8 +39,9 @@ function HonorAvatar({
         );
     }
 
-    const imgClass =
-        "size-full origin-center scale-175 object-cover object-center";
+    const fotoZoom = person.fotoZoom ?? 1.75;
+    const fotoOffsetY = person.fotoOffsetY ?? 0;
+    const fotoObjectPosition = person.fotoObjectPosition ?? "center center";
 
     const frameClass =
         "relative size-24 overflow-hidden rounded-full border-2 border-sage/30";
@@ -44,7 +51,11 @@ function HonorAvatar({
         <img
             src={person.foto}
             alt={onPhotoOpen ? "" : person.nome}
-            className={imgClass}
+            className="size-full origin-center object-cover"
+            style={{
+                objectPosition: fotoObjectPosition,
+                transform: `scale(${fotoZoom}) translateY(${fotoOffsetY}%)`,
+            }}
             onError={() => setImgError(true)}
         />
     );

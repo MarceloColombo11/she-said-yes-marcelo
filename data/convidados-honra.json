@@ -1,7 +1,23 @@
 [
-  {
-    "nome": "Nome do Convidado de Honra",
-    "foto": "https://ui-avatars.com/api/?name=Convidado&size=96&background=849652&color=faf9f6",
-    "texto": "Uma honra tê-lo(a) ao nosso lado neste dia especial."
-  }
+    {
+        "nome": "Paola e Rodrigo",
+        "foto": "/images/convidados-honra/paola-rodrigo.png",
+        "fotoZoom": 1,
+        "texto": "Olhar para a nossa história e ver vocês dois ali, desde os primeiros capítulos, é ter a certeza de que Deus caprichou demais nas nossas amizades.\n\nTudo começou nas salas e laboratórios da faculdade de Farmácia, onde a Paola e a Suelen se encontraram. Paola, desde o primeiro dia você não foi apenas uma colega de turma; você se posicionou como uma parceira de verdade, daquelas que dividem os perrengues, seguram a barra e estão juntas para o que der e vier.\n\nE, claro, como uma dupla dessas não anda só, o Marcelo e o Rodrigo logo entraram em cena como os nossos \"chaveiros\" oficiais! O que parecia ser apenas uma companhia para os rolês se transformou em uma conexão imediata. Rodrigo, a sintonia com o Marcelo foi tão natural que parece que vocês se conhecem de longa data.\n\nVocês dois são um casal totalmente fora da curva. A gente ama o fato de que vocês não fazem rodeios: dizem o que precisa ser dito com a maior sinceridade do mundo, mas também nos cobrem de carinho, orações e torcida. Saber que temos vocês intercedendo por nós a todo momento e comemorando de coração cada uma das nossas conquistas torna a vida muito mais leve e segura.\n\nPor sermos tão próximos e por compartilharmos a vida de forma tão real, não existiria outra forma de dar esse passo sem vocês ao nosso lado."
+    },
+    {
+        "nome": "Mariah e Neto",
+        "foto": "/images/convidados-honra/mariah-neto.png",
+        "fotoZoom": 1,
+        "fotoObjectPosition": "center 10%",
+        "fotoOffsetY": 0,
+        "texto": "É impossível contar a história do Marcelo sem que os nomes de vocês apareçam logo nos primeiros capítulos. Essa amizade que nasceu lá nos tempos de ensino médio no IFC já passou por tantas fases, tantas mudanças, e vocês sempre estiveram lá.\n\nMariah e Neto, desde o primeiro instante do nosso namoro, a Suelen ouvia histórias sobre vocês. Eram tantas risadas, lembranças de rolês e momentos marcantes que, mesmo antes de conhecê-los pessoalmente, ela já sabia o quanto vocês eram especiais. Conforme o tempo passou, foi impossível para a noiva não amar vocês também.\n\nVocês são aquele casal energia pura, que não deixa o ânimo abaixar por nada e que topa absolutamente tudo! É o tipo de parceria rara que a gente faz questão de carregar para a vida inteira.\n\nPassamos por muitas fases juntos, e agora que estamos prestes a viver a maior delas, não faria o menor sentido subir no altar sem vocês por perto.\n\nPorque o grande dia está chegando e, como diria o nosso querido indiano: é hoje! Ou melhor... ¡DUDEI!"
+    },
+    {
+        "nome": "Milena e Tiago",
+        "foto": "/images/convidados-honra/milena-tiago.png",
+        "fotoZoom": 1.1,
+        "fotoOffsetY": 0,
+        "texto": "Desde que a Suelen se conhece por gente, a Milena faz parte da sua vida. É aquela amizade rara que nasceu junto com os primeiros passos e que a gente tem a certeza de que vai durar para sempre. Milena, você esteve presente em absolutamente todas as fases da vida da noiva; e mesmo nos momentos em que a rotina trouxe alguma distância física, o coração e a cumplicidade nunca saíram do lugar.\n\nA noiva teve a honra de celebrar o casamento de vocês (isso bem antes do Marcelo aparecer na história!) e, mais tarde, o privilégio gigante de ser escolhida como madrinha da pequena Melina — um dos laços mais bonitos e cheios de amor da nossa vida.\n\nQuando o noivo finalmente entrou em cena, vocês o acolheram de braços abertos, com um carinho e uma parceria que fizeram com que ele se sentisse em casa desde o primeiro instante. A amizade entre o Marcelo e o Tiago foi crescendo naturalmente entre conversas e cervejas, e hoje, não dá para fazer um passeio de carro sem que um de nós olhe para o outro e diga: \"Amor, a gente podia ir ver a Milena e o Tiago, né?\".\n\nVocês são para nós um verdadeiro exemplo de vida, de amor e de construção de uma família linda. São pessoas de corações raros que tornam os nossos dias melhores, e o nosso dia não poderia estar completo sem vocês."
+    }
 ]
