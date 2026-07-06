@@ -1,13 +1,13 @@
 [
-  {
-    "nome": "Jéssica e Eduardo",
-    "foto": "/images/padrinhos/jessica-eduardo.jpg",
-    "fotoZoom": 1.1,
-    "texto": "Desde o início da nossa história, vocês nos acolheram de braços abertos e fizeram parte de cada passo dessa caminhada. Mais do que família, são presentes de Deus em nossas vidas.\n\nJessica, como irmã do noivo, sempre esteve presente com amor, cuidado e palavras sinceras. Eduardo, com sua leveza e sabedoria, trouxe equilíbrio, conselhos e muitos momentos de alegria.\n\nVocês nos ajudam, nos aconselham e também tornam tudo mais leve com tantas risadas. Somos muito gratos por termos vocês ao nosso lado, não só nesse dia, mas em toda a nossa jornada."
-  },
-  {
-    "nome": "Tamires e Geisson",
-    "foto": "/images/padrinhos/tamires-geisson.png",
-    "texto": "Desde o começo, vocês estiveram ao nosso lado, nos apoiando, aconselhando e tornando nossa caminhada mais leve e cheia de significado.\n\nTamires, como irmã da noiva, carrega um amor que transborda em cuidado, presença e incentivo. Geisson, com seu jeito acolhedor e bem-humorado, sempre trouxe alegria e bons conselhos para os nossos dias.\n\nVocês são parte essencial da nossa história, pessoas que nos ajudam a crescer, nos guiam com sabedoria e ainda garantem muitos momentos de diversão. É uma alegria imensa ter vocês conosco nesse momento tão especial."
-  }
+    {
+        "nome": "Jéssica e Eduardo",
+        "foto": "/images/padrinhos/jessica-eduardo.jpg",
+        "fotoZoom": 1.9,
+        "texto": "Desde o início da nossa história, vocês nos acolheram de braços abertos e fizeram parte de cada passo dessa caminhada. Mais do que família, são presentes de Deus em nossas vidas.\n\nJessica, como irmã do noivo, sempre esteve presente com amor, cuidado e palavras sinceras. Eduardo, com sua leveza e sabedoria, trouxe equilíbrio, conselhos e muitos momentos de alegria.\n\nVocês nos ajudam, nos aconselham e também tornam tudo mais leve com tantas risadas. Somos muito gratos por termos vocês ao nosso lado, não só nesse dia, mas em toda a nossa jornada."
+    },
+    {
+        "nome": "Tamires e Geisson",
+        "foto": "/images/padrinhos/tamires-geisson.png",
+        "texto": "Desde o começo, vocês estiveram ao nosso lado, nos apoiando, aconselhando e tornando nossa caminhada mais leve e cheia de significado.\n\nTamires, como irmã da noiva, carrega um amor que transborda em cuidado, presença e incentivo. Geisson, com seu jeito acolhedor e bem-humorado, sempre trouxe alegria e bons conselhos para os nossos dias.\n\nVocês são parte essencial da nossa história, pessoas que nos ajudam a crescer, nos guiam com sabedoria e ainda garantem muitos momentos de diversão. É uma alegria imensa ter vocês conosco nesse momento tão especial."
+    }
 ]
