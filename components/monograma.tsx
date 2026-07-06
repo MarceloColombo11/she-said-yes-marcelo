@@ -35,7 +35,18 @@ export default function Monograma({
 
     useEffect(() => {
         if (!animate || !ref.current) return;
+
+        const reducedMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)",
+        ).matches;
         const el = ref.current;
+
+        if (reducedMotion) {
+            el.style.opacity = "1";
+            el.style.transform = "scale(1)";
+            return;
+        }
+
         el.style.opacity = "0";
         el.style.transform = "scale(0.92)";
         el.style.transition = "opacity 1.2s ease, transform 1.2s ease";

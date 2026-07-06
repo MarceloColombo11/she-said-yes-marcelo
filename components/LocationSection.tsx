@@ -9,7 +9,7 @@ export function LocationSection() {
   return (
     <div className="mx-auto max-w-7xl">
       <div className="mb-12 text-center">
-        <h2 className="font-heading text-4xl font-semibold text-brown">
+        <h2 className="font-heading text-3xl font-semibold text-brown md:text-4xl">
           Local
         </h2>
         <p className="mt-4 text-olive">Onde celebraremos nosso amor</p>

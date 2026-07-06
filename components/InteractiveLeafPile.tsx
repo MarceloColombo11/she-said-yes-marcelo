@@ -99,6 +99,7 @@ export function InteractiveLeafPile() {
     const pointerRef = useRef({ x: 0, y: 0, active: false });
     const rafRef = useRef(0);
     const reducedRef = useRef(false);
+    const isVisibleRef = useRef(false);
     const lastTRef = useRef(0);
 
     const resize = useCallback(() => {
@@ -173,7 +174,11 @@ export function InteractiveLeafPile() {
             drawLeaf(ctx, leaf.x, leaf.y, leaf.size, leaf.rot, leaf.color);
         }
 
-        rafRef.current = requestAnimationFrame(step);
+        if (isVisibleRef.current && !reducedRef.current) {
+            rafRef.current = requestAnimationFrame(step);
+        } else {
+            rafRef.current = 0;
+        }
     }, []);
 
     useEffect(() => {
@@ -182,6 +187,13 @@ export function InteractiveLeafPile() {
         const onMq = () => {
             reducedRef.current = mq.matches;
             cancelAnimationFrame(rafRef.current);
+            rafRef.current = 0;
+            if (mq.matches) {
+                drawStatic();
+            } else if (isVisibleRef.current) {
+                lastTRef.current = performance.now();
+                rafRef.current = requestAnimationFrame(step);
+            }
         };
         mq.addEventListener("change", onMq);
 
@@ -256,9 +268,40 @@ export function InteractiveLeafPile() {
             }
         };
 
-        if (!reducedRef.current) {
+        const startLoop = () => {
+            if (reducedRef.current || rafRef.current !== 0) return;
             lastTRef.current = performance.now();
             rafRef.current = requestAnimationFrame(step);
+        };
+
+        const stopLoop = () => {
+            cancelAnimationFrame(rafRef.current);
+            rafRef.current = 0;
+        };
+
+        const visibilityObserver = new IntersectionObserver(
+            ([entry]) => {
+                isVisibleRef.current = entry.isIntersecting;
+                if (entry.isIntersecting && !reducedRef.current) {
+                    startLoop();
+                } else {
+                    stopLoop();
+                }
+            },
+            { threshold: 0 },
+        );
+
+        if (wrap) visibilityObserver.observe(wrap);
+
+        if (!reducedRef.current && wrap) {
+            const rect = wrap.getBoundingClientRect();
+            isVisibleRef.current =
+                rect.bottom > 0 && rect.top < window.innerHeight;
+            if (isVisibleRef.current) {
+                startLoop();
+            } else {
+                drawStatic();
+            }
         } else {
             drawStatic();
         }
@@ -266,7 +309,8 @@ export function InteractiveLeafPile() {
         return () => {
             mq.removeEventListener("change", onMq);
             ro.disconnect();
-            cancelAnimationFrame(rafRef.current);
+            visibilityObserver.disconnect();
+            stopLoop();
             canvas.removeEventListener("pointermove", onMove);
             canvas.removeEventListener("pointerdown", onDown);
             canvas.removeEventListener("pointerup", onUp);

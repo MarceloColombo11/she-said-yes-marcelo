@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -12,6 +12,12 @@ const dmSans = DM_Sans({
     variable: "--font-dm-sans",
     subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+    width: "device-width",
+    initialScale: 1,
+    viewportFit: "cover",
+};
 
 function resolveMetadataBase(): URL {
     const site = process.env.NEXT_PUBLIC_SITE_URL?.trim();
@@ -74,12 +80,6 @@ export default function RootLayout({
             lang="pt-BR"
             className={`${playfair.variable} ${dmSans.variable} h-full antialiased scroll-smooth`}
         >
-            <head>
-                <link
-                    rel="stylesheet"
-                    href="https://db.onlinewebfonts.com/c/042ebc0a3ba5a211f0893b31ab8da1d4?family=Hello+Paris+Serif"
-                />
-            </head>
             <body className="min-h-full flex flex-col font-sans">
                 <a
                     href="#main"

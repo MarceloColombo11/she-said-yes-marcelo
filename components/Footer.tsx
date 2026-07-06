@@ -14,7 +14,6 @@ export function Footer() {
                             <Link
                                 href="#home"
                                 className="pointer-events-auto font-heading text-2xl font-semibold text-brown"
-                                style={{ fontFamily: "var(--font-hello-paris)" }}
                             >
                                 S & M
                             </Link>

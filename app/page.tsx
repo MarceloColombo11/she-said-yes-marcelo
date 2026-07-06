@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FallingLeaves } from "@/components/FallingLeaves";
@@ -26,19 +27,21 @@ export default function Home() {
                 {/* 1. Home - Hero + Countdown */}
                 <section id="home" className="min-h-[100dvh]">
                     <div className="relative min-h-[100dvh] flex flex-col items-center justify-center bg-olive/10 overflow-hidden">
-                        {/* Hero background - substituir por imagem real do casal */}
-                        <div
-                            className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-30"
-                            style={{
-                                backgroundImage:
-                                    "url(https://images.unsplash.com/photo-1519741497674-611481863552?w=1920&q=80)",
-                            }}
-                        />
+                        <div className="absolute inset-0 opacity-30">
+                            <Image
+                                src="/images/casal/1.jpeg"
+                                alt=""
+                                fill
+                                priority
+                                sizes="100vw"
+                                className="object-cover object-center"
+                            />
+                        </div>
                         <div className="absolute inset-0 bg-cream/60" />
                         <FallingLeaves />
-                        <div className="relative z-10 flex flex-col items-center justify-center px-4 py-20 text-center">
+                        <div className="relative z-10 flex flex-col items-center justify-center px-4 py-12 text-center sm:py-16 md:py-20">
                             <Monograma
-                                className="h-96 md:h-[36rem] w-auto mb-4 object-contain"
+                                className="mb-4 h-56 w-auto object-contain sm:h-72 md:h-[36rem]"
                                 ariaHidden
                             />
                             <p className="text-olive text-lg md:text-xl mb-2">

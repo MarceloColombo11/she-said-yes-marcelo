@@ -91,7 +91,7 @@ export function PhotoUploadSection() {
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <div className="text-center">
-        <h2 className="font-heading text-4xl font-semibold text-brown">
+        <h2 className="font-heading text-3xl font-semibold text-brown md:text-4xl">
           Suba sua Foto
         </h2>
         <p className="mt-4 text-olive">

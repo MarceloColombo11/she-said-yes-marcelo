@@ -40,7 +40,6 @@ export function GiftCard({ presente, onClick, className }: GiftCardProps) {
           fill
           className="object-cover"
           sizes="64px"
-          unoptimized
         />
       </div>
       <div className="text-center">

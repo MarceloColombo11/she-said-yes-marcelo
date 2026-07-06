@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import {
     Dialog,
@@ -47,17 +48,23 @@ function HonorAvatar({
         "relative size-24 overflow-hidden rounded-full border-2 border-sage/30";
 
     const imgEl = (
-        /* eslint-disable-next-line @next/next/no-img-element */
-        <img
-            src={person.foto}
-            alt={onPhotoOpen ? "" : person.nome}
-            className="size-full origin-center object-cover"
+        <div
+            className="size-full origin-center"
             style={{
-                objectPosition: fotoObjectPosition,
                 transform: `scale(${fotoZoom}) translateY(${fotoOffsetY}%)`,
             }}
-            onError={() => setImgError(true)}
-        />
+        >
+            <Image
+                src={person.foto}
+                alt={onPhotoOpen ? "" : person.nome}
+                width={96}
+                height={96}
+                sizes="96px"
+                className="size-full object-cover"
+                style={{ objectPosition: fotoObjectPosition }}
+                onError={() => setImgError(true)}
+            />
+        </div>
     );
 
     if (onPhotoOpen) {
@@ -91,20 +98,46 @@ export function HonorSection({ title, subtitle, data }: HonorSectionProps) {
     const [lightbox, setLightbox] = useState<HonorPerson | null>(null);
 
     useEffect(() => {
+        const el = sectionRef.current;
+        if (!el) return;
+
+        const reveal = () => setIsVisible(true);
+
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+            reveal();
+        }
+
         const observer = new IntersectionObserver(
             ([entry]) => {
-                if (entry.isIntersecting) setIsVisible(true);
+                if (entry.isIntersecting) reveal();
             },
-            { threshold: 0.1 },
+            { threshold: 0.05, rootMargin: "0px 0px -5% 0px" },
         );
-        if (sectionRef.current) observer.observe(sectionRef.current);
-        return () => observer.disconnect();
+
+        observer.observe(el);
+
+        const onHashChange = () => {
+            requestAnimationFrame(() => {
+                const next = el.getBoundingClientRect();
+                if (next.top < window.innerHeight && next.bottom > 0) {
+                    reveal();
+                }
+            });
+        };
+
+        window.addEventListener("hashchange", onHashChange);
+
+        return () => {
+            observer.disconnect();
+            window.removeEventListener("hashchange", onHashChange);
+        };
     }, []);
 
     return (
         <section ref={sectionRef} className="mx-auto max-w-7xl">
             <div className="mb-12 text-center">
-                <h2 className="font-heading text-4xl font-semibold text-brown">
+                <h2 className="font-heading text-3xl font-semibold text-brown md:text-4xl">
                     {title}
                 </h2>
                 {subtitle && <p className="mt-4 text-olive">{subtitle}</p>}
@@ -118,7 +151,7 @@ export function HonorSection({ title, subtitle, data }: HonorSectionProps) {
                             "flex w-full max-w-md shrink-0 flex-col items-center rounded-xl border border-olive/20 bg-white p-6 shadow-sm transition-all duration-500",
                             isVisible
                                 ? "translate-y-0 opacity-100"
-                                : "translate-y-8 opacity-0",
+                                : "translate-y-4 opacity-100",
                         )}
                         style={{ transitionDelay: `${i * 100}ms` }}
                     >
@@ -157,12 +190,14 @@ export function HonorSection({ title, subtitle, data }: HonorSectionProps) {
                                     voltar à página.
                                 </DialogDescription>
                             </DialogHeader>
-                            <div className="flex min-h-0 justify-center">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
+                            <div className="relative flex min-h-0 w-full max-w-full justify-center">
+                                <Image
                                     src={lightbox.foto}
                                     alt={lightbox.nome}
-                                    className="max-h-[min(78dvh,80vh)] w-full max-w-full rounded-lg object-contain"
+                                    width={896}
+                                    height={1200}
+                                    sizes="(max-width: 768px) 96vw, 56rem"
+                                    className="max-h-[min(78dvh,80vh)] w-auto max-w-full rounded-lg object-contain"
                                 />
                             </div>
                         </>

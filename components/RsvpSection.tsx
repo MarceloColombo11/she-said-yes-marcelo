@@ -9,7 +9,7 @@ export function RsvpSection() {
 
   return (
     <div className="mx-auto max-w-2xl text-center">
-      <h2 className="font-heading text-4xl font-semibold text-brown">
+      <h2 className="font-heading text-3xl font-semibold text-brown md:text-4xl">
         Confirmação de Presença
       </h2>
       <p className="mt-6 text-olive leading-relaxed">
