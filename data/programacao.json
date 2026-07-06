@@ -1,26 +1,41 @@
 [
   {
+    "hora": "16:00",
+    "titulo": "Recepção dos Convidados",
+    "resumo": "Chegue cedo, pegue uma bebida e vem matar a saudade!",
+    "descricao": "Cheguem com calma e com o coração aberto — estaremos no Mirante Garden, em Fazendinha (Biguaçu/SC), esperando por vocês.\n\nMeia hora antes da cerimônia, abrimos os braços para recebê-los: conversa boa, abraço apertado e bebidas sem álcool à disposição. É nosso jeitinho de dizer \"que bom que vocês chegaram\" antes do grande \"sim\".",
+    "icone": "coffee",
+    "local": "Mirante Garden — Fazendinha, Biguaçu/SC",
+    "destaque": true
+  },
+  {
     "hora": "16:30",
     "titulo": "Início da Cerimônia",
-    "descricao": "Aqui se dá o início de um sonho que foi sonhado a três: Suelen, Marcelo e Deus.",
-    "icone": "church"
+    "resumo": "A hora do sim! Cheguem no horário, esse momento é único.",
+    "descricao": "Às 16h30, com o coração cheio e a presença de Deus, começa a cerimônia no mesmo endereço.\n\nPedimos com carinho que cheguem no horário — é breve, especial e feito para ser vivido juntos, de portas abertas até o altar.\n\nAqui começa um sonho sonhado a três: Suelen, Marcelo e Deus.",
+    "icone": "church",
+    "local": "Mirante Garden — Fazendinha, Biguaçu/SC",
+    "destaque": true
   },
   {
     "hora": "17:30",
     "titulo": "Cocktail",
-    "descricao": "Momento de confraternização com drinks e petiscos enquanto celebramos.",
+    "resumo": "Drinks liberados e entradinhas circulando.",
+    "descricao": "Logo depois da cerimônia, a festa ganha outro ritmo: recepção, brinde e aquele respiro depois do \"sim\".\n\nO bar de drinks e as entradas estarão à disposição — é hora de celebrar com calma, sorriso no rosto e copo na mão.",
     "icone": "wine"
   },
   {
     "hora": "19:00",
-    "titulo": "Recepção",
-    "descricao": "Jantar de gala para celebrarmos juntos esta noite inesquecível.",
+    "titulo": "Jantar",
+    "resumo": "Hora de sentar à mesa e comer bem.",
+    "descricao": "Às 19h, convidamos vocês à mesa: o jantar será servido nesse horário.\n\nBoa comida, boa companhia e mais um capítulo da noite para a gente curtir juntos.",
     "icone": "utensils"
   },
   {
-    "hora": "21:00",
+    "hora": "20:30",
     "titulo": "Festa",
-    "descricao": "Pista de dança liberada! Vamos celebrar até o amanhecer.",
+    "resumo": "Pista aberta. Vem dançar!",
+    "descricao": "20h30: pista liberada! A gente abre o chão, liga o som e dá o pontapé na celebração de verdade.\n\nSapato confortável (ou descalço, sem julgamentos), sorriso largo e vontade de dançar — o resto a gente resolve na pista.",
     "icone": "music"
   }
 ]
