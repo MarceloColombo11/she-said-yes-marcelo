@@ -3,7 +3,8 @@
  * Usa Canvas API nativa - sem dependências externas.
  */
 
-const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+import { isImageMime, validateMediaFileFromFile } from "@/lib/media-utils";
+
 const MAX_DIMENSION = 1920;
 const JPEG_QUALITY = 0.85;
 
@@ -12,31 +13,23 @@ export type ImageValidationResult =
   | { valid: false; error: string };
 
 /**
- * Valida se o arquivo é uma imagem aceita e não excede o tamanho máximo.
+ * @deprecated Prefer validateMediaFileFromFile from media-utils.
+ * Mantido para compatibilidade: só imagens, com teto de 200 MB.
  */
 export function validateImageFile(file: File): ImageValidationResult {
-  if (!file.type.startsWith("image/")) {
+  if (!isImageMime(file.type) && !file.type.startsWith("image/")) {
     return { valid: false, error: "Por favor, selecione apenas arquivos de imagem." };
   }
-
-  if (file.size > MAX_FILE_SIZE_BYTES) {
-    return {
-      valid: false,
-      error: `Arquivo muito grande. O máximo é ${MAX_FILE_SIZE_BYTES / 1024 / 1024} MB.`,
-    };
-  }
-
-  return { valid: true };
+  return validateMediaFileFromFile(file);
 }
 
 /**
- * Comprime e redimensiona a imagem para caber no limite da Vercel (4.5 MB).
- * Usa canvas para redimensionar e re-comprimir como JPEG.
+ * Comprime e redimensiona a imagem (max 1920px, JPEG quality 0.85).
+ * Reduz tempo de upload em redes móveis; não é exigido pelo body da Vercel.
  */
 export async function compressImage(file: File): Promise<File> {
-  const validation = validateImageFile(file);
-  if (!validation.valid) {
-    throw new Error(validation.error);
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Apenas imagens podem ser comprimidas.");
   }
 
   return new Promise((resolve, reject) => {

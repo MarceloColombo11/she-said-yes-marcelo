@@ -1,62 +1,39 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { Loader2, Camera } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Camera, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PhotoUploadZone } from "@/components/PhotoUploadZone";
-import { PhotoPreview } from "@/components/PhotoPreview";
 import { PhotoQRCode } from "@/components/PhotoQRCode";
 import { CameraModal } from "@/components/CameraModal";
-import { usePhotoUpload } from "@/hooks/usePhotoUpload";
+import { MediaQueueItem } from "@/components/MediaQueueItem";
+import { useMediaUploadQueue } from "@/hooks/useMediaUploadQueue";
 import { useCameraCapture } from "@/hooks/useCameraCapture";
-import { validateImageFile } from "@/lib/image-utils";
-import { toast } from "sonner";
 
 export function PhotoUploadSection() {
-  const [file, setFile] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
-
-  const resetForm = useCallback(() => {
-    setFile(null);
-    setPreview(null);
-  }, []);
-
-  const { upload, loading, progress } = usePhotoUpload();
+  const { items, enqueueFiles, retryItem, removeItem, isUploading } =
+    useMediaUploadQueue();
 
   const handleCameraCapture = useCallback(
     (capturedFile: File) => {
-      upload(capturedFile, () => {});
+      enqueueFiles([capturedFile]);
     },
-    [upload]
+    [enqueueFiles]
   );
 
   const camera = useCameraCapture(handleCameraCapture);
-
-  const handleFile = useCallback((f: File | null) => {
-    if (!f) {
-      setFile(null);
-      setPreview(null);
-      return;
-    }
-    const validation = validateImageFile(f);
-    if (!validation.valid) {
-      toast.error(validation.error);
-      return;
-    }
-    setFile(f);
-    const reader = new FileReader();
-    reader.onload = () => setPreview(reader.result as string);
-    reader.readAsDataURL(f);
-  }, []);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault();
       setDragActive(false);
-      handleFile(e.dataTransfer.files?.[0] ?? null);
+      const files = e.dataTransfer.files
+        ? Array.from(e.dataTransfer.files)
+        : [];
+      if (files.length > 0) enqueueFiles(files);
     },
-    [handleFile]
+    [enqueueFiles]
   );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
@@ -69,60 +46,48 @@ export function PhotoUploadSection() {
     setDragActive(false);
   }, []);
 
-  const handleSubmit = async () => {
-    if (!file) return;
-    await upload(file, resetForm);
-  };
-
   const handleCameraOpen = useCallback(async () => {
     await camera.open();
-  }, [camera.open]);
-
-  const progressMessage =
-    progress === "compressing"
-      ? "Comprimindo..."
-      : progress === "uploading"
-        ? "Enviando..."
-        : null;
-
-  const isUploadingFromGallery = loading && !!file;
-  const isUploadingFromCamera = loading && !file;
+  }, [camera]);
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <div className="text-center">
         <h2 className="font-heading text-3xl font-semibold text-brown md:text-4xl">
-          Suba sua Foto
+          Suba suas fotos e vídeos
         </h2>
         <p className="mt-4 text-olive">
-          Compartilhe seus momentos conosco! Envie suas fotos do casamento.
+          Compartilhe seus momentos conosco! Envie várias fotos ou vídeos de
+          uma vez.
         </p>
       </div>
 
-      <div className="space-y-6" aria-live="polite" aria-busy={loading}>
+      <div className="space-y-6" aria-live="polite" aria-busy={isUploading}>
         <div className="flex flex-col gap-6 lg:flex-row lg:items-stretch">
           <div className="flex flex-1 flex-col gap-6">
             <div className="rounded-2xl border border-amber-200/60 bg-linear-to-b from-white to-cream/80 p-6 shadow-sm">
               <Button
                 type="button"
                 onClick={handleCameraOpen}
-                disabled={loading}
-                className="h-16 w-full min-h-[64px] gap-4 rounded-xl bg-sage py-4 text-lg font-medium text-white transition-colors hover:bg-sage/90 disabled:opacity-70"
+                disabled={camera.isOpen}
+                className="h-16 w-full min-h-16 gap-4 rounded-xl bg-sage py-4 text-lg font-medium text-white transition-colors hover:bg-sage/90 disabled:opacity-70"
               >
                 <Camera className="size-8" aria-hidden />
-                <span>Tirar foto</span>
-                {(isUploadingFromCamera || camera.isOpen) && (
+                <span>Câmera</span>
+                {camera.isOpen && (
                   <Loader2 className="size-6 animate-spin" aria-hidden />
                 )}
               </Button>
               <p className="mt-2 text-center text-sm text-olive/80">
-                Capture o momento e envie direto
+                Toque para foto · Segure para vídeo de até 15s
               </p>
             </div>
 
             <div
               className={`flex flex-col rounded-2xl border-2 border-dashed transition-colors ${
-                dragActive ? "border-sage bg-sage/5" : "border-olive/20 bg-white"
+                dragActive
+                  ? "border-sage bg-sage/5"
+                  : "border-olive/20 bg-white"
               }`}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
@@ -131,50 +96,25 @@ export function PhotoUploadSection() {
               <p className="border-b border-olive/10 px-4 py-3 text-sm font-medium text-brown">
                 Ou envie da sua galeria
               </p>
-              {preview && file ? (
-                <div className="p-4">
-                  <PhotoPreview
-                    preview={preview}
-                    fileName={file.name}
-                    fileSize={file.size}
-                    onRemove={resetForm}
-                    disabled={loading}
-                  />
-                </div>
-              ) : (
-                <PhotoUploadZone onFileSelect={handleFile} disabled={loading} />
-              )}
+              <PhotoUploadZone onFilesSelect={enqueueFiles} />
             </div>
 
-            {preview && file && (
-              <div className="space-y-2">
-                {loading && (
-                  <div
-                    className="h-1 w-full overflow-hidden rounded-full bg-olive/10"
-                    role="progressbar"
-                    aria-valuetext={progressMessage ?? undefined}
-                    aria-busy
-                  >
-                    <div className="h-full w-1/3 animate-pulse rounded-full bg-sage" />
-                  </div>
-                )}
-                <Button
-                  onClick={handleSubmit}
-                  className="w-full"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2
-                        className="mr-2 size-4 animate-spin"
-                        aria-hidden
+            {items.length > 0 && (
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-brown">
+                  Fila de envio ({items.length})
+                </p>
+                <ul className="space-y-2">
+                  {items.map((item) => (
+                    <li key={item.id}>
+                      <MediaQueueItem
+                        item={item}
+                        onRetry={retryItem}
+                        onRemove={removeItem}
                       />
-                      <span>{progressMessage ?? "Enviando..."}</span>
-                    </>
-                  ) : (
-                    "Enviar Foto"
-                  )}
-                </Button>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>
@@ -192,12 +132,18 @@ export function PhotoUploadSection() {
           flashEnabled={camera.flashEnabled}
           flashSupported={camera.flashSupported}
           capturedPreview={camera.capturedPreview}
+          capturedKind={camera.capturedKind}
+          isRecording={camera.isRecording}
+          recordProgress={camera.recordProgress}
+          maxVideoSeconds={camera.maxVideoSeconds}
           onClose={camera.close}
-          onCapture={camera.capture}
           onConfirm={camera.confirmCapture}
           onRetake={camera.retake}
           onSwitchFlash={camera.switchFlash}
           onSwitchCamera={camera.switchCamera}
+          onShutterPointerDown={camera.onShutterPointerDown}
+          onShutterPointerUp={camera.onShutterPointerUp}
+          onShutterPointerCancel={camera.onShutterPointerCancel}
           videoRef={camera.setVideoRef}
           onVideoCanPlay={camera.handleVideoCanPlay}
         />

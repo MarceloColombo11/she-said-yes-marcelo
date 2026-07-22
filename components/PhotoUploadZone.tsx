@@ -3,54 +3,47 @@
 import { useRef } from "react";
 import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { validateImageFile } from "@/lib/image-utils";
-import { toast } from "sonner";
 
 type PhotoUploadZoneProps = {
-  onFileSelect: (file: File) => void;
+  onFilesSelect: (files: File[]) => void;
   disabled?: boolean;
 };
 
 export function PhotoUploadZone({
-  onFileSelect,
+  onFilesSelect,
   disabled = false,
 }: PhotoUploadZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (file: File | null) => {
-    if (!file) return;
-    const validation = validateImageFile(file);
-    if (!validation.valid) {
-      toast.error(validation.error);
-      return;
-    }
-    onFileSelect(file);
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleFile(e.target.files?.[0] ?? null);
+    const files = e.target.files ? Array.from(e.target.files) : [];
     e.target.value = "";
+    if (files.length > 0) onFilesSelect(files);
   };
 
   return (
     <div
       className="flex min-h-[160px] flex-col items-center justify-center"
       role="region"
-      aria-label="Área de upload de fotos da galeria"
+      aria-label="Área de upload de fotos e vídeos da galeria"
     >
       <div className="flex flex-col items-center gap-4 p-6">
         <Upload className="size-10 text-olive/60" aria-hidden />
         <span className="text-center text-sm font-medium text-olive">
-          Arraste uma imagem ou clique para selecionar
+          Arraste fotos ou vídeos, ou clique para selecionar
+        </span>
+        <span className="text-center text-xs text-olive/70">
+          Vários arquivos de uma vez · até 200 MB cada
         </span>
         <input
           ref={inputRef}
           type="file"
-          accept="image/*"
+          accept="image/*,video/*"
+          multiple
           onChange={handleInputChange}
           className="hidden"
           disabled={disabled}
-          aria-label="Selecionar foto da galeria"
+          aria-label="Selecionar fotos ou vídeos da galeria"
         />
         <Button
           type="button"

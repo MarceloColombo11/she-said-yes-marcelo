@@ -9,7 +9,8 @@ Site elegante e funcional para o casamento de Suelen e Marcelo. Data: **28 de no
 - **Tailwind CSS**
 - **Shadcn/ui**
 - **Google Maps Embed** (mapa, sem API key)
-- **Google Apps Script** (RSVP e upload de fotos)
+- **Google Apps Script** (RSVP)
+- **Google Drive API** (upload resumível de fotos e vídeos dos convidados)
 
 ## Como rodar
 
@@ -28,17 +29,48 @@ Acesse [http://localhost:3000](http://localhost:3000).
 | Variável | Descrição |
 |----------|-----------|
 | `GOOGLE_APPS_SCRIPT_RSVP_URL` | URL da Web App de confirmação (somente servidor) |
-| `GOOGLE_APPS_SCRIPT_UPLOAD_URL` | URL da Web App de upload de fotos (somente servidor) |
+| `GOOGLE_OAUTH_CLIENT_ID` | OAuth Desktop client (upload Drive) |
+| `GOOGLE_OAUTH_CLIENT_SECRET` | Secret do OAuth client |
+| `GOOGLE_OAUTH_REFRESH_TOKEN` | Refresh token da conta dona da pasta (`npm run drive:oauth`) |
+| `GOOGLE_DRIVE_FOLDER_ID` | ID da pasta do Drive onde as mídias serão salvas |
+| `NEXT_PUBLIC_SITE_URL` | (Opcional) URL pública do site — ajuda no CORS do upload |
 | `NEXT_PUBLIC_WEDDING_DATE` | Data e hora (ex: 2026-11-28T16:30:00) |
 
-## Scripts do Google Apps Script
+## Upload de mídias (Google Drive)
 
-Na pasta `scripts/` estão os códigos para:
+Convidados enviam **várias fotos e vídeos** (até **200 MB** cada). O arquivo vai **direto do celular ao Drive**; a Vercel só abre a sessão de upload.
 
-- **RSVP**: insere confirmações em uma planilha do Google Sheets
-- **Upload**: salva fotos em uma pasta do Google Drive
+> **Importante:** Service Account **não grava** em Drive pessoal (erro `storageQuotaExceeded`). Use **OAuth** da conta Google que é dona da pasta.
 
-Veja os comentários nos arquivos para instruções de implantação.
+### Setup OAuth (recomendado)
+
+1. No [Google Cloud Console](https://console.cloud.google.com/), ative a **Google Drive API**.
+2. **Credentials → Create credentials → OAuth client ID → Desktop app**.
+3. Copie Client ID e Client Secret para o `.env.local`:
+   - `GOOGLE_OAUTH_CLIENT_ID`
+   - `GOOGLE_OAUTH_CLIENT_SECRET`
+4. Defina `GOOGLE_DRIVE_FOLDER_ID` (ID na URL da pasta).
+5. Rode uma vez (com a conta dona da pasta logada no navegador):
+
+```bash
+npm run drive:oauth
+```
+
+6. Cole o `GOOGLE_OAUTH_REFRESH_TOKEN` impresso no `.env.local` e na Vercel.
+7. Remova `GOOGLE_SERVICE_ACCOUNT_*` se existirem (não são necessários).
+8. Reinicie `npm run dev`.
+
+### Fluxo técnico
+
+1. Cliente: `POST /api/upload/session` com `{ fileName, mimeType, size }`
+2. Servidor: autentica (OAuth refresh) e inicia upload resumível no Drive (header `Origin` para CORS)
+3. Cliente: envia o arquivo em chunks (~8 MB) direto à URL do Drive, com retry/resume
+
+O script antigo `scripts/google-apps-script-upload.js` é **legado** e não deve ser usado.
+
+## RSVP (Google Apps Script)
+
+Na pasta `scripts/` está o código de **RSVP** (confirmações em planilha). Veja os comentários no arquivo para implantação.
 
 ## Personalização
 
@@ -50,10 +82,18 @@ Veja os comentários nos arquivos para instruções de implantação.
 
 ## Deploy na Vercel
 
-O projeto pode ser implantado na Vercel:
-
 ```bash
 npm run build
 ```
 
-**Importante**: Configure `GOOGLE_APPS_SCRIPT_RSVP_URL` e `GOOGLE_APPS_SCRIPT_UPLOAD_URL` em **Project Settings > Environment Variables** no painel da Vercel. O `.env.local` é apenas para desenvolvimento local; em produção a Vercel usa as variáveis do projeto.
+Configure no painel da Vercel (**Project Settings > Environment Variables**):
+
+- `GOOGLE_APPS_SCRIPT_RSVP_URL`
+- `GOOGLE_OAUTH_CLIENT_ID`
+- `GOOGLE_OAUTH_CLIENT_SECRET`
+- `GOOGLE_OAUTH_REFRESH_TOKEN`
+- `GOOGLE_DRIVE_FOLDER_ID`
+- `NEXT_PUBLIC_WEDDING_DATE`
+- (recomendado) `NEXT_PUBLIC_SITE_URL`
+
+O `.env.local` é apenas para desenvolvimento local.

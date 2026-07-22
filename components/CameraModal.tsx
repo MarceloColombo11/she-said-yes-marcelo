@@ -9,9 +9,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import type { CapturedKind } from "@/hooks/useCameraCapture";
 
 type CameraModalProps = {
-  /** Câmera frontal: o stream costuma vir espelhado; corrigimos o preview com scaleX(-1). */
   effectiveFacingMode?: "user" | "environment";
   open: boolean;
   isReady: boolean;
@@ -19,12 +19,18 @@ type CameraModalProps = {
   flashEnabled: boolean;
   flashSupported: boolean;
   capturedPreview: string | null;
+  capturedKind?: CapturedKind;
+  isRecording?: boolean;
+  recordProgress?: number;
+  maxVideoSeconds?: number;
   onClose: () => void;
-  onCapture: () => void;
   onConfirm: () => void;
   onRetake: () => void;
   onSwitchFlash: () => void;
   onSwitchCamera: () => void;
+  onShutterPointerDown: (e: React.PointerEvent) => void;
+  onShutterPointerUp: (e: React.PointerEvent) => void;
+  onShutterPointerCancel: () => void;
   videoRef: (el: HTMLVideoElement | null) => void;
   onVideoCanPlay: () => void;
 };
@@ -37,12 +43,18 @@ export function CameraModal({
   flashEnabled,
   flashSupported,
   capturedPreview,
+  capturedKind = "photo",
+  isRecording = false,
+  recordProgress = 0,
+  maxVideoSeconds = 15,
   onClose,
-  onCapture,
   onConfirm,
   onRetake,
   onSwitchFlash,
   onSwitchCamera,
+  onShutterPointerDown,
+  onShutterPointerUp,
+  onShutterPointerCancel,
   videoRef,
   onVideoCanPlay,
 }: CameraModalProps) {
@@ -51,6 +63,18 @@ export function CameraModal({
   };
 
   const isPreviewMode = !!capturedPreview;
+  const secondsLeft = Math.max(
+    0,
+    Math.ceil(maxVideoSeconds * (1 - recordProgress))
+  );
+
+  const title = isPreviewMode
+    ? capturedKind === "video"
+      ? "Confirmar vídeo"
+      : "Confirmar foto"
+    : isRecording
+      ? `Gravando · ${secondsLeft}s`
+      : "Foto ou vídeo";
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -60,7 +84,7 @@ export function CameraModal({
       >
         <DialogHeader className="flex flex-row items-center justify-between border-b border-olive/10 px-4 py-3 pb-safe">
           <DialogTitle className="font-heading text-base font-medium text-brown">
-            {isPreviewMode ? "Confirmar foto" : "Tirar foto"}
+            {title}
           </DialogTitle>
           <Button
             variant="ghost"
@@ -68,6 +92,7 @@ export function CameraModal({
             onClick={onClose}
             className="h-10 w-10 shrink-0 rounded-full"
             aria-label="Fechar"
+            disabled={isRecording}
           >
             <X className="size-5" />
           </Button>
@@ -78,12 +103,51 @@ export function CameraModal({
           aria-live="polite"
           aria-busy={isLoading}
         >
+          {/* Barra estilo story */}
+          {!isPreviewMode && (
+            <div
+              className="pointer-events-none absolute inset-x-3 top-3 z-20"
+              aria-hidden={!isRecording}
+            >
+              <div className="h-1 overflow-hidden rounded-full bg-white/25">
+                <div
+                  className={cn(
+                    "h-full rounded-full origin-left transition-[width] duration-75 ease-linear",
+                    isRecording ? "bg-white" : "bg-white/40"
+                  )}
+                  style={{
+                    width: isRecording
+                      ? `${Math.min(100, recordProgress * 100)}%`
+                      : "100%",
+                    opacity: isRecording ? 1 : 0.35,
+                  }}
+                />
+              </div>
+              {isRecording && (
+                <p className="mt-2 text-center text-xs font-medium text-white drop-shadow">
+                  {secondsLeft}s · solte para encerrar
+                </p>
+              )}
+            </div>
+          )}
+
           {isPreviewMode ? (
-            <img
-              src={capturedPreview}
-              alt="Preview da foto capturada"
-              className="h-full w-full object-contain"
-            />
+            capturedKind === "video" ? (
+              <video
+                src={capturedPreview!}
+                controls
+                playsInline
+                className="h-full w-full object-contain"
+                aria-label="Preview do vídeo gravado"
+              />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={capturedPreview!}
+                alt="Preview da foto capturada"
+                className="h-full w-full object-contain"
+              />
+            )
           ) : (
             <>
               {isLoading && (
@@ -106,6 +170,12 @@ export function CameraModal({
                   aria-label="Visualização da câmera"
                 />
               )}
+              {isRecording && (
+                <div className="pointer-events-none absolute left-4 top-10 z-20 flex items-center gap-2 rounded-full bg-red-600/90 px-2.5 py-1 text-xs font-semibold text-white">
+                  <span className="size-2 animate-pulse rounded-full bg-white" />
+                  REC
+                </div>
+              )}
             </>
           )}
         </div>
@@ -116,31 +186,33 @@ export function CameraModal({
               <Button
                 variant="outline"
                 onClick={onRetake}
-                className="min-h-[48px] flex-1 py-3"
+                className="min-h-12 flex-1 py-3"
               >
-                Tirar outra
+                {capturedKind === "video" ? "Gravar outro" : "Tirar outra"}
               </Button>
-              <Button
-                onClick={onConfirm}
-                className="min-h-[48px] flex-1 py-3"
-              >
+              <Button onClick={onConfirm} className="min-h-12 flex-1 py-3">
                 Confirmar
               </Button>
             </div>
           ) : (
             <>
               <div className="flex items-center justify-between">
-                <div className="flex h-12 w-12 min-w-[48px] items-center justify-center">
+                <div className="flex size-12 min-w-12 items-center justify-center">
                   {flashSupported ? (
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={onSwitchFlash}
-                      disabled={isLoading}
-                      className={`h-12 w-12 min-h-[48px] min-w-[48px] rounded-full ${
-                        flashEnabled ? "bg-amber-200/80 text-amber-800" : "bg-white/80"
-                      }`}
-                      aria-label={flashEnabled ? "Desligar flash" : "Ligar flash"}
+                      disabled={isLoading || isRecording}
+                      className={cn(
+                        "size-12 min-h-12 min-w-12 rounded-full",
+                        flashEnabled
+                          ? "bg-amber-200/80 text-amber-800"
+                          : "bg-white/80"
+                      )}
+                      aria-label={
+                        flashEnabled ? "Desligar flash" : "Ligar flash"
+                      }
                     >
                       {flashEnabled ? (
                         <Zap className="size-6 fill-amber-600" />
@@ -151,22 +223,39 @@ export function CameraModal({
                   ) : null}
                 </div>
 
-                <Button
-                  onClick={onCapture}
+                <button
+                  type="button"
                   disabled={!isReady || isLoading}
-                  className="h-14 w-14 min-h-[56px] min-w-[56px] shrink-0 rounded-full bg-sage p-0 hover:bg-sage/90"
-                  aria-label="Capturar foto"
+                  onPointerDown={onShutterPointerDown}
+                  onPointerUp={onShutterPointerUp}
+                  onPointerCancel={onShutterPointerCancel}
+                  onContextMenu={(e) => e.preventDefault()}
+                  className={cn(
+                    "relative flex size-16 min-h-16 min-w-16 shrink-0 touch-none items-center justify-center rounded-full p-0 transition-transform select-none",
+                    "bg-sage hover:bg-sage/90 disabled:opacity-50",
+                    isRecording && "scale-110 bg-red-600 hover:bg-red-600"
+                  )}
+                  aria-label={
+                    isRecording
+                      ? "Solte para parar a gravação"
+                      : "Toque para foto, segure para vídeo de até 15 segundos"
+                  }
                 >
-                  <span className="h-12 w-12 rounded-full border-4 border-white" />
-                </Button>
+                  <span
+                    className={cn(
+                      "rounded-full border-4 border-white transition-all",
+                      isRecording ? "size-6 rounded-md" : "size-12"
+                    )}
+                  />
+                </button>
 
-                <div className="flex h-12 w-12 min-w-[48px] items-center justify-center">
+                <div className="flex size-12 min-w-12 items-center justify-center">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={onSwitchCamera}
-                    disabled={isLoading}
-                    className="h-12 w-12 min-h-[48px] min-w-[48px] rounded-full bg-white/80"
+                    disabled={isLoading || isRecording}
+                    className="size-12 min-h-12 min-w-12 rounded-full bg-white/80"
                     aria-label="Trocar câmera frontal/traseira"
                   >
                     <SwitchCamera className="size-6" />
@@ -174,9 +263,14 @@ export function CameraModal({
                 </div>
               </div>
 
+              <p className="text-center text-xs text-olive/80">
+                Toque = foto · Segure = vídeo até {maxVideoSeconds}s
+              </p>
+
               <Button
                 variant="outline"
                 onClick={onClose}
+                disabled={isRecording}
                 className="w-full py-3"
               >
                 Cancelar
