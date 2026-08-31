@@ -5,8 +5,8 @@
 
 import { isImageMime, validateMediaFileFromFile } from "@/lib/media-utils";
 
-const MAX_DIMENSION = 1920;
-const JPEG_QUALITY = 0.85;
+const MAX_DIMENSION = 2560;
+const JPEG_QUALITY = 0.92;
 
 export type ImageValidationResult =
   | { valid: true }
@@ -24,7 +24,7 @@ export function validateImageFile(file: File): ImageValidationResult {
 }
 
 /**
- * Comprime e redimensiona a imagem (max 1920px, JPEG quality 0.85).
+ * Comprime e redimensiona a imagem (max 2560px, JPEG quality 0.92).
  * Reduz tempo de upload em redes móveis; não é exigido pelo body da Vercel.
  */
 export async function compressImage(file: File): Promise<File> {
@@ -60,6 +60,8 @@ export async function compressImage(file: File): Promise<File> {
         return;
       }
 
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
       ctx.drawImage(img, 0, 0, width, height);
 
       const baseName = file.name.replace(/\.[^.]+$/, "") || "foto";

@@ -11,16 +11,54 @@ export const MAX_VIDEO_SECONDS = 15;
 const HOLD_TO_RECORD_MS = 220;
 /** Tempo da tela branca antes de capturar na frontal. */
 const SCREEN_FLASH_PHOTO_MS = 150;
+/** Bitrate de áudio (~voz/ambiente nítidos em mobile). */
+const AUDIO_BITS_PER_SECOND = 192_000;
+const VIDEO_BITS_PER_SECOND = 8_000_000;
+const PHOTO_JPEG_QUALITY = 0.95;
+
+/** Constraints de mic otimizadas para voz (casamento / ambiente). */
+const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
+  echoCancellation: true,
+  noiseSuppression: true,
+  autoGainControl: true,
+  channelCount: { ideal: 1 },
+  sampleRate: { ideal: 48_000 },
+};
 
 function pickRecorderMimeType(): string | undefined {
   if (typeof MediaRecorder === "undefined") return undefined;
+  // Preferir Opus (melhor áudio) quando disponível
   const candidates = [
     "video/webm;codecs=vp9,opus",
     "video/webm;codecs=vp8,opus",
+    "video/webm;codecs=vp9",
+    "video/webm;codecs=vp8",
     "video/webm",
+    "video/mp4;codecs=avc1,mp4a.40.2",
     "video/mp4",
   ];
   return candidates.find((t) => MediaRecorder.isTypeSupported(t));
+}
+
+function createRecorder(stream: MediaStream, mimeType?: string): MediaRecorder {
+  const options: MediaRecorderOptions = {
+    videoBitsPerSecond: VIDEO_BITS_PER_SECOND,
+    audioBitsPerSecond: AUDIO_BITS_PER_SECOND,
+  };
+  if (mimeType) options.mimeType = mimeType;
+
+  try {
+    return new MediaRecorder(stream, options);
+  } catch {
+    // Alguns browsers rejeitam bitrate/mime — tenta só com mime
+    try {
+      return mimeType
+        ? new MediaRecorder(stream, { mimeType })
+        : new MediaRecorder(stream);
+    } catch {
+      return new MediaRecorder(stream);
+    }
+  }
 }
 
 function extensionForMime(mime: string): string {
@@ -39,6 +77,67 @@ async function applyTorch(track: MediaStreamTrack, on: boolean) {
     advanced: [{ torch: on } as MediaTrackConstraintSet],
   });
 }
+
+async function applyZoom(track: MediaStreamTrack, zoom: number) {
+  await track.applyConstraints({
+    advanced: [{ zoom } as MediaTrackConstraintSet],
+  });
+}
+
+type ZoomRange = { min: number; max: number; step: number };
+
+function readZoomCapability(caps: MediaTrackCapabilities): ZoomRange | null {
+  const zoom = (
+    caps as MediaTrackCapabilities & {
+      zoom?: { min: number; max: number; step?: number };
+    }
+  ).zoom;
+  if (
+    !zoom ||
+    typeof zoom.min !== "number" ||
+    typeof zoom.max !== "number" ||
+    !(zoom.max > zoom.min)
+  ) {
+    return null;
+  }
+  return {
+    min: zoom.min,
+    max: zoom.max,
+    step: typeof zoom.step === "number" && zoom.step > 0 ? zoom.step : 0.1,
+  };
+}
+
+function buildZoomPresets(min: number, max: number): number[] {
+  const candidates = [0.5, 1, 2, 3];
+  if (max >= 5) candidates.push(5);
+  if (max >= 8 && max < 12) candidates.push(Math.floor(max));
+  else if (max >= 12) candidates.push(10);
+
+  const presets = candidates.filter((v) => v >= min - 0.05 && v <= max + 0.05);
+  return [...new Set(presets.map((v) => Math.round(v * 100) / 100))].sort(
+    (a, b) => a - b
+  );
+}
+
+function defaultZoomInRange(min: number, max: number): number {
+  if (1 >= min && 1 <= max) return 1;
+  return min;
+}
+
+function clampZoom(
+  value: number,
+  min: number,
+  max: number,
+  step: number
+): number {
+  const clamped = Math.min(max, Math.max(min, value));
+  if (step <= 0) return clamped;
+  const steps = Math.round((clamped - min) / step);
+  return Math.min(max, Math.max(min, min + steps * step));
+}
+
+/** Pixels de arraste vertical ≈ range completo de zoom (gesto Instagram). */
+const ZOOM_DRAG_PX = 260;
 
 export function useCameraCapture(onCapture: (file: File) => void) {
   const [isOpen, setIsOpen] = useState(false);
@@ -60,6 +159,12 @@ export function useCameraCapture(onCapture: (file: File) => void) {
   const [recordProgress, setRecordProgress] = useState(0);
   /** Overlay branco ativo (foto breve ou vídeo contínuo). */
   const [screenFlashActive, setScreenFlashActive] = useState(false);
+  const [zoomSupported, setZoomSupported] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const [zoomMin, setZoomMin] = useState(1);
+  const [zoomMax, setZoomMax] = useState(1);
+  const [zoomStep, setZoomStep] = useState(0.1);
+  const [zoomPresets, setZoomPresets] = useState<number[]>([]);
 
   const streamRef = useRef<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -74,6 +179,16 @@ export function useCameraCapture(onCapture: (file: File) => void) {
   const flashEnabledRef = useRef(false);
   const effectiveFacingRef = useRef<FacingMode>("environment");
   const torchSupportedRef = useRef(false);
+  const zoomSupportedRef = useRef(false);
+  const zoomRef = useRef(1);
+  const zoomMinRef = useRef(1);
+  const zoomMaxRef = useRef(1);
+  const zoomStepRef = useRef(0.1);
+  const pointerStartYRef = useRef(0);
+  const lastClientYRef = useRef(0);
+  const zoomAtPointerStartRef = useRef(1);
+  const zoomApplyInFlightRef = useRef(false);
+  const pendingZoomRef = useRef<number | null>(null);
 
   useEffect(() => {
     flashEnabledRef.current = flashEnabled;
@@ -86,6 +201,14 @@ export function useCameraCapture(onCapture: (file: File) => void) {
   useEffect(() => {
     torchSupportedRef.current = torchSupported;
   }, [torchSupported]);
+
+  useEffect(() => {
+    zoomSupportedRef.current = zoomSupported;
+  }, [zoomSupported]);
+
+  useEffect(() => {
+    zoomRef.current = zoom;
+  }, [zoom]);
 
   /** Flash na UI: frontal sempre; traseira só com torch. */
   const flashAvailable =
@@ -106,12 +229,71 @@ export function useCameraCapture(onCapture: (file: File) => void) {
     }
   }, []);
 
+  const clearZoomState = useCallback(() => {
+    setZoomSupported(false);
+    zoomSupportedRef.current = false;
+    setZoomPresets([]);
+    setZoom(1);
+    zoomRef.current = 1;
+    setZoomMin(1);
+    setZoomMax(1);
+    setZoomStep(0.1);
+    zoomMinRef.current = 1;
+    zoomMaxRef.current = 1;
+    zoomStepRef.current = 0.1;
+  }, []);
+
+  const applyZoomValue = useCallback(async (raw: number) => {
+    const stream = streamRef.current;
+    if (!stream || !zoomSupportedRef.current) return;
+
+    const next = clampZoom(
+      raw,
+      zoomMinRef.current,
+      zoomMaxRef.current,
+      zoomStepRef.current
+    );
+
+    if (zoomApplyInFlightRef.current) {
+      pendingZoomRef.current = next;
+      return;
+    }
+
+    const track = stream.getVideoTracks()[0];
+    if (!track) return;
+
+    zoomApplyInFlightRef.current = true;
+    try {
+      let value = next;
+      for (;;) {
+        await applyZoom(track, value);
+        zoomRef.current = value;
+        setZoom(value);
+        if (pendingZoomRef.current == null) break;
+        value = pendingZoomRef.current;
+        pendingZoomRef.current = null;
+      }
+    } catch {
+      /* device pode rejeitar zoom intermediário */
+    } finally {
+      zoomApplyInFlightRef.current = false;
+    }
+  }, []);
+
+  const setZoomPreset = useCallback(
+    (preset: number) => {
+      void applyZoomValue(preset);
+    },
+    [applyZoomValue]
+  );
+
   const stopStream = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
     setTorchSupported(false);
     setScreenFlashActive(false);
-  }, []);
+    clearZoomState();
+  }, [clearZoomState]);
 
   const close = useCallback(() => {
     if (recorderRef.current && recordingActiveRef.current) {
@@ -146,24 +328,30 @@ export function useCameraCapture(onCapture: (file: File) => void) {
   const startStream = useCallback(
     async (facingMode: FacingMode) => {
       // Áudio para gravação de vídeo; se negar, segue só com vídeo
+      const videoConstraints: MediaTrackConstraints = {
+        facingMode,
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        frameRate: { ideal: 30 },
+      };
       let stream: MediaStream;
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: {
-            facingMode,
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
+          audio: AUDIO_CONSTRAINTS,
+          video: videoConstraints,
         });
       } catch {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode,
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-        });
+        try {
+          // Fallback: áudio sem constraints detalhadas
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: videoConstraints,
+          });
+        } catch {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: videoConstraints,
+          });
+        }
       }
 
       streamRef.current = stream;
@@ -200,13 +388,37 @@ export function useCameraCapture(onCapture: (file: File) => void) {
             /* ignore */
           }
         }
+
+        const zoomRange = readZoomCapability(caps);
+        if (zoomRange) {
+          const presets = buildZoomPresets(zoomRange.min, zoomRange.max);
+          const initial = defaultZoomInRange(zoomRange.min, zoomRange.max);
+          setZoomSupported(true);
+          zoomSupportedRef.current = true;
+          setZoomMin(zoomRange.min);
+          setZoomMax(zoomRange.max);
+          setZoomStep(zoomRange.step);
+          zoomMinRef.current = zoomRange.min;
+          zoomMaxRef.current = zoomRange.max;
+          zoomStepRef.current = zoomRange.step;
+          setZoomPresets(presets);
+          setZoom(initial);
+          zoomRef.current = initial;
+          try {
+            await applyZoom(videoTrack, initial);
+          } catch {
+            /* ignore */
+          }
+        } else {
+          clearZoomState();
+        }
       }
 
       await checkMultipleCameras();
 
       return stream;
     },
-    [checkMultipleCameras]
+    [checkMultipleCameras, clearZoomState]
   );
 
   const open = useCallback(
@@ -346,7 +558,7 @@ export function useCameraCapture(onCapture: (file: File) => void) {
         setCapturedFile(file);
       },
       "image/jpeg",
-      0.9
+      PHOTO_JPEG_QUALITY
     );
   }, []);
 
@@ -410,12 +622,14 @@ export function useCameraCapture(onCapture: (file: File) => void) {
       return;
     }
 
+    if (stream.getAudioTracks().length === 0) {
+      toast.message("Gravando sem áudio — microfone indisponível.");
+    }
+
     const mimeType = pickRecorderMimeType();
     let recorder: MediaRecorder;
     try {
-      recorder = mimeType
-        ? new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 2_500_000 })
-        : new MediaRecorder(stream, { videoBitsPerSecond: 2_500_000 });
+      recorder = createRecorder(stream, mimeType);
     } catch {
       toast.error("Não foi possível iniciar a gravação.");
       return;
@@ -487,14 +701,35 @@ export function useCameraCapture(onCapture: (file: File) => void) {
       e.preventDefault();
       if (!isReady || isLoading || capturedPreview) return;
       pointerDownRef.current = true;
+      pointerStartYRef.current = e.clientY;
+      lastClientYRef.current = e.clientY;
+      zoomAtPointerStartRef.current = zoomRef.current;
       (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
 
       holdTimerRef.current = setTimeout(() => {
         if (!pointerDownRef.current) return;
+        // Rebase zoom gesture when REC starts
+        zoomAtPointerStartRef.current = zoomRef.current;
+        pointerStartYRef.current = lastClientYRef.current;
         startRecording();
       }, HOLD_TO_RECORD_MS);
     },
     [capturedPreview, isLoading, isReady, startRecording]
+  );
+
+  const onShutterPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      lastClientYRef.current = e.clientY;
+      if (!pointerDownRef.current || !recordingActiveRef.current) return;
+      if (!zoomSupportedRef.current) return;
+
+      const deltaY = pointerStartYRef.current - e.clientY;
+      const range = zoomMaxRef.current - zoomMinRef.current;
+      const next =
+        zoomAtPointerStartRef.current + (deltaY / ZOOM_DRAG_PX) * range;
+      void applyZoomValue(next);
+    },
+    [applyZoomValue]
   );
 
   const onShutterPointerUp = useCallback(
@@ -589,6 +824,9 @@ export function useCameraCapture(onCapture: (file: File) => void) {
     flashAvailable,
     torchSupported,
     screenFlashActive,
+    zoomSupported,
+    zoom,
+    zoomPresets,
     hasMultipleCameras,
     capturedPreview,
     capturedKind,
@@ -604,9 +842,11 @@ export function useCameraCapture(onCapture: (file: File) => void) {
     retake,
     switchCamera,
     switchFlash,
+    setZoomPreset,
     setVideoRef,
     handleVideoCanPlay,
     onShutterPointerDown,
+    onShutterPointerMove,
     onShutterPointerUp,
     onShutterPointerCancel,
     streamRef,

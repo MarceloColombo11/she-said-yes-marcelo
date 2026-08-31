@@ -22,6 +22,10 @@ type CameraModalProps = {
   /** @deprecated use flashAvailable */
   flashSupported?: boolean;
   screenFlashActive?: boolean;
+  zoomSupported?: boolean;
+  zoom?: number;
+  zoomPresets?: number[];
+  onZoomPreset?: (preset: number) => void;
   capturedPreview: string | null;
   capturedKind?: CapturedKind;
   isRecording?: boolean;
@@ -33,11 +37,31 @@ type CameraModalProps = {
   onSwitchFlash: () => void;
   onSwitchCamera: () => void;
   onShutterPointerDown: (e: React.PointerEvent) => void;
+  onShutterPointerMove?: (e: React.PointerEvent) => void;
   onShutterPointerUp: (e: React.PointerEvent) => void;
   onShutterPointerCancel: () => void;
   videoRef: (el: HTMLVideoElement | null) => void;
   onVideoCanPlay: () => void;
 };
+
+function formatZoomLabel(value: number): string {
+  if (Number.isInteger(value)) return `${value}x`;
+  return `${value}x`;
+}
+
+function nearestPreset(zoom: number, presets: number[]): number | null {
+  if (presets.length === 0) return null;
+  let best = presets[0];
+  let bestDist = Math.abs(zoom - best);
+  for (const p of presets) {
+    const d = Math.abs(zoom - p);
+    if (d < bestDist) {
+      best = p;
+      bestDist = d;
+    }
+  }
+  return best;
+}
 
 export function CameraModal({
   effectiveFacingMode = "environment",
@@ -48,6 +72,10 @@ export function CameraModal({
   flashAvailable,
   flashSupported,
   screenFlashActive = false,
+  zoomSupported = false,
+  zoom = 1,
+  zoomPresets = [],
+  onZoomPreset,
   capturedPreview,
   capturedKind = "photo",
   isRecording = false,
@@ -59,6 +87,7 @@ export function CameraModal({
   onSwitchFlash,
   onSwitchCamera,
   onShutterPointerDown,
+  onShutterPointerMove,
   onShutterPointerUp,
   onShutterPointerCancel,
   videoRef,
@@ -69,6 +98,10 @@ export function CameraModal({
   };
 
   const showFlashButton = flashAvailable ?? flashSupported ?? false;
+  const showZoomChips = zoomSupported && zoomPresets.length > 1;
+  const activePreset = showZoomChips
+    ? nearestPreset(zoom, zoomPresets)
+    : null;
   const isPreviewMode = !!capturedPreview;
   const secondsLeft = Math.max(
     0,
@@ -83,11 +116,15 @@ export function CameraModal({
       ? `Gravando · ${secondsLeft}s`
       : "Foto ou vídeo";
 
-  const hint = flashEnabled
-    ? effectiveFacingMode === "user"
-      ? "Flash ligado · tela clara na captura"
-      : "Flash ligado"
-    : `Toque = foto · Segure = vídeo até ${maxVideoSeconds}s`;
+  const hint = showZoomChips
+    ? isRecording
+      ? "Arraste para cima/baixo para zoom · solte para encerrar"
+      : `Toque = foto · Segure = vídeo · arraste para zoom`
+    : flashEnabled
+      ? effectiveFacingMode === "user"
+        ? "Flash ligado · tela clara na captura"
+        : "Flash ligado"
+      : `Toque = foto · Segure = vídeo até ${maxVideoSeconds}s`;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -196,6 +233,31 @@ export function CameraModal({
                   aria-hidden
                 />
               )}
+              {showZoomChips && (
+                <div className="absolute inset-x-0 bottom-3 z-30 flex justify-center gap-2 px-3">
+                  {zoomPresets.map((preset) => {
+                    const active = activePreset === preset;
+                    return (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => onZoomPreset?.(preset)}
+                        disabled={isLoading}
+                        className={cn(
+                          "min-h-9 min-w-9 rounded-full px-2.5 text-xs font-semibold transition-colors",
+                          active
+                            ? "bg-white text-brown shadow-sm"
+                            : "bg-black/45 text-white backdrop-blur-sm"
+                        )}
+                        aria-label={`Zoom ${formatZoomLabel(preset)}`}
+                        aria-pressed={active}
+                      >
+                        {formatZoomLabel(preset)}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </>
           )}
         </div>
@@ -248,6 +310,7 @@ export function CameraModal({
                   type="button"
                   disabled={!isReady || isLoading}
                   onPointerDown={onShutterPointerDown}
+                  onPointerMove={onShutterPointerMove}
                   onPointerUp={onShutterPointerUp}
                   onPointerCancel={onShutterPointerCancel}
                   onContextMenu={(e) => e.preventDefault()}
@@ -258,7 +321,9 @@ export function CameraModal({
                   )}
                   aria-label={
                     isRecording
-                      ? "Solte para parar a gravação"
+                      ? showZoomChips
+                        ? "Arraste para zoom, solte para parar"
+                        : "Solte para parar a gravação"
                       : "Toque para foto, segure para vídeo de até 15 segundos"
                   }
                 >

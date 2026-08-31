@@ -132,6 +132,10 @@ export function PhotoUploadSection() {
           flashEnabled={camera.flashEnabled}
           flashAvailable={camera.flashAvailable}
           screenFlashActive={camera.screenFlashActive}
+          zoomSupported={camera.zoomSupported}
+          zoom={camera.zoom}
+          zoomPresets={camera.zoomPresets}
+          onZoomPreset={camera.setZoomPreset}
           capturedPreview={camera.capturedPreview}
           capturedKind={camera.capturedKind}
           isRecording={camera.isRecording}
@@ -143,6 +147,7 @@ export function PhotoUploadSection() {
           onSwitchFlash={camera.switchFlash}
           onSwitchCamera={camera.switchCamera}
           onShutterPointerDown={camera.onShutterPointerDown}
+          onShutterPointerMove={camera.onShutterPointerMove}
           onShutterPointerUp={camera.onShutterPointerUp}
           onShutterPointerCancel={camera.onShutterPointerCancel}
           videoRef={camera.setVideoRef}
