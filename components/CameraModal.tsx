@@ -17,7 +17,11 @@ type CameraModalProps = {
   isReady: boolean;
   isLoading: boolean;
   flashEnabled: boolean;
-  flashSupported: boolean;
+  /** Flash disponível na UI (frontal sempre; traseira se torch). */
+  flashAvailable?: boolean;
+  /** @deprecated use flashAvailable */
+  flashSupported?: boolean;
+  screenFlashActive?: boolean;
   capturedPreview: string | null;
   capturedKind?: CapturedKind;
   isRecording?: boolean;
@@ -41,7 +45,9 @@ export function CameraModal({
   isReady,
   isLoading,
   flashEnabled,
+  flashAvailable,
   flashSupported,
+  screenFlashActive = false,
   capturedPreview,
   capturedKind = "photo",
   isRecording = false,
@@ -62,6 +68,7 @@ export function CameraModal({
     if (!next) onClose();
   };
 
+  const showFlashButton = flashAvailable ?? flashSupported ?? false;
   const isPreviewMode = !!capturedPreview;
   const secondsLeft = Math.max(
     0,
@@ -75,6 +82,12 @@ export function CameraModal({
     : isRecording
       ? `Gravando · ${secondsLeft}s`
       : "Foto ou vídeo";
+
+  const hint = flashEnabled
+    ? effectiveFacingMode === "user"
+      ? "Flash ligado · tela clara na captura"
+      : "Flash ligado"
+    : `Toque = foto · Segure = vídeo até ${maxVideoSeconds}s`;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -171,10 +184,17 @@ export function CameraModal({
                 />
               )}
               {isRecording && (
-                <div className="pointer-events-none absolute left-4 top-10 z-20 flex items-center gap-2 rounded-full bg-red-600/90 px-2.5 py-1 text-xs font-semibold text-white">
+                <div className="pointer-events-none absolute left-4 top-10 z-30 flex items-center gap-2 rounded-full bg-red-600 px-2.5 py-1 text-xs font-semibold text-white shadow-sm">
                   <span className="size-2 animate-pulse rounded-full bg-white" />
                   REC
                 </div>
+              )}
+              {/* Flash frontal: tela branca (não bloqueia o shutter) */}
+              {screenFlashActive && (
+                <div
+                  className="pointer-events-none absolute inset-0 z-40 bg-white"
+                  aria-hidden
+                />
               )}
             </>
           )}
@@ -198,24 +218,25 @@ export function CameraModal({
             <>
               <div className="flex items-center justify-between">
                 <div className="flex size-12 min-w-12 items-center justify-center">
-                  {flashSupported ? (
+                  {showFlashButton ? (
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={onSwitchFlash}
                       disabled={isLoading || isRecording}
                       className={cn(
-                        "size-12 min-h-12 min-w-12 rounded-full",
+                        "size-12 min-h-12 min-w-12 rounded-full transition-colors",
                         flashEnabled
-                          ? "bg-amber-200/80 text-amber-800"
-                          : "bg-white/80"
+                          ? "bg-amber-300 text-amber-900 ring-2 ring-amber-500/60"
+                          : "bg-white/80 text-brown"
                       )}
+                      aria-pressed={flashEnabled}
                       aria-label={
                         flashEnabled ? "Desligar flash" : "Ligar flash"
                       }
                     >
                       {flashEnabled ? (
-                        <Zap className="size-6 fill-amber-600" />
+                        <Zap className="size-6 fill-amber-700" />
                       ) : (
                         <ZapOff className="size-6" />
                       )}
@@ -263,9 +284,7 @@ export function CameraModal({
                 </div>
               </div>
 
-              <p className="text-center text-xs text-olive/80">
-                Toque = foto · Segure = vídeo até {maxVideoSeconds}s
-              </p>
+              <p className="text-center text-xs text-olive/80">{hint}</p>
 
               <Button
                 variant="outline"

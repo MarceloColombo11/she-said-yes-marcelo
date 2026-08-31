@@ -22,7 +22,7 @@ function statusLabel(item: QueueItem): string {
     case "success":
       return "Enviado";
     case "error":
-      return item.error || "Erro";
+      return "Falha no envio";
     default:
       return "";
   }
@@ -106,16 +106,21 @@ export function MediaQueueItem({
         )}
 
         {item.status === "error" && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="mt-1 h-8"
-            onClick={() => onRetry(item.id)}
-          >
-            <RefreshCw className="mr-1.5 size-3.5" aria-hidden />
-            Tentar de novo
-          </Button>
+          <div className="space-y-1.5">
+            <p className="text-xs leading-snug text-red-700/90" role="alert">
+              {item.error || "Erro ao enviar"}
+            </p>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-8"
+              onClick={() => onRetry(item.id)}
+            >
+              <RefreshCw className="mr-1.5 size-3.5" aria-hidden />
+              Tentar de novo
+            </Button>
+          </div>
         )}
       </div>
     </div>

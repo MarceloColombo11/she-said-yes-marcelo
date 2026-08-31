@@ -13,6 +13,44 @@ import { MAX_AUTO_RETRIES, resumablePut } from "@/lib/resumable-put";
 const SESSION_ENDPOINT = "/api/upload/session";
 const CONCURRENCY = 2;
 
+const MSG_NOT_CONFIGURED = "Envio de fotos em breve. Volte em alguns dias!";
+const MSG_AUTH_UNAVAILABLE =
+  "Envio temporariamente indisponível. Tente mais tarde.";
+const MSG_GENERIC_FAIL = "Erro ao enviar. Tente novamente.";
+
+type BatchFailKind = "auth" | "config" | "other";
+
+function mapSessionError(
+  status: number,
+  result: { error?: unknown; code?: unknown }
+): Error {
+  if (status === 503) {
+    if (result?.code === "AUTH_UNAVAILABLE") {
+      return new Error("AUTH_UNAVAILABLE");
+    }
+    return new Error("NOT_CONFIGURED");
+  }
+
+  return new Error(
+    typeof result?.error === "string"
+      ? result.error
+      : "Não foi possível iniciar o envio."
+  );
+}
+
+function userFacingUploadError(err: unknown): string {
+  if (!(err instanceof Error)) return MSG_GENERIC_FAIL;
+  if (err.message === "NOT_CONFIGURED") return MSG_NOT_CONFIGURED;
+  if (err.message === "AUTH_UNAVAILABLE") return MSG_AUTH_UNAVAILABLE;
+  return err.message || MSG_GENERIC_FAIL;
+}
+
+function classifyFail(message: string): BatchFailKind {
+  if (message === MSG_AUTH_UNAVAILABLE) return "auth";
+  if (message === MSG_NOT_CONFIGURED) return "config";
+  return "other";
+}
+
 export type QueueItemStatus =
   | "queued"
   | "compressing"
@@ -72,16 +110,8 @@ async function requestUploadSession(file: File): Promise<string> {
 
   const result = await response.json().catch(() => ({}));
 
-  if (response.status === 503) {
-    throw new Error("NOT_CONFIGURED");
-  }
-
   if (!response.ok || !result?.uploadUrl) {
-    throw new Error(
-      typeof result?.error === "string"
-        ? result.error
-        : "Não foi possível iniciar o envio."
-    );
+    throw mapSessionError(response.status, result);
   }
 
   return result.uploadUrl as string;
@@ -92,7 +122,12 @@ export function useMediaUploadQueue() {
   const itemsRef = useRef<QueueItem[]>([]);
   const inFlightRef = useRef(new Set<string>());
   const activeCountRef = useRef(0);
-  const batchTotalsRef = useRef({ success: 0, failed: 0, pending: 0 });
+  const batchTotalsRef = useRef({
+    success: 0,
+    failed: 0,
+    pending: 0,
+    failKinds: { auth: 0, config: 0, other: 0 },
+  });
   const pumpScheduledRef = useRef(false);
 
   const syncItems = useCallback((next: QueueItem[]) => {
@@ -113,7 +148,7 @@ export function useMediaUploadQueue() {
   }, []);
 
   const finishBatchIfDone = useCallback(() => {
-    const { success, failed, pending } = batchTotalsRef.current;
+    const { success, failed, pending, failKinds } = batchTotalsRef.current;
     if (pending > 0) return;
     if (success + failed === 0) return;
 
@@ -124,18 +159,29 @@ export function useMediaUploadQueue() {
           : `${success} arquivos enviados! Obrigado por compartilhar.`
       );
     } else if (success === 0) {
-      toast.error(
-        failed === 1
-          ? "1 arquivo falhou. Toque em tentar de novo."
-          : `${failed} arquivos falharam. Toque em tentar de novo.`
-      );
+      if (failKinds.auth > 0 && failKinds.auth === failed) {
+        toast.error(MSG_AUTH_UNAVAILABLE);
+      } else if (failKinds.config > 0 && failKinds.config === failed) {
+        toast.error(MSG_NOT_CONFIGURED);
+      } else {
+        toast.error(
+          failed === 1
+            ? "1 arquivo falhou. Toque em tentar de novo."
+            : `${failed} arquivos falharam. Toque em tentar de novo.`
+        );
+      }
     } else {
       toast.message(
         `${success} enviados, ${failed} falhou${failed > 1 ? "ram" : ""}.`
       );
     }
 
-    batchTotalsRef.current = { success: 0, failed: 0, pending: 0 };
+    batchTotalsRef.current = {
+      success: 0,
+      failed: 0,
+      pending: 0,
+      failKinds: { auth: 0, config: 0, other: 0 },
+    };
   }, []);
 
   const pump = useCallback(() => {
@@ -196,12 +242,9 @@ export function useMediaUploadQueue() {
             });
             batchTotalsRef.current.success += 1;
           } catch (err) {
-            const message =
-              err instanceof Error && err.message === "NOT_CONFIGURED"
-                ? "Envio de fotos em breve. Volte em alguns dias!"
-                : err instanceof Error
-                  ? err.message
-                  : "Erro ao enviar. Tente novamente.";
+            const message = userFacingUploadError(err);
+            const kind = classifyFail(message);
+            batchTotalsRef.current.failKinds[kind] += 1;
 
             patchItem(itemId, { status: "error", error: message });
             batchTotalsRef.current.failed += 1;

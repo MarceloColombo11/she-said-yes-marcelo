@@ -9,6 +9,8 @@ export type CapturedKind = "photo" | "video";
 /** Limite estilo story (Instagram/Snap). */
 export const MAX_VIDEO_SECONDS = 15;
 const HOLD_TO_RECORD_MS = 220;
+/** Tempo da tela branca antes de capturar na frontal. */
+const SCREEN_FLASH_PHOTO_MS = 150;
 
 function pickRecorderMimeType(): string | undefined {
   if (typeof MediaRecorder === "undefined") return undefined;
@@ -26,6 +28,18 @@ function extensionForMime(mime: string): string {
   return "webm";
 }
 
+function sleep(ms: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+async function applyTorch(track: MediaStreamTrack, on: boolean) {
+  await track.applyConstraints({
+    advanced: [{ torch: on } as MediaTrackConstraintSet],
+  });
+}
+
 export function useCameraCapture(onCapture: (file: File) => void) {
   const [isOpen, setIsOpen] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -34,14 +48,18 @@ export function useCameraCapture(onCapture: (file: File) => void) {
     useState<FacingMode>("environment");
   const [effectiveFacingMode, setEffectiveFacingMode] =
     useState<FacingMode>("environment");
+  /** Preferência do usuário (persiste ao trocar câmera). */
   const [flashEnabled, setFlashEnabled] = useState(false);
-  const [flashSupported, setFlashSupported] = useState(false);
+  /** Torch hardware disponível no track atual. */
+  const [torchSupported, setTorchSupported] = useState(false);
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false);
   const [capturedPreview, setCapturedPreview] = useState<string | null>(null);
   const [capturedKind, setCapturedKind] = useState<CapturedKind>("photo");
   const [capturedFile, setCapturedFile] = useState<File | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recordProgress, setRecordProgress] = useState(0);
+  /** Overlay branco ativo (foto breve ou vídeo contínuo). */
+  const [screenFlashActive, setScreenFlashActive] = useState(false);
 
   const streamRef = useRef<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -53,6 +71,25 @@ export function useCameraCapture(onCapture: (file: File) => void) {
   const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const recordingActiveRef = useRef(false);
   const pointerDownRef = useRef(false);
+  const flashEnabledRef = useRef(false);
+  const effectiveFacingRef = useRef<FacingMode>("environment");
+  const torchSupportedRef = useRef(false);
+
+  useEffect(() => {
+    flashEnabledRef.current = flashEnabled;
+  }, [flashEnabled]);
+
+  useEffect(() => {
+    effectiveFacingRef.current = effectiveFacingMode;
+  }, [effectiveFacingMode]);
+
+  useEffect(() => {
+    torchSupportedRef.current = torchSupported;
+  }, [torchSupported]);
+
+  /** Flash na UI: frontal sempre; traseira só com torch. */
+  const flashAvailable =
+    effectiveFacingMode === "user" || torchSupported;
 
   const clearRecordTimers = useCallback(() => {
     if (progressRafRef.current != null) {
@@ -72,7 +109,8 @@ export function useCameraCapture(onCapture: (file: File) => void) {
   const stopStream = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
-    setFlashEnabled(false);
+    setTorchSupported(false);
+    setScreenFlashActive(false);
   }, []);
 
   const close = useCallback(() => {
@@ -87,6 +125,7 @@ export function useCameraCapture(onCapture: (file: File) => void) {
     recordingActiveRef.current = false;
     setIsRecording(false);
     setRecordProgress(0);
+    setScreenFlashActive(false);
     stopStream();
     setIsReady(false);
     setIsLoading(false);
@@ -94,6 +133,7 @@ export function useCameraCapture(onCapture: (file: File) => void) {
     setCapturedPreview(null);
     setCapturedFile(null);
     setCapturedKind("photo");
+    setFlashEnabled(false);
   }, [clearRecordTimers, stopStream]);
 
   const checkMultipleCameras = useCallback(async () => {
@@ -144,13 +184,21 @@ export function useCameraCapture(onCapture: (file: File) => void) {
           effective = capsFacing[0];
         }
         setEffectiveFacingMode(effective);
+        effectiveFacingRef.current = effective;
 
-        const torchSupported =
+        const torchOk =
           "torch" in caps &&
           typeof (caps as { torch?: boolean }).torch === "boolean";
-        setFlashSupported(torchSupported);
-        if (!torchSupported) {
-          setFlashEnabled(false);
+        setTorchSupported(torchOk);
+        torchSupportedRef.current = torchOk;
+
+        // Reaplica torch se a preferência estiver ligada e a traseira suportar
+        if (torchOk && flashEnabledRef.current && effective === "environment") {
+          try {
+            await applyTorch(videoTrack, true);
+          } catch {
+            /* ignore */
+          }
         }
       }
 
@@ -176,6 +224,8 @@ export function useCameraCapture(onCapture: (file: File) => void) {
       setCapturedFile(null);
       setRecordProgress(0);
       setIsRecording(false);
+      setScreenFlashActive(false);
+      setFlashEnabled(false);
 
       try {
         await startStream(facingMode);
@@ -202,6 +252,7 @@ export function useCameraCapture(onCapture: (file: File) => void) {
 
     setIsLoading(true);
     setIsReady(false);
+    setScreenFlashActive(false);
     stopStream();
 
     try {
@@ -216,42 +267,49 @@ export function useCameraCapture(onCapture: (file: File) => void) {
 
   const switchFlash = useCallback(async () => {
     const stream = streamRef.current;
-    if (!stream || !flashSupported || recordingActiveRef.current) return;
+    if (!stream || recordingActiveRef.current) return;
 
-    const videoTrack = stream.getVideoTracks()[0];
-    if (!videoTrack) return;
+    const facing = effectiveFacingRef.current;
+    const canUse =
+      facing === "user" || torchSupportedRef.current;
+    if (!canUse) return;
 
-    const nextState = !flashEnabled;
+    const nextState = !flashEnabledRef.current;
 
-    try {
-      await videoTrack.applyConstraints({
-        advanced: [{ torch: nextState } as MediaTrackConstraintSet],
-      });
-      setFlashEnabled(nextState);
-    } catch {
-      setFlashEnabled(false);
+    if (facing === "environment" && torchSupportedRef.current) {
+      const videoTrack = stream.getVideoTracks()[0];
+      if (!videoTrack) return;
+      try {
+        await applyTorch(videoTrack, nextState);
+        setFlashEnabled(nextState);
+      } catch {
+        setFlashEnabled(false);
+      }
+      return;
     }
-  }, [flashEnabled, flashSupported]);
+
+    // Frontal: só preferência (tela branca na captura/gravação)
+    setFlashEnabled(nextState);
+  }, []);
 
   const closeWithFlashOff = useCallback(() => {
     const stream = streamRef.current;
-    if (stream && flashEnabled) {
+    if (stream && flashEnabledRef.current && torchSupportedRef.current) {
       const videoTrack = stream.getVideoTracks()[0];
-      videoTrack
-        ?.applyConstraints({
-          advanced: [{ torch: false } as MediaTrackConstraintSet],
-        })
-        .catch(() => {});
+      videoTrack?.applyConstraints({
+        advanced: [{ torch: false } as MediaTrackConstraintSet],
+      }).catch(() => {});
     }
     close();
-  }, [close, flashEnabled]);
+  }, [close]);
 
-  const capturePhoto = useCallback(() => {
+  const capturePhotoNow = useCallback(() => {
     const video = videoRef.current;
     const stream = streamRef.current;
 
     if (!video || !stream || video.readyState < 2) {
       toast.error("Aguarde a câmera carregar.");
+      setScreenFlashActive(false);
       return;
     }
 
@@ -262,10 +320,11 @@ export function useCameraCapture(onCapture: (file: File) => void) {
 
     if (!ctx) {
       toast.error("Erro ao capturar a foto.");
+      setScreenFlashActive(false);
       return;
     }
 
-    if (effectiveFacingMode === "user") {
+    if (effectiveFacingRef.current === "user") {
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
     }
@@ -273,6 +332,7 @@ export function useCameraCapture(onCapture: (file: File) => void) {
 
     canvas.toBlob(
       (blob) => {
+        setScreenFlashActive(false);
         if (!blob) {
           toast.error("Erro ao capturar a foto.");
           return;
@@ -288,13 +348,34 @@ export function useCameraCapture(onCapture: (file: File) => void) {
       "image/jpeg",
       0.9
     );
-  }, [effectiveFacingMode]);
+  }, []);
+
+  const capturePhoto = useCallback(async () => {
+    const video = videoRef.current;
+    const stream = streamRef.current;
+
+    if (!video || !stream || video.readyState < 2) {
+      toast.error("Aguarde a câmera carregar.");
+      return;
+    }
+
+    const useScreenFlash =
+      flashEnabledRef.current && effectiveFacingRef.current === "user";
+
+    if (useScreenFlash) {
+      setScreenFlashActive(true);
+      await sleep(SCREEN_FLASH_PHOTO_MS);
+    }
+
+    capturePhotoNow();
+  }, [capturePhotoNow]);
 
   const finishRecording = useCallback((blob: Blob, mimeType: string) => {
     clearRecordTimers();
     recordingActiveRef.current = false;
     setIsRecording(false);
     setRecordProgress(1);
+    setScreenFlashActive(false);
 
     if (blob.size < 1000) {
       toast.error("Vídeo muito curto. Segure o botão para gravar.");
@@ -347,6 +428,13 @@ export function useCameraCapture(onCapture: (file: File) => void) {
     setIsRecording(true);
     setRecordProgress(0);
 
+    if (
+      flashEnabledRef.current &&
+      effectiveFacingRef.current === "user"
+    ) {
+      setScreenFlashActive(true);
+    }
+
     recorder.ondataavailable = (event) => {
       if (event.data.size > 0) chunksRef.current.push(event.data);
     };
@@ -363,6 +451,7 @@ export function useCameraCapture(onCapture: (file: File) => void) {
       recordingActiveRef.current = false;
       setIsRecording(false);
       setRecordProgress(0);
+      setScreenFlashActive(false);
       toast.error("Erro ao gravar o vídeo.");
     };
 
@@ -371,6 +460,7 @@ export function useCameraCapture(onCapture: (file: File) => void) {
     } catch {
       recordingActiveRef.current = false;
       setIsRecording(false);
+      setScreenFlashActive(false);
       toast.error("Não foi possível iniciar a gravação.");
       return;
     }
@@ -429,7 +519,7 @@ export function useCameraCapture(onCapture: (file: File) => void) {
 
       // Toque curto → foto
       if (isReady && !isLoading && !capturedPreview) {
-        capturePhoto();
+        void capturePhoto();
       }
     },
     [capturePhoto, capturedPreview, isLoading, isReady, stopRecording]
@@ -494,7 +584,11 @@ export function useCameraCapture(onCapture: (file: File) => void) {
     currentFacingMode,
     effectiveFacingMode,
     flashEnabled,
-    flashSupported,
+    /** @deprecated use flashAvailable — mantido: torch no track */
+    flashSupported: flashAvailable,
+    flashAvailable,
+    torchSupported,
+    screenFlashActive,
     hasMultipleCameras,
     capturedPreview,
     capturedKind,

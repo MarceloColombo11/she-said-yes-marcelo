@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
-import { isDriveUploadConfigured } from "@/lib/drive-auth";
+import {
+  DRIVE_AUTH_ERROR_CODE,
+  DRIVE_AUTH_UNAVAILABLE_MESSAGE,
+  DriveAuthError,
+  getSafeDriveErrorLog,
+  isDriveAuthFailure,
+  isDriveUploadConfigured,
+} from "@/lib/drive-auth";
 import { createResumableUploadSession } from "@/lib/drive-resumable";
 import { validateMediaFile } from "@/lib/media-utils";
 
@@ -66,7 +73,19 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, uploadUrl });
   } catch (err) {
-    console.error("[upload/session]", err);
+    if (err instanceof DriveAuthError || isDriveAuthFailure(err)) {
+      console.error("[upload/session]", getSafeDriveErrorLog(err));
+      return NextResponse.json(
+        {
+          success: false,
+          error: DRIVE_AUTH_UNAVAILABLE_MESSAGE,
+          code: DRIVE_AUTH_ERROR_CODE,
+        },
+        { status: 503 }
+      );
+    }
+
+    console.error("[upload/session]", getSafeDriveErrorLog(err));
     const message =
       err instanceof Error ? err.message : "Erro ao iniciar o upload.";
     return NextResponse.json(
