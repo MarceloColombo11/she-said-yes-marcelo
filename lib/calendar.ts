@@ -80,22 +80,16 @@ export function getGoogleCalendarUrl(event = WEDDING_EVENT): string {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
-export function downloadIcsFile(
-  filename = "casamento-suelen-marcelo.ics",
-  event = WEDDING_EVENT
-) {
-  const blob = new Blob([buildIcsContent(event)], {
-    type: "text/calendar;charset=utf-8",
-  });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.rel = "noopener";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+export const ICS_PATH = "/casamento.ics";
+export const ICS_FILENAME = "casamento-suelen-marcelo.ics";
+
+/** iPhone / iPad — Safari abre .ics no app Calendar; blob+download não. */
+export function isIosDevice(): boolean {
+  if (typeof navigator === "undefined") return false;
+  const ua = navigator.userAgent;
+  if (/iPad|iPhone|iPod/.test(ua)) return true;
+  // iPadOS 13+ reports as Macintosh
+  return navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
 }
 
 export function getShareText(event = WEDDING_EVENT): string {

@@ -72,6 +72,7 @@ export default function Home() {
                         title="Padrinhos"
                         subtitle="As pessoas que caminham conosco"
                         data={padrinhosData}
+                        collapsibleText
                     />
                 </section>
 
@@ -84,6 +85,7 @@ export default function Home() {
                         title="Convidados de Honra"
                         subtitle="Especiais para nós"
                         data={convidadosHonraData}
+                        collapsibleText
                     />
                 </section>
 
@@ -96,6 +98,7 @@ export default function Home() {
                         title="Damas de Honra"
                         subtitle="Nossas queridas damas"
                         data={damasData}
+                        collapsibleText
                     />
                 </section>
 

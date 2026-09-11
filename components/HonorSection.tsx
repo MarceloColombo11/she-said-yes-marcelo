@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
     Dialog,
@@ -86,13 +87,52 @@ function HonorAvatar({
     return <div className={frameClass}>{imgEl}</div>;
 }
 
+function HonorPersonText({
+    texto,
+    collapsible,
+}: {
+    texto: string;
+    collapsible: boolean;
+}) {
+    const body = (
+        <p className="w-full text-center text-pretty text-sm leading-relaxed text-olive whitespace-pre-line">
+            {texto}
+        </p>
+    );
+
+    if (!collapsible) {
+        return <div className="mt-2 w-full">{body}</div>;
+    }
+
+    return (
+        <details className="group mt-2 w-full">
+            <summary className="mx-auto flex w-fit cursor-pointer list-none items-center justify-center gap-1 rounded-md py-2 text-sm font-medium text-sage transition-colors hover:text-olive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 marker:content-none [&::-webkit-details-marker]:hidden">
+                <span className="group-open:hidden">Saiba mais</span>
+                <span className="hidden group-open:inline">Fechar</span>
+                <ChevronDown
+                    className="size-4 shrink-0 transition-transform duration-200 group-open:rotate-180"
+                    aria-hidden
+                />
+            </summary>
+            <div className="mt-1">{body}</div>
+        </details>
+    );
+}
+
 interface HonorSectionProps {
     title: string;
     subtitle?: string;
     data: HonorPerson[];
+    /** Recolhe o texto de cada card atrás de “Saiba mais”. */
+    collapsibleText?: boolean;
 }
 
-export function HonorSection({ title, subtitle, data }: HonorSectionProps) {
+export function HonorSection({
+    title,
+    subtitle,
+    data,
+    collapsibleText = false,
+}: HonorSectionProps) {
     const sectionRef = useRef<HTMLElement>(null);
     const [isVisible, setIsVisible] = useState(false);
     const [lightbox, setLightbox] = useState<HonorPerson | null>(null);
@@ -162,9 +202,10 @@ export function HonorSection({ title, subtitle, data }: HonorSectionProps) {
                         <h3 className="mt-4 font-heading text-lg font-semibold text-brown">
                             {person.nome}
                         </h3>
-                        <p className="mt-2 w-full text-center text-pretty text-sm leading-relaxed text-olive whitespace-pre-line">
-                            {person.texto}
-                        </p>
+                        <HonorPersonText
+                            texto={person.texto}
+                            collapsible={collapsibleText}
+                        />
                     </div>
                 ))}
             </div>

@@ -1,12 +1,16 @@
 "use client";
 
+import type { MouseEvent } from "react";
 import Image from "next/image";
 import { CalendarPlus, MapPin, Copy, Share2 } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   WEDDING_EVENT,
-  downloadIcsFile,
+  ICS_PATH,
+  ICS_FILENAME,
+  isIosDevice,
   getGoogleCalendarUrl,
   getShareText,
   getWhatsAppShareUrl,
@@ -21,10 +25,22 @@ export function EventDetailsCard({ variant = "form" }: EventDetailsCardProps) {
   const shareText = getShareText();
   const isSuccess = variant === "success";
 
-  const handleSaveCalendar = () => {
-    downloadIcsFile();
+  const handleSaveCalendar = (e: MouseEvent<HTMLAnchorElement>) => {
+    if (isIosDevice()) {
+      toast.success("O iPhone vai pedir para adicionar na Agenda.");
+      return;
+    }
+
+    e.preventDefault();
     window.open(getGoogleCalendarUrl(), "_blank", "noopener,noreferrer");
-    toast.success("Agenda pronta — baixamos o arquivo e abrimos o Google Calendar.");
+
+    const link = document.createElement("a");
+    link.href = ICS_PATH;
+    link.download = ICS_FILENAME;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    toast.success("Abrimos o Google Calendar e o arquivo da agenda.");
   };
 
   const handleCopyAddress = async () => {
@@ -94,15 +110,17 @@ export function EventDetailsCard({ variant = "form" }: EventDetailsCardProps) {
       </div>
 
       <div className="mt-6 flex flex-wrap justify-center gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          className="min-h-11 border-olive/20 bg-cream text-brown hover:bg-sage/10"
+        <a
+          href={ICS_PATH}
+          className={cn(
+            buttonVariants({ variant: "outline" }),
+            "min-h-11 border-olive/20 bg-cream text-brown hover:bg-sage/10"
+          )}
           onClick={handleSaveCalendar}
         >
           <CalendarPlus className="size-4" aria-hidden />
           Salvar na agenda
-        </Button>
+        </a>
         <Button
           type="button"
           variant="outline"
