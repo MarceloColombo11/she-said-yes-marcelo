@@ -6,7 +6,8 @@
  *
  * Como usar:
  * 1. Abra a planilha no Google Sheets
- * 2. Linha 1 (headers): Data, Nome, Email, Nome do acompanhante, Microônibus
+ * 2. Linha 1 (headers): Data, Nome, Email, Nome do acompanhante, Microônibus, Presença, Mensagem
+ *    (adicione as colunas Presença e Mensagem se a planilha já existir)
  * 3. Extensões > Apps Script (vincula o script à planilha)
  * 4. Cole este código, execute "testarAcesso" para autorizar
  * 5. Implante: Implantar > Nova implantação > Aplicativo da Web
@@ -69,12 +70,14 @@ function doPost(e) {
 
     const lastRow = Math.max(sheet.getLastRow(), 0);
     const nextRow = lastRow + 1;
-    sheet.getRange(nextRow, 1, 1, 5).setValues([[
+    sheet.getRange(nextRow, 1, 1, 7).setValues([[
       new Date(),
       data.nome || '',
       data.email || '',
       data.nomeAcompanhante || '',
-      data.microonibus || ''
+      data.microonibus || '',
+      data.presenca || 'vou',
+      data.mensagem || ''
     ]]);
     
     return ContentService

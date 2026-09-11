@@ -96,7 +96,8 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { nome, email, nomeAcompanhante, microonibus } = body;
+    const { nome, email, nomeAcompanhante, microonibus, presenca, mensagem } =
+      body;
 
     const trimmedNome = typeof nome === "string" ? nome.trim() : "";
     if (!trimmedNome) {
@@ -114,6 +115,10 @@ export async function POST(request: Request) {
       );
     }
 
+    // Home modal omits `presenca` — treat as attending for backwards compatibility
+    const normalizedPresenca =
+      presenca === "nao_vou" || presenca === "vou" ? presenca : "vou";
+
     const trimmedEmail = typeof email === "string" ? email.trim() : null;
     if (trimmedEmail) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -125,6 +130,22 @@ export async function POST(request: Request) {
       }
     }
 
+    const normalizedMicro =
+      microonibus === "sim" || microonibus === "nao" ? microonibus : null;
+
+    if (normalizedPresenca === "vou" && body.presenca === "vou" && !normalizedMicro) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Por favor, informe se precisa de microônibus.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const trimmedMensagem =
+      typeof mensagem === "string" && mensagem.trim() ? mensagem.trim() : null;
+
     const payload = {
       nome: trimmedNome,
       email: trimmedEmail || null,
@@ -133,7 +154,9 @@ export async function POST(request: Request) {
           ? nomeAcompanhante.trim()
           : null,
       microonibus:
-        microonibus === "sim" || microonibus === "nao" ? microonibus : null,
+        normalizedPresenca === "nao_vou" ? null : normalizedMicro,
+      presenca: normalizedPresenca,
+      mensagem: trimmedMensagem,
     };
 
     const controller = new AbortController();
