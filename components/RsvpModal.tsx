@@ -26,6 +26,7 @@ import type { RsvpBlock } from "@/lib/content/text-blocks";
 import { GuestNameField } from "@/components/rsvp/GuestNameField";
 import {
   submitRsvp,
+  validateCompanionName,
   validateRsvpName,
   type Presenca,
 } from "@/components/rsvp/submit-rsvp";
@@ -50,6 +51,7 @@ export function RsvpModal({ open, onOpenChange, texts }: RsvpModalProps) {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [nomeError, setNomeError] = useState<string | null>(null);
   const [microError, setMicroError] = useState<string | null>(null);
+  const [companionError, setCompanionError] = useState<string | null>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -57,6 +59,7 @@ export function RsvpModal({ open, onOpenChange, texts }: RsvpModalProps) {
       setSuccess(null);
       setNomeError(null);
       setMicroError(null);
+      setCompanionError(null);
       const t = setTimeout(() => firstInputRef.current?.focus({ preventScroll: true }), 50);
       return () => clearTimeout(t);
     }
@@ -73,11 +76,14 @@ export function RsvpModal({ open, onOpenChange, texts }: RsvpModalProps) {
       presenca === "vou" && !formData.microonibus
         ? "Por favor, informe se deseja microônibus."
         : null;
+    const cErr =
+      presenca === "vou" ? validateCompanionName(formData.nomeAcompanhante) : null;
     setNomeError(nErr);
     setMicroError(mErr);
+    setCompanionError(cErr);
 
-    if (nErr || mErr) {
-      toast.error(nErr || mErr);
+    if (nErr || mErr || cErr) {
+      toast.error(nErr || mErr || cErr);
       return;
     }
 
@@ -232,13 +238,20 @@ export function RsvpModal({ open, onOpenChange, texts }: RsvpModalProps) {
                   <Input
                     id="rsvp-nome-acompanhante"
                     value={formData.nomeAcompanhante}
-                    onChange={(e) =>
-                      setFormData((p) => ({ ...p, nomeAcompanhante: e.target.value }))
-                    }
+                    onChange={(e) => {
+                      setFormData((p) => ({ ...p, nomeAcompanhante: e.target.value }));
+                      if (companionError) setCompanionError(null);
+                    }}
                     placeholder="Nome completo do acompanhante (opcional)"
                     disabled={loading}
+                    aria-invalid={!!companionError}
                     className="min-h-[44px]"
                   />
+                  {companionError && (
+                    <p className="text-sm text-destructive" role="alert">
+                      {companionError}
+                    </p>
+                  )}
                 </div>
               </>
             ) : null}

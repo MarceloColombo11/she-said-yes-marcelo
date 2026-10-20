@@ -24,6 +24,7 @@ import type { ConfirmacaoBlock } from "@/lib/content/text-blocks";
 import { GuestNameField } from "@/components/rsvp/GuestNameField";
 import {
   submitRsvp,
+  validateCompanionName,
   validateRsvpName,
   type Presenca,
 } from "@/components/rsvp/submit-rsvp";
@@ -51,6 +52,7 @@ export function ConfirmacaoPage({ texts, event }: ConfirmacaoPageProps) {
   const timeLine = formatTime(event.startLocal);
   const [nomeError, setNomeError] = useState<string | null>(null);
   const [microError, setMicroError] = useState<string | null>(null);
+  const [companionError, setCompanionError] = useState<string | null>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -70,12 +72,15 @@ export function ConfirmacaoPage({ texts, event }: ConfirmacaoPageProps) {
       presenca === "vou" && !formData.microonibus
         ? "Por favor, informe se precisa de microônibus."
         : null;
+    const cErr =
+      presenca === "vou" ? validateCompanionName(formData.nomeAcompanhante) : null;
 
     setNomeError(nErr);
     setMicroError(mErr);
+    setCompanionError(cErr);
 
-    if (nErr || mErr) {
-      toast.error(nErr || mErr);
+    if (nErr || mErr || cErr) {
+      toast.error(nErr || mErr || cErr);
       const target = nErr
         ? firstInputRef.current
         : formRef.current?.querySelector<HTMLElement>("#conf-micro");
@@ -311,16 +316,23 @@ export function ConfirmacaoPage({ texts, event }: ConfirmacaoPageProps) {
                 <Input
                   id="conf-acompanhante"
                   value={formData.nomeAcompanhante}
-                  onChange={(e) =>
+                  onChange={(e) => {
                     setFormData((p) => ({
                       ...p,
                       nomeAcompanhante: e.target.value,
-                    }))
-                  }
-                  placeholder="Quem vem com você"
+                    }));
+                    if (companionError) setCompanionError(null);
+                  }}
+                  placeholder="Nome completo de quem vem com você"
                   disabled={loading}
+                  aria-invalid={!!companionError}
                   className="min-h-11"
                 />
+                {companionError && (
+                  <p className="text-sm text-destructive" role="alert">
+                    {companionError}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">

@@ -1,19 +1,9 @@
 import { requireAdminSession } from "@/lib/admin-auth";
-import { loadGuestBoard, type RsvpExtras } from "@/lib/content/guests";
+import { countComingPeople } from "@/lib/content/companion-guest";
+import { loadGuestBoard } from "@/lib/content/guests";
 import { GuestPanel } from "@/components/admin/GuestPanel";
 
 export const dynamic = "force-dynamic";
-
-function headcount(rows: RsvpExtras[]) {
-  let people = 0;
-  let bus = 0;
-  for (const row of rows) {
-    const size = row.companionName ? 2 : 1;
-    people += size;
-    if (row.microonibus) bus += size;
-  }
-  return { people, bus };
-}
 
 export default async function ConvidadosPage() {
   await requireAdminSession();
@@ -34,9 +24,19 @@ export default async function ConvidadosPage() {
   const confirmed = board.guests.filter((g) => g.status === "confirmed");
   const declined = board.guests.filter((g) => g.status === "declined").length;
   const pending = board.guests.length - confirmed.length - declined;
-  const totals = headcount([
-    ...confirmed,
-    ...board.unmatched.filter((item) => item.attending),
+  const totals = countComingPeople([
+    ...confirmed.map((guest) => ({
+      name: guest.fullName,
+      companionName: guest.companionName,
+      microonibus: guest.microonibus,
+    })),
+    ...board.unmatched
+      .filter((item) => item.attending)
+      .map((item) => ({
+        name: item.typedName,
+        companionName: item.companionName,
+        microonibus: item.microonibus,
+      })),
   ]);
 
   return (

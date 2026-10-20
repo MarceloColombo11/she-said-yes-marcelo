@@ -10,7 +10,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "admin:hash": "node scripts/hash-admin-password.mjs",
-    "test:guests": "node --experimental-strip-types --test lib/content/guest-name.test.ts lib/content/rsvp-match.test.ts lib/content/guest-status.test.ts",
+    "test:guests": "node --experimental-strip-types --test lib/content/guest-name.test.ts lib/content/rsvp-match.test.ts lib/content/guest-status.test.ts lib/content/companion-guest.test.ts",
     "drive:oauth": "node --env-file=.env.local scripts/get-google-refresh-token.mjs"
   },
   "dependencies": {

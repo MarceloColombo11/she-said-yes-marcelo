@@ -7,6 +7,10 @@ import {
   normalizePersonName,
   validateGuestFullName,
 } from "@/lib/content/guest-name";
+import {
+  planCompanionGuest,
+  type CompanionPlan,
+} from "@/lib/content/companion-guest";
 import { resolveRsvpTarget } from "@/lib/content/rsvp-match";
 
 const SAVE_ERROR = "Não foi possível salvar. Tente de novo em instantes.";
@@ -286,6 +290,65 @@ export async function suggestGuests(
     .limit(8);
 }
 
+type GuestLookup = {
+  id: string;
+  nameNormalized: string;
+  groupId: string | null;
+};
+
+async function resolveCompanionPlan(
+  db: ReturnType<typeof requireDb>,
+  companionName: string | null,
+  primaryNameNormalized: string,
+  attending: boolean,
+): Promise<CompanionPlan> {
+  if (!attending) return { action: "none" };
+  const draft = planCompanionGuest(companionName, primaryNameNormalized, []);
+  if (draft.action !== "create") return draft;
+  const matches = await db
+    .select({ id: guests.id, nameNormalized: guests.nameNormalized })
+    .from(guests)
+    .where(eq(guests.nameNormalized, draft.nameNormalized));
+  return planCompanionGuest(companionName, primaryNameNormalized, matches);
+}
+
+async function saveCompanionGuest(
+  db: ReturnType<typeof requireDb>,
+  plan: Extract<CompanionPlan, { action: "create" | "confirm" }>,
+  primaryGroupId: string | null,
+  microonibus: boolean | null,
+  now: Date,
+): Promise<void> {
+  if (plan.action === "confirm") {
+    const [current] = await db
+      .select({ groupId: guests.groupId })
+      .from(guests)
+      .where(eq(guests.id, plan.id))
+      .limit(1);
+    if (!current) return;
+    await db
+      .update(guests)
+      .set({
+        status: "confirmed",
+        respondedAt: now,
+        updatedAt: now,
+        microonibus,
+        groupId: current.groupId ?? primaryGroupId,
+      })
+      .where(eq(guests.id, plan.id));
+    return;
+  }
+
+  await db.insert(guests).values({
+    fullName: plan.fullName,
+    nameNormalized: plan.nameNormalized,
+    groupId: primaryGroupId,
+    status: "confirmed",
+    respondedAt: now,
+    microonibus,
+  });
+}
+
 export async function applyPublicRsvp(input: {
   name: string;
   attending: boolean;
@@ -294,13 +357,21 @@ export async function applyPublicRsvp(input: {
   const parsed = validateGuestFullName(input.name);
   if (!parsed.ok) throw new Error(parsed.error);
   const db = requireDb();
+  const companionPlan = await resolveCompanionPlan(
+    db,
+    input.companionName,
+    parsed.normalized,
+    input.attending,
+  );
+  if (companionPlan.action === "reject") throw new Error(companionPlan.error);
 
-  const candidates: { id: string; nameNormalized: string }[] = [];
+  const candidates: GuestLookup[] = [];
   if (input.guestId && isUuid(input.guestId)) {
     const [byId] = await db
       .select({
         id: guests.id,
         nameNormalized: guests.nameNormalized,
+        groupId: guests.groupId,
       })
       .from(guests)
       .where(eq(guests.id, input.guestId))
@@ -311,6 +382,7 @@ export async function applyPublicRsvp(input: {
     .select({
       id: guests.id,
       nameNormalized: guests.nameNormalized,
+      groupId: guests.groupId,
     })
     .from(guests)
     .where(eq(guests.nameNormalized, parsed.normalized));
@@ -333,7 +405,13 @@ export async function applyPublicRsvp(input: {
   };
 
   const now = new Date();
-  if (resolved.target.kind === "guest") {
+  const target = resolved.target;
+  const primaryGroupId =
+    target.kind === "guest"
+      ? (candidates.find((item) => item.id === target.id)?.groupId ?? null)
+      : null;
+
+  if (target.kind === "guest") {
     await db
       .update(guests)
       .set({
@@ -342,25 +420,34 @@ export async function applyPublicRsvp(input: {
         updatedAt: now,
         ...extras,
       })
-      .where(eq(guests.id, resolved.target.id));
-    return;
+      .where(eq(guests.id, target.id));
+  } else {
+    await db
+      .insert(unmatchedRsvps)
+      .values({
+        typedName: target.typedName,
+        nameNormalized: target.nameNormalized,
+        attending: input.attending,
+        ...extras,
+      })
+      .onConflictDoUpdate({
+        target: unmatchedRsvps.nameNormalized,
+        set: {
+          typedName: target.typedName,
+          attending: input.attending,
+          updatedAt: now,
+          ...extras,
+        },
+      });
   }
 
-  await db
-    .insert(unmatchedRsvps)
-    .values({
-      typedName: resolved.target.typedName,
-      nameNormalized: resolved.target.nameNormalized,
-      attending: input.attending,
-      ...extras,
-    })
-    .onConflictDoUpdate({
-      target: unmatchedRsvps.nameNormalized,
-      set: {
-        typedName: resolved.target.typedName,
-        attending: input.attending,
-        updatedAt: now,
-        ...extras,
-      },
-    });
+  if (companionPlan.action === "create" || companionPlan.action === "confirm") {
+    await saveCompanionGuest(
+      db,
+      companionPlan,
+      primaryGroupId,
+      extras.microonibus,
+      now,
+    );
+  }
 }

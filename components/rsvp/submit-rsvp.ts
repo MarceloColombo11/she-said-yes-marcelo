@@ -1,3 +1,5 @@
+import { planCompanionGuest } from "@/lib/content/companion-guest";
+
 export type Presenca = "vou" | "nao_vou";
 
 export type RsvpForm = {
@@ -15,6 +17,11 @@ export function validateRsvpName(nome: string): string | null {
   const parts = trimmed.split(/\s+/).filter(Boolean);
   if (parts.length < 2) return "Por favor, informe nome e sobrenome.";
   return null;
+}
+
+export function validateCompanionName(nome: string): string | null {
+  const plan = planCompanionGuest(nome, "", []);
+  return plan.action === "reject" ? plan.error : null;
 }
 
 export async function submitRsvp(
