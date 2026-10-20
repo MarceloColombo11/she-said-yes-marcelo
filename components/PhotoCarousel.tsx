@@ -10,6 +10,7 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from "@/components/ui/carousel";
+import { isSiteMediaUrl } from "@/lib/site-media";
 
 const AUTOPLAY_MS = 10000;
 
@@ -36,7 +37,7 @@ export function PhotoCarousel({
         return (
             <div className="flex aspect-[4/5] items-center justify-center rounded-xl border border-olive/20 bg-cream/50">
                 <p className="text-olive/80">
-                    Adicione fotos em /public/images/casal/
+                    Adicione fotos pelo painel dos noivos
                 </p>
             </div>
         );
@@ -55,6 +56,7 @@ export function PhotoCarousel({
                                 className="object-cover"
                                 sizes="(max-width: 768px) 100vw, 50vw"
                                 priority={i === 0}
+                                unoptimized={isSiteMediaUrl(src)}
                             />
                         </div>
                     </CarouselItem>

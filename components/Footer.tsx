@@ -1,7 +1,13 @@
 import Link from "next/link";
 import { InteractiveLeafPile } from "@/components/InteractiveLeafPile";
 
-export function Footer() {
+type FooterProps = {
+    initials: string;
+    dateLine: string;
+    signature: string;
+};
+
+export function Footer({ initials, dateLine, signature }: FooterProps) {
     return (
         <footer className="relative isolate z-0 overflow-hidden border-t border-olive/20 bg-cream pb-[max(1rem,env(safe-area-inset-bottom))]">
             <div className="mx-auto max-w-7xl px-4 pt-5 sm:px-6 sm:pt-6 lg:px-8">
@@ -15,12 +21,10 @@ export function Footer() {
                                 href="#home"
                                 className="pointer-events-auto font-heading text-2xl font-semibold text-brown"
                             >
-                                S & M
+                                {initials}
                             </Link>
-                            <p className="text-sm text-olive/80">28 · 11 · 2026</p>
-                            <p className="text-xs text-olive/60">
-                                Suelen & Marcelo — Com amor, para sempre
-                            </p>
+                            <p className="text-sm text-olive/80">{dateLine}</p>
+                            <p className="text-xs text-olive/60">{signature}</p>
                         </div>
                     </div>
                 </div>

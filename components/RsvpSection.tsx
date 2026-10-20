@@ -2,19 +2,19 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import type { RsvpBlock } from "@/lib/content/text-blocks";
 import { RsvpModal } from "./RsvpModal";
 
-export function RsvpSection() {
+export function RsvpSection({ texts }: { texts: RsvpBlock }) {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <div className="mx-auto max-w-2xl text-center">
       <h2 className="font-heading text-3xl font-semibold text-brown md:text-4xl">
-        Confirmação de Presença
+        {texts.titulo}
       </h2>
-      <p className="mt-6 text-olive leading-relaxed">
-        Seria uma honra contar com sua presença neste dia tão especial. Por
-        favor, confirme sua presença até o dia 15 de novembro de 2026.
+      <p className="mt-6 text-olive leading-relaxed whitespace-pre-line">
+        {texts.texto}
       </p>
       <Button
         size="lg"
@@ -23,9 +23,9 @@ export function RsvpSection() {
         onClick={() => setModalOpen(true)}
         aria-label="Abrir formulário de confirmação de presença"
       >
-        Confirmar Presença
+        {texts.botao}
       </Button>
-      <RsvpModal open={modalOpen} onOpenChange={setModalOpen} />
+      <RsvpModal open={modalOpen} onOpenChange={setModalOpen} texts={texts} />
     </div>
   );
 }

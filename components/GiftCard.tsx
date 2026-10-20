@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import { Gift } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isSiteMediaUrl } from "@/lib/site-media";
 
 export interface Presente {
   id: string;
@@ -18,10 +20,8 @@ interface GiftCardProps {
   className?: string;
 }
 
-const getImagemUrl = (id: string) => `/imagensPresentes/${id}.jpeg`;
-
 export function GiftCard({ presente, onClick, className }: GiftCardProps) {
-  const imagemUrl = getImagemUrl(presente.id);
+  const imagemUrl = presente.imagem;
 
   return (
     <button
@@ -34,13 +34,18 @@ export function GiftCard({ presente, onClick, className }: GiftCardProps) {
       aria-label={`Ver detalhes do presente: ${presente.nome}`}
     >
       <div className="relative size-16 min-w-[4rem] min-h-[4rem] overflow-hidden rounded-full bg-sage/20 transition-colors group-hover:bg-sage/30">
-        <Image
-          src={imagemUrl}
-          alt={presente.nome}
-          fill
-          className="object-cover"
-          sizes="64px"
-        />
+        {imagemUrl ? (
+          <Image
+            src={imagemUrl}
+            alt={presente.nome}
+            fill
+            className="object-cover"
+            sizes="64px"
+            unoptimized={isSiteMediaUrl(imagemUrl)}
+          />
+        ) : (
+          <Gift className="absolute inset-0 m-auto size-7 text-sage" aria-hidden />
+        )}
       </div>
       <div className="text-center">
         <h3 className="font-heading text-lg font-semibold text-brown">

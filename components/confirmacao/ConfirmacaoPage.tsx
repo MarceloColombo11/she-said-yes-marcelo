@@ -19,23 +19,38 @@ import {
 } from "@/components/ui/select";
 import { fireConfettiCannon } from "@/lib/confetti";
 import { cn } from "@/lib/utils";
+import { formatDateDots, formatTime, type WeddingEvent } from "@/lib/calendar";
+import type { ConfirmacaoBlock } from "@/lib/content/text-blocks";
+import { GuestNameField } from "@/components/rsvp/GuestNameField";
+import {
+  submitRsvp,
+  validateRsvpEmail,
+  validateRsvpName,
+  type Presenca,
+} from "@/components/rsvp/submit-rsvp";
 
-const RSVP_ENDPOINT = "/api/rsvp";
+const EMPTY_FORM = {
+  nome: "",
+  guestId: null as string | null,
+  email: "",
+  nomeAcompanhante: "",
+  microonibus: "" as "" | "sim" | "nao",
+  mensagem: "",
+};
 
-type Presenca = "vou" | "nao_vou";
+type ConfirmacaoPageProps = {
+  texts: ConfirmacaoBlock;
+  event: WeddingEvent;
+};
 
-export function ConfirmacaoPage() {
+export function ConfirmacaoPage({ texts, event }: ConfirmacaoPageProps) {
   const [presenca, setPresenca] = useState<Presenca>("vou");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<Presenca | null>(null);
   const [heroVisible, setHeroVisible] = useState(false);
-  const [formData, setFormData] = useState({
-    nome: "",
-    email: "",
-    nomeAcompanhante: "",
-    microonibus: "" as "" | "sim" | "nao",
-    mensagem: "",
-  });
+  const [formData, setFormData] = useState(EMPTY_FORM);
+  const dateLine = formatDateDots(event.startLocal);
+  const timeLine = formatTime(event.startLocal);
   const [nomeError, setNomeError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [microError, setMicroError] = useState<string | null>(null);
@@ -51,25 +66,10 @@ export function ConfirmacaoPage() {
     if (success === "vou") fireConfettiCannon();
   }, [success]);
 
-  const validateNome = (nome: string) => {
-    const trimmed = nome.trim();
-    if (!trimmed) return "Por favor, informe seu nome completo.";
-    const parts = trimmed.split(/\s+/).filter(Boolean);
-    if (parts.length < 2) return "Por favor, informe nome e sobrenome.";
-    return null;
-  };
-
-  const validateEmail = (email: string) => {
-    if (!email.trim()) return null;
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!re.test(email)) return "Informe um e-mail válido.";
-    return null;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const nErr = validateNome(formData.nome);
-    const eErr = validateEmail(formData.email);
+    const nErr = validateRsvpName(formData.nome);
+    const eErr = validateRsvpEmail(formData.email);
     const mErr =
       presenca === "vou" && !formData.microonibus
         ? "Por favor, informe se precisa de microônibus."
@@ -92,36 +92,14 @@ export function ConfirmacaoPage() {
 
     setLoading(true);
     try {
-      const response = await fetch(RSVP_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nome: formData.nome.trim(),
-          email: formData.email.trim() || null,
-          nomeAcompanhante: formData.nomeAcompanhante.trim() || null,
-          microonibus:
-            presenca === "vou" ? formData.microonibus || null : null,
-          presenca,
-          mensagem: formData.mensagem.trim() || null,
-        }),
-      });
-
-      const result = await response.json().catch(() => ({}));
-      if (response.ok && result?.success !== false) {
+      const result = await submitRsvp({ ...formData, presenca });
+      if (result.ok) {
         setSuccess(presenca);
-        setFormData({
-          nome: "",
-          email: "",
-          nomeAcompanhante: "",
-          microonibus: "",
-          mensagem: "",
-        });
+        setFormData(EMPTY_FORM);
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
-        toast.error(result?.error ?? "Erro ao confirmar. Tente novamente.");
+        toast.error(result.error);
       }
-    } catch {
-      toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -148,22 +126,22 @@ export function ConfirmacaoPage() {
             <Heart className="size-7 fill-sage" aria-hidden />
           </div>
           <h1 className="font-heading text-2xl font-semibold text-brown md:text-3xl">
-            {isVou ? "Nota! Você entrou na lista." : "Recebido com carinho."}
+            {isVou ? texts.sucessoVouTitulo : texts.sucessoNaoVouTitulo}
           </h1>
           <p className="mt-3 text-olive leading-relaxed">
-            {isVou
-              ? "Nos vemos na obra — digo, na festa."
-              : "Vai fazer falta no canteiro, mas a gente entende."}
+            {isVou ? texts.sucessoVouTexto : texts.sucessoNaoVouTexto}
           </p>
           {isVou && (
             <div className="mt-3 flex items-center gap-2 text-olive">
               <PartyPopper className="size-5" aria-hidden />
-              <span className="text-sm">28 · 11 · 2026 · Mirante Garden</span>
+              <span className="text-sm">
+                {dateLine} · {event.venueName}
+              </span>
             </div>
           )}
         </div>
 
-        {isVou ? <EventDetailsCard variant="success" /> : null}
+        {isVou ? <EventDetailsCard variant="success" event={event} /> : null}
 
         <div className="mx-auto flex max-w-lg flex-col items-center px-5 pb-12 pt-2 text-center">
           <Button
@@ -210,15 +188,15 @@ export function ConfirmacaoPage() {
           />
         </div>
         <h1 className="mt-3 font-heading text-[1.65rem] font-semibold leading-tight text-brown md:text-4xl">
-          Confirma presença
+          {texts.titulo}
         </h1>
         <p className="mt-1.5 text-sm text-olive leading-relaxed">
-          A gente tá montando a obra — falta você na lista.
+          {texts.subtitulo}
         </p>
         <p className="mt-2 font-heading text-sm tracking-wide text-brown">
-          28 · 11 · 2026 · 16:30 · Mirante Garden
+          {dateLine} · {timeLine} · {event.venueName}
         </p>
-        <p className="mt-1 text-xs text-brown/70">Até 15 de novembro de 2026</p>
+        <p className="mt-1 text-xs text-brown/70">{texts.prazo}</p>
       </header>
 
       <section
@@ -268,9 +246,7 @@ export function ConfirmacaoPage() {
           </button>
         </div>
         <p className="mt-2 text-center text-xs text-brown/70">
-          {presenca === "vou"
-            ? "Ótimo — quer festa, então."
-            : "Tudo bem. A gente recebe mesmo assim."}
+          {presenca === "vou" ? texts.vouDica : texts.naoVouDica}
         </p>
 
         <form
@@ -279,29 +255,17 @@ export function ConfirmacaoPage() {
           className="mt-6 space-y-5"
           noValidate
         >
-          <div className="space-y-2">
-            <Label htmlFor="conf-nome">Nome completo *</Label>
-            <Input
-              ref={firstInputRef}
-              id="conf-nome"
-              value={formData.nome}
-              onChange={(e) => {
-                setFormData((p) => ({ ...p, nome: e.target.value }));
-                if (nomeError) setNomeError(null);
-              }}
-              placeholder="Nome e sobrenome"
-              autoComplete="name"
-              required
-              disabled={loading}
-              className="min-h-11"
-              aria-invalid={!!nomeError}
-            />
-            {nomeError && (
-              <p className="text-sm text-destructive" role="alert">
-                {nomeError}
-              </p>
-            )}
-          </div>
+          <GuestNameField
+            ref={firstInputRef}
+            id="conf-nome"
+            value={formData.nome}
+            error={nomeError}
+            disabled={loading}
+            onChange={(nome, guestId) => {
+              setFormData((p) => ({ ...p, nome, guestId }));
+              if (nomeError) setNomeError(null);
+            }}
+          />
 
           {presenca === "vou" && (
             <div className="space-y-2 animate-in fade-in-0 duration-200">
@@ -423,7 +387,7 @@ export function ConfirmacaoPage() {
         </form>
       </section>
 
-      <EventDetailsCard variant="form" />
+      <EventDetailsCard variant="form" event={event} />
 
       <footer className="mx-auto max-w-lg px-5 pb-12 pt-2 text-center">
         <Link

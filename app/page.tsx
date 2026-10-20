@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FallingLeaves } from "@/components/FallingLeaves";
@@ -11,32 +10,24 @@ import { AboutSection } from "@/components/AboutSection";
 import { HonorSection } from "@/components/HonorSection";
 import { TimelineSection } from "@/components/TimelineSection";
 import { PhotoUploadSection } from "@/components/PhotoUploadSection";
+import { HeroBackground } from "@/components/HeroBackground";
+import { getPublicSiteContent } from "@/lib/content/public";
+import { formatDateDots, formatTime, localToDate } from "@/lib/calendar";
 
-import presentesData from "@/data/presentes.json";
-import padrinhosData from "@/data/padrinhos.json";
-import damasData from "@/data/damas.json";
-import convidadosHonraData from "@/data/convidados-honra.json";
-import programacaoData from "@/data/programacao.json";
-import sobreNosData from "@/data/sobre-nos.json";
+export const revalidate = 60;
 
-export default function Home() {
+export default async function Home() {
+    const content = await getPublicSiteContent();
+    const { evento, secoes } = content;
+
     return (
         <>
-            <Navbar />
+            <Navbar initials={content.rodape.iniciais} />
             <main id="main" className="pt-20 md:pt-16">
                 {/* 1. Home - Hero + Countdown */}
                 <section id="home" className="min-h-[100dvh]">
                     <div className="relative min-h-[100dvh] flex flex-col items-center justify-center bg-olive/10 overflow-hidden">
-                        <div className="absolute inset-0 opacity-30">
-                            <Image
-                                src="/images/casal/1.jpeg"
-                                alt=""
-                                fill
-                                priority
-                                sizes="100vw"
-                                className="object-cover object-center"
-                            />
-                        </div>
+                        <HeroBackground images={content.heroImageUrls} />
                         <div className="absolute inset-0 bg-cream/60" />
                         <FallingLeaves />
                         <div className="relative z-10 flex flex-col items-center justify-center px-4 py-12 text-center sm:py-16 md:py-20">
@@ -45,12 +36,14 @@ export default function Home() {
                                 ariaHidden
                             />
                             <p className="text-olive text-lg md:text-xl mb-2">
-                                28 · 11 · 2026
+                                {formatDateDots(evento.inicio)}
                             </p>
                             <p className="font-heading text-brown font-medium mb-12">
-                                16:30
+                                {formatTime(evento.inicio)}
                             </p>
-                            <CountdownTimer />
+                            <CountdownTimer
+                                target={localToDate(evento.inicio).toISOString()}
+                            />
                         </div>
                     </div>
                 </section>
@@ -60,54 +53,64 @@ export default function Home() {
                     id="sobre-nos"
                     className="py-12 md:py-16 lg:py-20 px-4 bg-cream"
                 >
-                    <AboutSection content={sobreNosData} />
+                    <AboutSection content={content.sobreNos} />
                 </section>
 
                 {/* 3. Padrinhos */}
-                <section
-                    id="padrinhos"
-                    className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
-                >
-                    <HonorSection
-                        title="Padrinhos"
-                        subtitle="As pessoas que caminham conosco"
-                        data={padrinhosData}
-                        collapsibleText
-                    />
-                </section>
+                {content.padrinhos.length > 0 && (
+                    <section
+                        id="padrinhos"
+                        className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
+                    >
+                        <HonorSection
+                            title={secoes.padrinhosTitulo}
+                            subtitle={secoes.padrinhosSubtitulo}
+                            data={content.padrinhos}
+                            collapsibleText
+                        />
+                    </section>
+                )}
 
                 {/* 4. Convidados de Honra */}
-                <section
-                    id="convidados-honra"
-                    className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
-                >
-                    <HonorSection
-                        title="Convidados de Honra"
-                        subtitle="Especiais para nós"
-                        data={convidadosHonraData}
-                        collapsibleText
-                    />
-                </section>
+                {content.honra.length > 0 && (
+                    <section
+                        id="convidados-honra"
+                        className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
+                    >
+                        <HonorSection
+                            title={secoes.honraTitulo}
+                            subtitle={secoes.honraSubtitulo}
+                            data={content.honra}
+                            collapsibleText
+                        />
+                    </section>
+                )}
 
                 {/* 5. Damas de Honra */}
-                <section
-                    id="damas"
-                    className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
-                >
-                    <HonorSection
-                        title="Damas de Honra"
-                        subtitle="Nossas queridas damas"
-                        data={damasData}
-                        collapsibleText
-                    />
-                </section>
+                {content.damas.length > 0 && (
+                    <section
+                        id="damas"
+                        className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
+                    >
+                        <HonorSection
+                            title={secoes.damasTitulo}
+                            subtitle={secoes.damasSubtitulo}
+                            data={content.damas}
+                            collapsibleText
+                        />
+                    </section>
+                )}
 
                 {/* 6. Local */}
                 <section
                     id="local"
                     className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
                 >
-                    <LocationSection />
+                    <LocationSection
+                        title={secoes.localTitulo}
+                        subtitle={secoes.localSubtitulo}
+                        evento={evento}
+                    />
                 </section>
 
                 {/* 7. Confirmação */}
@@ -115,7 +118,7 @@ export default function Home() {
                     id="confirmacao"
                     className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
                 >
-                    <RsvpSection />
+                    <RsvpSection texts={content.rsvp} />
                 </section>
 
                 {/* 8. Programação */}
@@ -123,7 +126,11 @@ export default function Home() {
                     id="programacao"
                     className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
                 >
-                    <TimelineSection events={programacaoData} />
+                    <TimelineSection
+                        title={secoes.programacaoTitulo}
+                        subtitle={secoes.programacaoSubtitulo}
+                        events={content.programacao}
+                    />
                 </section>
 
                 {/* 9. Presentes */}
@@ -132,9 +139,9 @@ export default function Home() {
                     className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
                 >
                     <GiftsSection
-                        presents={presentesData.map(
-                            ({ chavePix: _chavePix, ...p }) => p
-                        )}
+                        title={secoes.presentesTitulo}
+                        subtitle={secoes.presentesSubtitulo}
+                        presents={content.gifts}
                     />
                 </section>
 
@@ -143,10 +150,17 @@ export default function Home() {
                     id="fotos"
                     className="py-16 md:py-20 lg:py-24 px-4 bg-cream"
                 >
-                    <PhotoUploadSection />
+                    <PhotoUploadSection
+                        title={secoes.fotosTitulo}
+                        subtitle={secoes.fotosSubtitulo}
+                    />
                 </section>
             </main>
-            <Footer />
+            <Footer
+                initials={content.rodape.iniciais}
+                dateLine={formatDateDots(evento.inicio)}
+                signature={content.rodape.assinatura}
+            />
         </>
     );
 }

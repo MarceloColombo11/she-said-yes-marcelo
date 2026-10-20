@@ -57,7 +57,7 @@ function isSectionInComitiva(sectionId: string) {
     return ["padrinhos", "convidados-honra", "damas"].includes(sectionId);
 }
 
-export function Navbar() {
+export function Navbar({ initials = "S & M" }: { initials?: string }) {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [activeSection, setActiveSection] = useState<string>("home");
@@ -113,7 +113,7 @@ export function Navbar() {
                 <Link
                     href="#home"
                     className="flex items-center min-h-[44px] min-w-[44px]"
-                    aria-label="S & M - Ir para início"
+                    aria-label={`${initials} - Ir para início`}
                 >
                     <Monograma
                         className="h-12 md:h-14 w-auto object-contain"

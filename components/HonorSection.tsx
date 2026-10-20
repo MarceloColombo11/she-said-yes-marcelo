@@ -4,6 +4,7 @@ import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { isSiteMediaUrl } from "@/lib/site-media";
 import {
     Dialog,
     DialogContent,
@@ -63,6 +64,7 @@ function HonorAvatar({
                 sizes="96px"
                 className="size-full object-cover"
                 style={{ objectPosition: fotoObjectPosition }}
+                unoptimized={isSiteMediaUrl(person.foto)}
                 onError={() => setImgError(true)}
             />
         </div>
@@ -238,6 +240,7 @@ export function HonorSection({
                                     width={896}
                                     height={1200}
                                     sizes="(max-width: 768px) 96vw, 56rem"
+                                    unoptimized={isSiteMediaUrl(lightbox.foto)}
                                     className="max-h-[min(78dvh,80vh)] w-auto max-w-full rounded-lg object-contain"
                                 />
                             </div>

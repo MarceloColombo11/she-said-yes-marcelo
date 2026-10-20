@@ -21,98 +21,96 @@ import {
 import { toast } from "sonner";
 import { Loader2, Heart, PartyPopper } from "lucide-react";
 import { fireConfettiCannon } from "@/lib/confetti";
-
-const RSVP_ENDPOINT = "/api/rsvp";
+import { cn } from "@/lib/utils";
+import type { RsvpBlock } from "@/lib/content/text-blocks";
+import { GuestNameField } from "@/components/rsvp/GuestNameField";
+import {
+  submitRsvp,
+  validateRsvpEmail,
+  validateRsvpName,
+  type Presenca,
+} from "@/components/rsvp/submit-rsvp";
 
 interface RsvpModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  texts: RsvpBlock;
 }
 
-export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
+const EMPTY_FORM = {
+  nome: "",
+  guestId: null as string | null,
+  email: "",
+  nomeAcompanhante: "",
+  microonibus: "" as "" | "sim" | "nao",
+};
+
+export function RsvpModal({ open, onOpenChange, texts }: RsvpModalProps) {
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [formData, setFormData] = useState({
-    nome: "",
-    email: "",
-    nomeAcompanhante: "",
-    microonibus: "" as "" | "sim" | "nao",
-  });
+  const [success, setSuccess] = useState<Presenca | null>(null);
+  const [presenca, setPresenca] = useState<Presenca>("vou");
+  const [formData, setFormData] = useState(EMPTY_FORM);
   const [nomeError, setNomeError] = useState<string | null>(null);
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [microError, setMicroError] = useState<string | null>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (open) {
-      setSuccess(false);
+      setSuccess(null);
       setNomeError(null);
       setEmailError(null);
+      setMicroError(null);
       const t = setTimeout(() => firstInputRef.current?.focus({ preventScroll: true }), 50);
       return () => clearTimeout(t);
     }
   }, [open]);
 
   useEffect(() => {
-    if (success) fireConfettiCannon();
+    if (success === "vou") fireConfettiCannon();
   }, [success]);
-
-  const validateNome = (nome: string) => {
-    const trimmed = nome.trim();
-    if (!trimmed) return "Por favor, informe seu nome completo.";
-    const parts = trimmed.split(/\s+/).filter(Boolean);
-    if (parts.length < 2) return "Por favor, informe nome e sobrenome.";
-    return null;
-  };
-
-  const validateEmail = (email: string) => {
-    if (!email.trim()) return null;
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!re.test(email)) return "Informe um e-mail válido.";
-    return null;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const nErr = validateNome(formData.nome);
-    const eErr = validateEmail(formData.email);
+    const nErr = validateRsvpName(formData.nome);
+    const eErr = validateRsvpEmail(formData.email);
+    const mErr =
+      presenca === "vou" && !formData.microonibus
+        ? "Por favor, informe se deseja microônibus."
+        : null;
     setNomeError(nErr);
     setEmailError(eErr);
+    setMicroError(mErr);
 
-    if (nErr || eErr) {
-      if (nErr) toast.error(nErr);
-      else if (eErr) toast.error(eErr);
+    if (nErr || eErr || mErr) {
+      toast.error(nErr || eErr || mErr);
       return;
     }
 
     setLoading(true);
     try {
-      const response = await fetch(RSVP_ENDPOINT, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nome: formData.nome.trim(),
-          email: formData.email.trim() || null,
-          nomeAcompanhante: formData.nomeAcompanhante.trim() || null,
-          microonibus: formData.microonibus || null,
-        }),
+      const result = await submitRsvp({
+        nome: formData.nome,
+        guestId: formData.guestId,
+        presenca,
+        email: formData.email,
+        nomeAcompanhante: formData.nomeAcompanhante,
+        microonibus: formData.microonibus,
+        mensagem: "",
       });
-
-      const result = await response.json().catch(() => ({}));
-      if (response.ok && result?.success !== false) {
-        setSuccess(true);
-        setFormData({ nome: "", email: "", nomeAcompanhante: "", microonibus: "" });
+      if (result.ok) {
+        setSuccess(presenca);
+        setFormData(EMPTY_FORM);
       } else {
-        toast.error(result?.error ?? "Erro ao confirmar. Tente novamente.");
+        toast.error(result.error);
       }
-    } catch {
-      toast.error("Erro de conexão. Verifique sua internet e tente novamente.");
     } finally {
       setLoading(false);
     }
   };
 
   const handleClose = () => {
-    if (success) setSuccess(false);
+    if (success) setSuccess(null);
     onOpenChange(false);
   };
 
@@ -125,12 +123,10 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
       >
         <DialogHeader>
           <DialogTitle className="font-heading text-brown">
-            {success ? "Presença confirmada!" : "Confirmar Presença"}
+            {success ? texts.sucessoTitulo : texts.modalTitulo}
           </DialogTitle>
           <DialogDescription id={success ? "rsvp-success-desc" : "rsvp-form-desc"}>
-            {success
-              ? "Obrigado por nos honrar com sua presença neste dia tão especial!"
-              : "Preencha o formulário para confirmar sua presença no nosso casamento."}
+            {success ? texts.sucessoDescricao : texts.modalDescricao}
           </DialogDescription>
         </DialogHeader>
 
@@ -139,13 +135,17 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
             <div className="flex size-20 items-center justify-center rounded-full bg-sage/20 text-sage">
               <Heart className="size-10 fill-sage" aria-hidden />
             </div>
-            <p className="text-center font-heading text-lg text-brown">
-              Mal podemos esperar para celebrar com você!
-            </p>
-            <div className="flex items-center gap-2 text-olive">
-              <PartyPopper className="size-5" aria-hidden />
-              <span className="text-sm">Nos vemos em breve</span>
-            </div>
+            {success === "vou" ? (
+              <>
+                <p className="text-center font-heading text-lg text-brown">
+                  {texts.sucessoMensagem}
+                </p>
+                <div className="flex items-center gap-2 text-olive">
+                  <PartyPopper className="size-5" aria-hidden />
+                  <span className="text-sm">Nos vemos em breve</span>
+                </div>
+              </>
+            ) : null}
             <Button
               size="lg"
               className="min-h-[44px] w-full min-w-[44px] rounded-xl bg-sage px-6 transition-transform active:scale-[0.98] hover:bg-sage/90"
@@ -160,29 +160,95 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
             className="space-y-5 pb-2"
             noValidate
           >
+            <GuestNameField
+              ref={firstInputRef}
+              id="rsvp-nome"
+              value={formData.nome}
+              error={nomeError}
+              disabled={loading}
+              onChange={(nome, guestId) => {
+                setFormData((p) => ({ ...p, nome, guestId }));
+                if (nomeError) setNomeError(null);
+              }}
+            />
+
             <div className="space-y-2">
-              <Label htmlFor="rsvp-nome">Nome completo *</Label>
-              <Input
-                ref={firstInputRef}
-                id="rsvp-nome"
-                value={formData.nome}
-                onChange={(e) => {
-                  setFormData((p) => ({ ...p, nome: e.target.value }));
-                  if (nomeError) setNomeError(null);
-                }}
-                placeholder="Seu nome completo"
-                required
-                disabled={loading}
-                className="min-h-[44px]"
-                aria-describedby={nomeError ? "rsvp-nome-error" : undefined}
-                aria-invalid={!!nomeError}
-              />
-              {nomeError && (
-                <p id="rsvp-nome-error" className="text-sm text-destructive" role="alert">
-                  {nomeError}
-                </p>
-              )}
+              <p className="text-sm font-medium">Você vem? *</p>
+              <div className="grid grid-cols-2 gap-2" role="group" aria-label="Você vem?">
+                {(["vou", "nao_vou"] as const).map((value) => (
+                  <Button
+                    key={value}
+                    type="button"
+                    variant="outline"
+                    aria-pressed={presenca === value}
+                    className={cn(
+                      "min-h-11 text-brown",
+                      presenca === value && "border-sage bg-sage text-cream hover:bg-sage/90 hover:text-cream",
+                    )}
+                    disabled={loading}
+                    onClick={() => {
+                      setPresenca(value);
+                      setMicroError(null);
+                    }}
+                  >
+                    {value === "vou" ? "Vou" : "Não vou"}
+                  </Button>
+                ))}
+              </div>
             </div>
+
+            {presenca === "vou" ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="rsvp-microonibus">Deseja microônibus? *</Label>
+                  <Select
+                    value={formData.microonibus}
+                    onValueChange={(v) => {
+                      setFormData((p) => ({
+                        ...p,
+                        microonibus: (v ?? "") as "" | "sim" | "nao",
+                      }));
+                      if (microError) setMicroError(null);
+                    }}
+                    disabled={loading}
+                  >
+                    <SelectTrigger
+                      id="rsvp-microonibus"
+                      className="min-h-[44px] w-full"
+                      aria-invalid={!!microError}
+                    >
+                      <SelectValue placeholder="Selecione" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="sim">Sim</SelectItem>
+                      <SelectItem value="nao">Não</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <span className="block text-sm text-muted-foreground">
+                    {texts.microonibusAviso}
+                  </span>
+                  {microError && (
+                    <p className="text-sm text-destructive" role="alert">
+                      {microError}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="rsvp-nome-acompanhante">Nome do acompanhante</Label>
+                  <Input
+                    id="rsvp-nome-acompanhante"
+                    value={formData.nomeAcompanhante}
+                    onChange={(e) =>
+                      setFormData((p) => ({ ...p, nomeAcompanhante: e.target.value }))
+                    }
+                    placeholder="Nome completo do acompanhante (opcional)"
+                    disabled={loading}
+                    className="min-h-[44px]"
+                  />
+                </div>
+              </>
+            ) : null}
 
             <div className="space-y-2">
               <Label htmlFor="rsvp-email">E-mail</Label>
@@ -207,42 +273,6 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="rsvp-nome-acompanhante">Nome do acompanhante</Label>
-              <Input
-                id="rsvp-nome-acompanhante"
-                value={formData.nomeAcompanhante}
-                onChange={(e) =>
-                  setFormData((p) => ({ ...p, nomeAcompanhante: e.target.value }))
-                }
-                placeholder="Nome completo do acompanhante (opcional)"
-                disabled={loading}
-                className="min-h-[44px]"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="rsvp-microonibus">Deseja microônibus?</Label>
-              <Select
-                value={formData.microonibus}
-                onValueChange={(v) =>
-                  setFormData((p) => ({ ...p, microonibus: (v ?? "") as "" | "sim" | "nao" }))
-                }
-                disabled={loading}
-              >
-                <SelectTrigger className="min-h-[44px] w-full">
-                  <SelectValue placeholder="Selecione" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="sim">Sim</SelectItem>
-                  <SelectItem value="nao">Não</SelectItem>
-                </SelectContent>
-              </Select>
-              <span className="block text-sm text-muted-foreground">
-                O microônibus será por conta dos noivos.
-              </span>
-            </div>
-
             <Button
               type="submit"
               className="w-full min-h-[44px] rounded-xl bg-sage py-3 text-base transition-transform active:scale-[0.98] hover:bg-sage/90 disabled:opacity-70"
@@ -251,10 +281,10 @@ export function RsvpModal({ open, onOpenChange }: RsvpModalProps) {
               {loading ? (
                 <>
                   <Loader2 className="mr-2 size-5 animate-spin" aria-hidden />
-                  Confirmando...
+                  Enviando...
                 </>
               ) : (
-                "Confirmar presença"
+                "Enviar resposta"
               )}
             </Button>
           </form>

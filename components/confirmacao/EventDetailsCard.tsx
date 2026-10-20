@@ -7,22 +7,25 @@ import { toast } from "sonner";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
-  WEDDING_EVENT,
   ICS_PATH,
   ICS_FILENAME,
+  formatDateDots,
+  formatTime,
   isIosDevice,
   getGoogleCalendarUrl,
   getShareText,
   getWhatsAppShareUrl,
+  type WeddingEvent,
 } from "@/lib/calendar";
 
 type EventDetailsCardProps = {
   /** After RSVP, lead with “save this”; on the form page it’s a quieter second step. */
   variant?: "form" | "success";
+  event: WeddingEvent;
 };
 
-export function EventDetailsCard({ variant = "form" }: EventDetailsCardProps) {
-  const shareText = getShareText();
+export function EventDetailsCard({ variant = "form", event }: EventDetailsCardProps) {
+  const shareText = getShareText(event);
   const isSuccess = variant === "success";
 
   const handleSaveCalendar = (e: MouseEvent<HTMLAnchorElement>) => {
@@ -32,7 +35,7 @@ export function EventDetailsCard({ variant = "form" }: EventDetailsCardProps) {
     }
 
     e.preventDefault();
-    window.open(getGoogleCalendarUrl(), "_blank", "noopener,noreferrer");
+    window.open(getGoogleCalendarUrl(event), "_blank", "noopener,noreferrer");
 
     const link = document.createElement("a");
     link.href = ICS_PATH;
@@ -46,7 +49,7 @@ export function EventDetailsCard({ variant = "form" }: EventDetailsCardProps) {
   const handleCopyAddress = async () => {
     try {
       await navigator.clipboard.writeText(
-        `${WEDDING_EVENT.venueName}\n${WEDDING_EVENT.address}`
+        `${event.venueName}\n${event.address}`
       );
       toast.success("Endereço copiado!");
     } catch {
@@ -58,7 +61,7 @@ export function EventDetailsCard({ variant = "form" }: EventDetailsCardProps) {
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({
-          title: WEDDING_EVENT.title,
+          title: event.title,
           text: shareText,
         });
         return;
@@ -99,12 +102,12 @@ export function EventDetailsCard({ variant = "form" }: EventDetailsCardProps) {
 
       <div className="mt-6 space-y-3 text-center">
         <p className="font-heading text-xl tracking-wide text-brown">
-          28 · 11 · 2026 · 16:30
+          {formatDateDots(event.startLocal)} · {formatTime(event.startLocal)}
         </p>
         <div>
-          <p className="font-medium text-brown">{WEDDING_EVENT.venueName}</p>
+          <p className="font-medium text-brown">{event.venueName}</p>
           <p className="mt-1 text-sm text-olive leading-relaxed">
-            {WEDDING_EVENT.address}
+            {event.address}
           </p>
         </div>
       </div>
@@ -126,7 +129,7 @@ export function EventDetailsCard({ variant = "form" }: EventDetailsCardProps) {
           variant="outline"
           className="min-h-11 border-olive/20 bg-cream text-brown hover:bg-sage/10"
           onClick={() =>
-            window.open(WEDDING_EVENT.mapsUrl, "_blank", "noopener,noreferrer")
+            window.open(event.mapsUrl, "_blank", "noopener,noreferrer")
           }
         >
           <MapPin className="size-4" aria-hidden />

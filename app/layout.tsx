@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { getPublicSiteContent } from "@/lib/content/public";
+import { formatDateLong } from "@/lib/calendar";
 
 const playfair = Playfair_Display({
     variable: "--font-playfair",
@@ -36,39 +38,41 @@ function resolveMetadataBase(): URL {
     return new URL(`http://localhost:${port}`);
 }
 
-const shareTitle = "Suelen & Marcelo — 28.11.2026";
-const shareDescription =
-    "Celebremos juntos o amor de Suelen e Marcelo. 28 de novembro de 2026.";
+export async function generateMetadata(): Promise<Metadata> {
+    const { compartilhamento, evento } = await getPublicSiteContent();
+    const shareTitle = compartilhamento.titulo;
+    const shareDescription = compartilhamento.descricao;
 
-export const metadata: Metadata = {
-    metadataBase: resolveMetadataBase(),
-    title: shareTitle,
-    description: shareDescription,
-    openGraph: {
-        type: "website",
-        locale: "pt_BR",
-        siteName: "Suelen & Marcelo",
+    return {
+        metadataBase: resolveMetadataBase(),
         title: shareTitle,
         description: shareDescription,
-        images: [
-            {
-                url: "/images/monograma-share.jpeg",
-                width: 1136,
-                height: 1600,
-                alt: "Monograma Suelen e Marcelo — 28 de novembro de 2026",
-            },
-        ],
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: shareTitle,
-        description: shareDescription,
-        images: ["/images/monograma-share.jpeg"],
-    },
-    icons: {
-        icon: "/Monograma simples.svg",
-    },
-};
+        openGraph: {
+            type: "website",
+            locale: "pt_BR",
+            siteName: compartilhamento.nomeSite,
+            title: shareTitle,
+            description: shareDescription,
+            images: [
+                {
+                    url: "/images/monograma-share.jpeg",
+                    width: 1136,
+                    height: 1600,
+                    alt: `Monograma ${compartilhamento.nomeSite} — ${formatDateLong(evento.inicio)}`,
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: shareTitle,
+            description: shareDescription,
+            images: ["/images/monograma-share.jpeg"],
+        },
+        icons: {
+            icon: "/Monograma simples.svg",
+        },
+    };
+}
 
 export default function RootLayout({
     children,

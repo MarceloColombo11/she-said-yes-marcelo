@@ -10,7 +10,12 @@ import { MediaQueueItem } from "@/components/MediaQueueItem";
 import { useMediaUploadQueue } from "@/hooks/useMediaUploadQueue";
 import { useCameraCapture } from "@/hooks/useCameraCapture";
 
-export function PhotoUploadSection() {
+type PhotoUploadSectionProps = {
+  title: string;
+  subtitle: string;
+};
+
+export function PhotoUploadSection({ title, subtitle }: PhotoUploadSectionProps) {
   const [dragActive, setDragActive] = useState(false);
   const { items, enqueueFiles, retryItem, removeItem, isUploading } =
     useMediaUploadQueue();
@@ -54,12 +59,9 @@ export function PhotoUploadSection() {
     <div className="mx-auto max-w-2xl space-y-8">
       <div className="text-center">
         <h2 className="font-heading text-3xl font-semibold text-brown md:text-4xl">
-          Suba suas fotos e vídeos
+          {title}
         </h2>
-        <p className="mt-4 text-olive">
-          Compartilhe seus momentos conosco! Envie várias fotos ou vídeos de
-          uma vez.
-        </p>
+        <p className="mt-4 text-olive">{subtitle}</p>
       </div>
 
       <div className="space-y-6" aria-live="polite" aria-busy={isUploading}>

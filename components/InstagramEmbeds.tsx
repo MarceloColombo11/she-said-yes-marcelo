@@ -9,12 +9,7 @@ declare global {
     }
 }
 
-const INSTAGRAM_POSTS = [
-    "https://www.instagram.com/p/DV9nJsJjyuz/",
-    "https://www.instagram.com/p/DUnyY8aDmBc/",
-];
-
-export function InstagramEmbeds() {
+export function InstagramEmbeds({ posts }: { posts: string[] }) {
     const containerRef = useRef<HTMLDivElement>(null);
     const [shouldLoad, setShouldLoad] = useState(false);
 
@@ -55,7 +50,7 @@ export function InstagramEmbeds() {
             {shouldLoad ? (
                 <>
                     <div className="flex flex-wrap justify-center gap-6">
-                        {INSTAGRAM_POSTS.map((url) => (
+                        {posts.map((url) => (
                             <div
                                 key={url}
                                 className="flex min-w-0 flex-[1_1_280px] max-w-[540px] justify-center overflow-hidden rounded-lg sm:min-w-[280px] [&_.instagram-media]:w-full! [&_.instagram-media]:max-w-full! [&_iframe]:max-w-full!"

@@ -1,6 +1,6 @@
 # Site de Casamento — Suelen & Marcelo
 
-Site elegante e funcional para o casamento de Suelen e Marcelo. Data: **28 de novembro de 2026, às 16:30**.
+Site elegante e funcional para o casamento de Suelen e Marcelo. Todo o conteúdo (textos, fotos, presentes, comitiva, programação, evento e confirmações de presença) fica num banco Postgres e é editado pelo painel em `/admin`.
 
 ## Tecnologias
 
@@ -8,8 +8,8 @@ Site elegante e funcional para o casamento de Suelen e Marcelo. Data: **28 de no
 - **TypeScript**
 - **Tailwind CSS**
 - **Shadcn/ui**
+- **Neon Postgres + Drizzle ORM** (conteúdo do site e lista de convidados)
 - **Google Maps Embed** (mapa, sem API key)
-- **Google Apps Script** (RSVP)
 - **Google Drive API** (upload resumível de fotos e vídeos dos convidados)
 
 ## Como rodar
@@ -19,7 +19,7 @@ npm install
 npm run dev
 ```
 
-Acesse [http://localhost:3000](http://localhost:3000).
+Acesse [http://localhost:3000](http://localhost:3000). Sem `DATABASE_URL`, o site público mostra o conteúdo padrão de `data/*.json` e a confirmação de presença fica indisponível.
 
 ## Configuração
 
@@ -28,13 +28,44 @@ Acesse [http://localhost:3000](http://localhost:3000).
 
 | Variável | Descrição |
 |----------|-----------|
-| `GOOGLE_APPS_SCRIPT_RSVP_URL` | URL da Web App de confirmação (somente servidor) |
+| `DATABASE_URL` | Connection string do Neon (a integração Vercel ↔ Neon cria automaticamente) |
+| `ADMIN_USERNAME` | Usuário do painel `/admin` |
+| `ADMIN_PASSWORD_HASH` | Hash da senha do painel (`npm run admin:hash` pede a senha e imprime o hash) |
+| `ADMIN_SESSION_SECRET` | Segredo aleatório com 32+ caracteres para assinar a sessão |
 | `GOOGLE_OAUTH_CLIENT_ID` | OAuth Desktop client (upload Drive) |
 | `GOOGLE_OAUTH_CLIENT_SECRET` | Secret do OAuth client |
 | `GOOGLE_OAUTH_REFRESH_TOKEN` | Refresh token da conta dona da pasta (`npm run drive:oauth`) |
 | `GOOGLE_DRIVE_FOLDER_ID` | ID da pasta do Drive onde as mídias serão salvas |
 | `NEXT_PUBLIC_SITE_URL` | (Opcional) URL pública do site — ajuda no CORS do upload |
-| `NEXT_PUBLIC_WEDDING_DATE` | Data e hora (ex: 2026-11-28T16:30:00) |
+
+## Banco de dados
+
+1. Crie o banco pela integração **Neon** no painel da Vercel (Storage) e copie a `DATABASE_URL` para o `.env.local`.
+2. Aplique as migrações:
+
+```bash
+npm run db:migrate
+```
+
+3. Gere o hash da senha do admin e preencha `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH` e `ADMIN_SESSION_SECRET` (ex.: `openssl rand -base64 48`).
+
+Na primeira leitura, o banco é populado automaticamente com o conteúdo de `data/*.json` e com os textos atuais do site. Depois disso, o banco é a única fonte: edite tudo pelo `/admin`.
+
+Ao mudar `lib/db/schema.ts`, gere uma nova migração com `npm run db:generate` e aplique com `npm run db:migrate`.
+
+## Painel admin (`/admin`)
+
+- **Convidados**: grupos e lista de convidados, status de cada um, totais (pessoas, acompanhantes, microônibus) e confirmações que não bateram com nenhum nome da lista, para vincular ou criar convidado.
+- **Presentes**: título, descrição, foto, Pix e ordem.
+- **Fotos**: fotos da capa e do carrossel “Sobre Nós”.
+- **Comitiva**: padrinhos, convidados de honra e damas, com foto, zoom e enquadramento.
+- **Programação**: momentos do dia, ícone e destaque.
+- **Evento e local**: data/horário (contagem regressiva, agenda e `.ics`), endereço, mapa, Instagram e logo do local.
+- **Textos**: Sobre Nós, títulos das seções, RSVP, página `/confirmacao`, rodapé e compartilhamento.
+
+## Confirmação de presença
+
+O convidado digita o nome e recebe sugestões da lista cadastrada no admin. Se escolher uma sugestão, o status do convidado é atualizado direto; se não, a resposta entra em “confirmações sem vínculo” no painel. Os campos extras (e-mail, acompanhante, microônibus e mensagem) ficam visíveis no admin.
 
 ## Upload de mídias (Google Drive)
 
@@ -68,18 +99,6 @@ npm run drive:oauth
 
 O script antigo `scripts/google-apps-script-upload.js` é **legado** e não deve ser usado.
 
-## RSVP (Google Apps Script)
-
-Na pasta `scripts/` está o código de **RSVP** (confirmações em planilha). Veja os comentários no arquivo para implantação.
-
-## Personalização
-
-- **Fotos**: adicione imagens em `public/images/` e atualize os JSONs em `data/`
-- **Presentes**: edite `data/presentes.json` (inclua a chave Pix real)
-- **Local**: atualize endereço, telefone e Instagram em `components/LocationSection.tsx`
-- **Padrinhos/Damas**: edite `data/padrinhos.json`, `data/damas.json`, `data/convidados-honra.json`
-- **Programação**: edite `data/programacao.json`
-
 ## Deploy na Vercel
 
 ```bash
@@ -88,12 +107,16 @@ npm run build
 
 Configure no painel da Vercel (**Project Settings > Environment Variables**):
 
-- `GOOGLE_APPS_SCRIPT_RSVP_URL`
+- `DATABASE_URL` (já vem da integração Neon)
+- `ADMIN_USERNAME`
+- `ADMIN_PASSWORD_HASH`
+- `ADMIN_SESSION_SECRET`
 - `GOOGLE_OAUTH_CLIENT_ID`
 - `GOOGLE_OAUTH_CLIENT_SECRET`
 - `GOOGLE_OAUTH_REFRESH_TOKEN`
 - `GOOGLE_DRIVE_FOLDER_ID`
-- `NEXT_PUBLIC_WEDDING_DATE`
 - (recomendado) `NEXT_PUBLIC_SITE_URL`
+
+Rode `npm run db:migrate` apontando para o banco de produção antes do primeiro deploy (e sempre que houver migração nova em `drizzle/`).
 
 O `.env.local` é apenas para desenvolvimento local.

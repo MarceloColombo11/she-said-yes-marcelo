@@ -5,10 +5,12 @@ import { GiftCard, type Presente } from "./GiftCard";
 import { GiftModal } from "./GiftModal";
 
 interface GiftsSectionProps {
+  title: string;
+  subtitle: string;
   presents: Presente[];
 }
 
-export function GiftsSection({ presents }: GiftsSectionProps) {
+export function GiftsSection({ title, subtitle, presents }: GiftsSectionProps) {
   const [selectedPresent, setSelectedPresent] = useState<Presente | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -21,11 +23,9 @@ export function GiftsSection({ presents }: GiftsSectionProps) {
     <div className="mx-auto max-w-7xl">
       <div className="mb-12 text-center">
         <h2 className="font-heading text-3xl font-semibold text-brown md:text-4xl">
-          Presentes
+          {title}
         </h2>
-        <p className="mt-4 text-olive">
-          Se preferir nos presentear, aqui estão algumas sugestões.
-        </p>
+        <p className="mt-4 text-olive">{subtitle}</p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">

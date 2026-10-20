@@ -1,19 +1,85 @@
 /** Wedding event helpers for calendar (.ics / Google) and share links. */
 
-export const WEDDING_EVENT = {
-  title: "Casamento Suelen & Marcelo",
-  description:
-    "Cerimônia e celebração de Suelen e Marcelo no Mirante Garden.",
-  location:
-    "Mirante Garden, Estrada Geral da Fazendinha - Fazendinha, Biguaçu - SC, 88160-000",
-  venueName: "Mirante Garden",
-  address: "Estrada Geral da Fazendinha - Fazendinha, Biguaçu - SC, 88160-000",
-  /** Local time America/Sao_Paulo */
-  start: new Date("2026-11-28T16:30:00-03:00"),
-  end: new Date("2026-11-28T23:00:00-03:00"),
-  mapsUrl:
-    "https://www.google.com/maps/search/?api=1&query=Mirante+Garden+Fazendinha+Biguacu+SC",
-} as const;
+const MONTHS = [
+  "janeiro",
+  "fevereiro",
+  "março",
+  "abril",
+  "maio",
+  "junho",
+  "julho",
+  "agosto",
+  "setembro",
+  "outubro",
+  "novembro",
+  "dezembro",
+];
+
+/** Brazil has had no DST since 2019; local times are always UTC-3. */
+const SAO_PAULO_OFFSET = "-03:00";
+
+export type WeddingEvent = {
+  title: string;
+  description: string;
+  venueName: string;
+  address: string;
+  mapsUrl: string;
+  /** "YYYY-MM-DDTHH:mm" in America/Sao_Paulo */
+  startLocal: string;
+  endLocal: string;
+};
+
+type LocalParts = {
+  year: string;
+  month: string;
+  day: string;
+  hour: string;
+  minute: string;
+};
+
+function parseLocal(value: string): LocalParts {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value);
+  if (!match) {
+    return { year: "2026", month: "01", day: "01", hour: "00", minute: "00" };
+  }
+  const [, year, month, day, hour, minute] = match;
+  return { year, month, day, hour, minute };
+}
+
+export function localToDate(value: string): Date {
+  const p = parseLocal(value);
+  return new Date(
+    `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:00${SAO_PAULO_OFFSET}`,
+  );
+}
+
+/** "28 · 11 · 2026" */
+export function formatDateDots(value: string): string {
+  const p = parseLocal(value);
+  return `${p.day} · ${p.month} · ${p.year}`;
+}
+
+/** "16:30" */
+export function formatTime(value: string): string {
+  const p = parseLocal(value);
+  return `${p.hour}:${p.minute}`;
+}
+
+/** "28 de novembro de 2026" */
+export function formatDateLong(value: string): string {
+  const p = parseLocal(value);
+  return `${Number(p.day)} de ${MONTHS[Number(p.month) - 1] ?? ""} de ${p.year}`;
+}
+
+/** "28.11.2026" */
+export function formatDateCompact(value: string): string {
+  const p = parseLocal(value);
+  return `${p.day}.${p.month}.${p.year}`;
+}
+
+export function eventLocation(event: WeddingEvent): string {
+  return `${event.venueName}, ${event.address}`;
+}
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -41,8 +107,10 @@ function escapeIcs(text: string): string {
     .replace(/\n/g, "\\n");
 }
 
-export function buildIcsContent(event = WEDDING_EVENT): string {
-  const uid = `casamento-suelen-marcelo-${toIcsUtc(event.start)}@casamento`;
+export function buildIcsContent(event: WeddingEvent): string {
+  const start = localToDate(event.startLocal);
+  const end = localToDate(event.endLocal);
+  const uid = `casamento-suelen-marcelo-${toIcsUtc(start)}@casamento`;
   const stamp = toIcsUtc(new Date());
   const lines = [
     "BEGIN:VCALENDAR",
@@ -53,29 +121,31 @@ export function buildIcsContent(event = WEDDING_EVENT): string {
     "BEGIN:VEVENT",
     `UID:${uid}`,
     `DTSTAMP:${stamp}`,
-    `DTSTART:${toIcsUtc(event.start)}`,
-    `DTEND:${toIcsUtc(event.end)}`,
+    `DTSTART:${toIcsUtc(start)}`,
+    `DTEND:${toIcsUtc(end)}`,
     `SUMMARY:${escapeIcs(event.title)}`,
     `DESCRIPTION:${escapeIcs(event.description)}`,
-    `LOCATION:${escapeIcs(event.location)}`,
+    `LOCATION:${escapeIcs(eventLocation(event))}`,
     "END:VEVENT",
     "END:VCALENDAR",
   ];
   return lines.join("\r\n");
 }
 
-/** Fixed local times in America/Sao_Paulo (avoids browser TZ drift). */
-const GOOGLE_START = "20261128T163000";
-const GOOGLE_END = "20261128T230000";
+/** Local times in America/Sao_Paulo (avoids browser TZ drift). */
+function toGoogleLocal(value: string): string {
+  const p = parseLocal(value);
+  return `${p.year}${p.month}${p.day}T${p.hour}${p.minute}00`;
+}
 
-export function getGoogleCalendarUrl(event = WEDDING_EVENT): string {
-  const dates = `${GOOGLE_START}/${GOOGLE_END}`;
+export function getGoogleCalendarUrl(event: WeddingEvent): string {
   const params = new URLSearchParams({
     action: "TEMPLATE",
     text: event.title,
     details: event.description,
-    location: event.location,
-    dates,
+    location: eventLocation(event),
+    dates: `${toGoogleLocal(event.startLocal)}/${toGoogleLocal(event.endLocal)}`,
+    ctz: "America/Sao_Paulo",
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
@@ -92,10 +162,10 @@ export function isIosDevice(): boolean {
   return navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
 }
 
-export function getShareText(event = WEDDING_EVENT): string {
+export function getShareText(event: WeddingEvent): string {
   return [
     event.title,
-    "28 de novembro de 2026 · 16:30",
+    `${formatDateLong(event.startLocal)} · ${formatTime(event.startLocal)}`,
     event.venueName,
     event.address,
     event.mapsUrl,

@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react";
 
-const WEDDING_DATE = process.env.NEXT_PUBLIC_WEDDING_DATE || "2026-11-28T16:30:00";
-
 interface TimeLeft {
   days: number;
   hours: number;
@@ -11,9 +9,9 @@ interface TimeLeft {
   seconds: number;
 }
 
-function getTimeLeft(): TimeLeft {
+function getTimeLeft(target: string): TimeLeft {
   const now = new Date().getTime();
-  const wedding = new Date(WEDDING_DATE).getTime();
+  const wedding = new Date(target).getTime();
   const diff = wedding - now;
 
   if (diff <= 0) {
@@ -32,16 +30,17 @@ function pad(num: number): string {
   return num.toString().padStart(2, "0");
 }
 
-export function CountdownTimer() {
+/** `target` is an ISO timestamp of the ceremony start. */
+export function CountdownTimer({ target }: { target: string }) {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
-    setTimeLeft(getTimeLeft());
+    setTimeLeft(getTimeLeft(target));
     const timer = setInterval(() => {
-      setTimeLeft(getTimeLeft());
+      setTimeLeft(getTimeLeft(target));
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [target]);
 
   const cards = [
     { label: "Dias", value: timeLeft.days },

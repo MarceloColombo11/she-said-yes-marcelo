@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  images: {
+    localPatterns: [
+      { pathname: "/images/**" },
+      { pathname: "/imagensPresentes/**" },
+      { pathname: "/api/site-media/**" },
+    ],
+  },
   async headers() {
     return [
       {
