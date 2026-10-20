@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ConfirmacaoPage } from "@/components/confirmacao/ConfirmacaoPage";
 import { getPublicSiteContent } from "@/lib/content/public";
+import { shareOpenGraph } from "@/lib/share-metadata";
 
 export const revalidate = 60;
 
@@ -11,7 +12,12 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    openGraph: { title, description },
+    openGraph: shareOpenGraph({
+      siteName: compartilhamento.nomeSite,
+      title,
+      description,
+      imageAlt: `Monograma ${compartilhamento.nomeSite}`,
+    }),
   };
 }
 

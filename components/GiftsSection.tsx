@@ -4,6 +4,8 @@ import { useState } from "react";
 import { GiftCard, type Presente } from "./GiftCard";
 import { GiftModal } from "./GiftModal";
 
+const POLAROID_TILTS = [-2.2, 1.5, -1.1, 2, 0.7, -1.7];
+
 interface GiftsSectionProps {
   title: string;
   subtitle: string;
@@ -28,11 +30,12 @@ export function GiftsSection({ title, subtitle, presents }: GiftsSectionProps) {
         <p className="mt-4 text-olive">{subtitle}</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-        {presents.map((presente) => (
+      <div className="mx-auto grid max-w-4xl grid-cols-2 items-start gap-x-6 gap-y-12 md:grid-cols-3 md:gap-x-10 md:gap-y-14">
+        {presents.map((presente, index) => (
           <GiftCard
             key={presente.id}
             presente={presente}
+            tilt={POLAROID_TILTS[index % POLAROID_TILTS.length]}
             onClick={() => handleSelectPresent(presente)}
           />
         ))}

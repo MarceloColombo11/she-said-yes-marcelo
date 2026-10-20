@@ -6,7 +6,6 @@ import { getDb } from "@/lib/db/client";
 
 export const dynamic = "force-dynamic";
 
-const EMAIL_MAX = 200;
 const COMPANION_MAX = 120;
 const MESSAGE_MAX = 1000;
 const RETRY_LATER = "Tente de novo em instantes.";
@@ -30,11 +29,6 @@ function parseBody(body: Record<string, unknown>) {
   }
   const attending = body.presenca === "vou";
 
-  const email = optionalText(body.email, "E-mail", EMAIL_MAX);
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    throw new InputError("Informe um e-mail válido.");
-  }
-
   let microonibus: boolean | null = null;
   if (attending) {
     if (body.microonibus !== "sim" && body.microonibus !== "nao") {
@@ -47,7 +41,6 @@ function parseBody(body: Record<string, unknown>) {
     name: typeof body.nome === "string" ? body.nome : "",
     guestId: typeof body.guestId === "string" ? body.guestId : null,
     attending,
-    email,
     companionName: attending
       ? optionalText(body.nomeAcompanhante, "Nome do acompanhante", COMPANION_MAX)
       : null,

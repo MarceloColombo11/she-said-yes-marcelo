@@ -28,7 +28,7 @@ export default async function Home() {
                 <section id="home" className="min-h-[100dvh]">
                     <div className="relative min-h-[100dvh] flex flex-col items-center justify-center bg-olive/10 overflow-hidden">
                         <HeroBackground images={content.heroImageUrls} />
-                        <div className="absolute inset-0 bg-cream/60" />
+                        <div className="absolute inset-0 bg-cream/40" />
                         <FallingLeaves />
                         <div className="relative z-10 flex flex-col items-center justify-center px-4 py-12 text-center sm:py-16 md:py-20">
                             <Monograma
@@ -66,7 +66,7 @@ export default async function Home() {
                             title={secoes.padrinhosTitulo}
                             subtitle={secoes.padrinhosSubtitulo}
                             data={content.padrinhos}
-                            collapsibleText
+                            assinatura={content.sobreNos.assinatura}
                         />
                     </section>
                 )}
@@ -81,7 +81,7 @@ export default async function Home() {
                             title={secoes.honraTitulo}
                             subtitle={secoes.honraSubtitulo}
                             data={content.honra}
-                            collapsibleText
+                            assinatura={content.sobreNos.assinatura}
                         />
                     </section>
                 )}
@@ -96,7 +96,7 @@ export default async function Home() {
                             title={secoes.damasTitulo}
                             subtitle={secoes.damasSubtitulo}
                             data={content.damas}
-                            collapsibleText
+                            assinatura={content.sobreNos.assinatura}
                         />
                     </section>
                 )}

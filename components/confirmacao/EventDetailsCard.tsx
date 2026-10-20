@@ -8,11 +8,12 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   ICS_PATH,
-  ICS_FILENAME,
   formatDateDots,
   formatTime,
   isIosDevice,
+  getDevicePlatform,
   getGoogleCalendarUrl,
+  getRouteUrl,
   getShareText,
   getWhatsAppShareUrl,
   type WeddingEvent,
@@ -36,14 +37,6 @@ export function EventDetailsCard({ variant = "form", event }: EventDetailsCardPr
 
     e.preventDefault();
     window.open(getGoogleCalendarUrl(event), "_blank", "noopener,noreferrer");
-
-    const link = document.createElement("a");
-    link.href = ICS_PATH;
-    link.download = ICS_FILENAME;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    toast.success("Abrimos o Google Calendar e o arquivo da agenda.");
   };
 
   const handleCopyAddress = async () => {
@@ -129,7 +122,11 @@ export function EventDetailsCard({ variant = "form", event }: EventDetailsCardPr
           variant="outline"
           className="min-h-11 border-olive/20 bg-cream text-brown hover:bg-sage/10"
           onClick={() =>
-            window.open(event.mapsUrl, "_blank", "noopener,noreferrer")
+            window.open(
+              getRouteUrl(event, getDevicePlatform()),
+              "_blank",
+              "noopener,noreferrer"
+            )
           }
         >
           <MapPin className="size-4" aria-hidden />

@@ -27,7 +27,7 @@ export function HeroBackground({ images }: HeroBackgroundProps) {
   if (images.length === 0) return null;
 
   return (
-    <div className="absolute inset-0 opacity-30" aria-hidden>
+    <div className="absolute inset-0 opacity-70" aria-hidden>
       {images.map((src, i) => (
         <Image
           key={`${src}-${i}`}

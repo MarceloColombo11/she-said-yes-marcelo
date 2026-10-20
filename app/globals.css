@@ -167,6 +167,35 @@
     animation-fill-mode: none;
 }
 
+/* Polaroid da lista de presentes: papel sobre o linho, leve inclinação */
+.gift-polaroid {
+  --tilt: 0deg;
+  background: #fff;
+  transform: rotate(var(--tilt));
+  box-shadow:
+    0 1px 1px rgba(61, 23, 0, 0.05),
+    0 16px 28px -18px rgba(61, 23, 0, 0.62);
+  transition:
+    transform 320ms ease,
+    box-shadow 320ms ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gift-polaroid:hover,
+  .gift-polaroid:focus-visible {
+    transform: rotate(0deg) translateY(-8px);
+    box-shadow:
+      0 1px 1px rgba(61, 23, 0, 0.05),
+      0 24px 36px -16px rgba(61, 23, 0, 0.5);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gift-polaroid {
+    transition: none;
+  }
+}
+
 /* Safe area para dispositivos com notch/dynamic island */
 @utility pt-safe {
   padding-top: env(safe-area-inset-top);

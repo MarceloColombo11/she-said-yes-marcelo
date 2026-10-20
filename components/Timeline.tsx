@@ -30,7 +30,7 @@ export interface TimelineEvent {
     destaque?: boolean;
 }
 
-const ICON_MAP: Record<string, React.ElementType> = {
+export const ICON_MAP: Record<string, React.ElementType> = {
     church: Church,
     coffee: Coffee,
     wine: Wine,

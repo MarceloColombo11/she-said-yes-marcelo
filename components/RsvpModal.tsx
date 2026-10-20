@@ -26,7 +26,6 @@ import type { RsvpBlock } from "@/lib/content/text-blocks";
 import { GuestNameField } from "@/components/rsvp/GuestNameField";
 import {
   submitRsvp,
-  validateRsvpEmail,
   validateRsvpName,
   type Presenca,
 } from "@/components/rsvp/submit-rsvp";
@@ -40,7 +39,6 @@ interface RsvpModalProps {
 const EMPTY_FORM = {
   nome: "",
   guestId: null as string | null,
-  email: "",
   nomeAcompanhante: "",
   microonibus: "" as "" | "sim" | "nao",
 };
@@ -51,7 +49,6 @@ export function RsvpModal({ open, onOpenChange, texts }: RsvpModalProps) {
   const [presenca, setPresenca] = useState<Presenca>("vou");
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [nomeError, setNomeError] = useState<string | null>(null);
-  const [emailError, setEmailError] = useState<string | null>(null);
   const [microError, setMicroError] = useState<string | null>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
 
@@ -59,7 +56,6 @@ export function RsvpModal({ open, onOpenChange, texts }: RsvpModalProps) {
     if (open) {
       setSuccess(null);
       setNomeError(null);
-      setEmailError(null);
       setMicroError(null);
       const t = setTimeout(() => firstInputRef.current?.focus({ preventScroll: true }), 50);
       return () => clearTimeout(t);
@@ -73,17 +69,15 @@ export function RsvpModal({ open, onOpenChange, texts }: RsvpModalProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const nErr = validateRsvpName(formData.nome);
-    const eErr = validateRsvpEmail(formData.email);
     const mErr =
       presenca === "vou" && !formData.microonibus
         ? "Por favor, informe se deseja microônibus."
         : null;
     setNomeError(nErr);
-    setEmailError(eErr);
     setMicroError(mErr);
 
-    if (nErr || eErr || mErr) {
-      toast.error(nErr || eErr || mErr);
+    if (nErr || mErr) {
+      toast.error(nErr || mErr);
       return;
     }
 
@@ -93,7 +87,6 @@ export function RsvpModal({ open, onOpenChange, texts }: RsvpModalProps) {
         nome: formData.nome,
         guestId: formData.guestId,
         presenca,
-        email: formData.email,
         nomeAcompanhante: formData.nomeAcompanhante,
         microonibus: formData.microonibus,
         mensagem: "",
@@ -249,29 +242,6 @@ export function RsvpModal({ open, onOpenChange, texts }: RsvpModalProps) {
                 </div>
               </>
             ) : null}
-
-            <div className="space-y-2">
-              <Label htmlFor="rsvp-email">E-mail</Label>
-              <Input
-                id="rsvp-email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => {
-                  setFormData((p) => ({ ...p, email: e.target.value }));
-                  if (emailError) setEmailError(null);
-                }}
-                placeholder="seu@email.com"
-                disabled={loading}
-                className="min-h-[44px]"
-                aria-describedby={emailError ? "rsvp-email-error" : undefined}
-                aria-invalid={!!emailError}
-              />
-              {emailError && (
-                <p id="rsvp-email-error" className="text-sm text-destructive" role="alert">
-                  {emailError}
-                </p>
-              )}
-            </div>
 
             <Button
               type="submit"

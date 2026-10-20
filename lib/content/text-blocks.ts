@@ -75,6 +75,13 @@ export type ConfirmacaoBlock = {
   sucessoNaoVouTexto: string;
 };
 
+export type ConviteBlock = {
+  titulo: string;
+  subtitulo: string;
+  mensagemDia: string;
+  atalhosTitulo: string;
+};
+
 export type RodapeBlock = {
   iniciais: string;
   assinatura: string;
@@ -108,6 +115,7 @@ export type TextBlockValues = {
   secoes: SecoesBlock;
   rsvp: RsvpBlock;
   confirmacao: ConfirmacaoBlock;
+  convite: ConviteBlock;
   rodape: RodapeBlock;
   compartilhamento: CompartilhamentoBlock;
   evento: EventoBlock;
@@ -235,6 +243,23 @@ export const TEXT_BLOCKS: Record<TextBlockKey, BlockDef> = {
       sucessoVouTexto: "Nos vemos na obra — digo, na festa.",
       sucessoNaoVouTitulo: "Recebido com carinho.",
       sucessoNaoVouTexto: "Vai fazer falta no canteiro, mas a gente entende.",
+    },
+  },
+  convite: {
+    label: "Página do dia (/convite)",
+    description:
+      "Textos da página com as informações do dia, enviada aos convidados na semana do casamento.",
+    fields: [
+      t("titulo", "Título"),
+      t("subtitulo", "Subtítulo", { max: 300 }),
+      t("mensagemDia", "Mensagem no dia do casamento", { max: 300 }),
+      t("atalhosTitulo", "Título dos atalhos"),
+    ],
+    defaults: {
+      titulo: "Tá chegando!",
+      subtitulo: "Tudo o que você precisa pra chegar e curtir o dia com a gente.",
+      mensagemDia: "É hoje! Te esperamos de coração aberto.",
+      atalhosTitulo: "Durante a festa",
     },
   },
   rodape: {

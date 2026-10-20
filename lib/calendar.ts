@@ -77,6 +77,35 @@ export function formatDateCompact(value: string): string {
   return `${p.day}.${p.month}.${p.year}`;
 }
 
+const DAY_MS = 86_400_000;
+const SAO_PAULO_OFFSET_MS = -3 * 60 * 60 * 1000;
+
+/** Calendar days from today (in São Paulo) until the given local date; 0 = today. */
+export function daysUntilLocal(value: string, nowMs: number): number {
+  const p = parseLocal(value);
+  const target = Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day));
+  const today = new Date(nowMs + SAO_PAULO_OFFSET_MS);
+  const todayUtc = Date.UTC(
+    today.getUTCFullYear(),
+    today.getUTCMonth(),
+    today.getUTCDate(),
+  );
+  return Math.round((target - todayUtc) / DAY_MS);
+}
+
+/** Minutes since midnight in São Paulo. */
+export function saoPauloMinutes(nowMs: number): number {
+  const d = new Date(nowMs + SAO_PAULO_OFFSET_MS);
+  return d.getUTCHours() * 60 + d.getUTCMinutes();
+}
+
+/** "16:30" or "16h30" → 990; null when unparseable. */
+export function clockToMinutes(value: string): number | null {
+  const match = /^(\d{1,2})\s*[:h]\s*(\d{2})?/.exec(value.trim());
+  if (!match) return null;
+  return Number(match[1]) * 60 + Number(match[2] ?? 0);
+}
+
 export function eventLocation(event: WeddingEvent): string {
   return `${event.venueName}, ${event.address}`;
 }
@@ -162,6 +191,16 @@ export function isIosDevice(): boolean {
   return navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
 }
 
+export type DevicePlatform = "ios" | "android" | "desktop";
+
+export function getDevicePlatform(): DevicePlatform {
+  if (isIosDevice()) return "ios";
+  if (typeof navigator !== "undefined" && /Android/i.test(navigator.userAgent)) {
+    return "android";
+  }
+  return "desktop";
+}
+
 export function getShareText(event: WeddingEvent): string {
   return [
     event.title,
@@ -170,6 +209,31 @@ export function getShareText(event: WeddingEvent): string {
     event.address,
     event.mapsUrl,
   ].join("\n");
+}
+
+export function getInviteShareText(event: WeddingEvent, pageUrl: string): string {
+  return `${getShareText(event)}\n\nTudo sobre o dia: ${pageUrl}`;
+}
+
+export function getWazeUrl(event: WeddingEvent): string {
+  const params = new URLSearchParams({
+    q: eventLocation(event),
+    navigate: "yes",
+  });
+  return `https://waze.com/ul?${params.toString()}`;
+}
+
+export function getAppleMapsUrl(event: WeddingEvent): string {
+  const params = new URLSearchParams({
+    daddr: eventLocation(event),
+    q: event.venueName,
+  });
+  return `https://maps.apple.com/?${params.toString()}`;
+}
+
+/** Apple Maps is always installed on iPhone; elsewhere Google Maps is the safe default. */
+export function getRouteUrl(event: WeddingEvent, platform: DevicePlatform): string {
+  return platform === "ios" ? getAppleMapsUrl(event) : event.mapsUrl;
 }
 
 export function getWhatsAppShareUrl(text: string): string {

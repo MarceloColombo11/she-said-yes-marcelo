@@ -290,7 +290,7 @@ export async function applyPublicRsvp(input: {
   name: string;
   attending: boolean;
   guestId?: string | null;
-} & RsvpExtras): Promise<void> {
+} & Omit<RsvpExtras, "email">): Promise<void> {
   const parsed = validateGuestFullName(input.name);
   if (!parsed.ok) throw new Error(parsed.error);
   const db = requireDb();
@@ -326,8 +326,7 @@ export async function applyPublicRsvp(input: {
   );
   if (!resolved.ok) throw new Error(resolved.error);
 
-  const extras: RsvpExtras = {
-    email: input.email,
+  const extras = {
     companionName: input.companionName,
     microonibus: input.attending ? input.microonibus : null,
     message: input.message,

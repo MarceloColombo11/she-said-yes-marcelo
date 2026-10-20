@@ -24,7 +24,6 @@ import type { ConfirmacaoBlock } from "@/lib/content/text-blocks";
 import { GuestNameField } from "@/components/rsvp/GuestNameField";
 import {
   submitRsvp,
-  validateRsvpEmail,
   validateRsvpName,
   type Presenca,
 } from "@/components/rsvp/submit-rsvp";
@@ -32,7 +31,6 @@ import {
 const EMPTY_FORM = {
   nome: "",
   guestId: null as string | null,
-  email: "",
   nomeAcompanhante: "",
   microonibus: "" as "" | "sim" | "nao",
   mensagem: "",
@@ -52,7 +50,6 @@ export function ConfirmacaoPage({ texts, event }: ConfirmacaoPageProps) {
   const dateLine = formatDateDots(event.startLocal);
   const timeLine = formatTime(event.startLocal);
   const [nomeError, setNomeError] = useState<string | null>(null);
-  const [emailError, setEmailError] = useState<string | null>(null);
   const [microError, setMicroError] = useState<string | null>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
@@ -69,23 +66,19 @@ export function ConfirmacaoPage({ texts, event }: ConfirmacaoPageProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const nErr = validateRsvpName(formData.nome);
-    const eErr = validateRsvpEmail(formData.email);
     const mErr =
       presenca === "vou" && !formData.microonibus
         ? "Por favor, informe se precisa de microônibus."
         : null;
 
     setNomeError(nErr);
-    setEmailError(eErr);
     setMicroError(mErr);
 
-    if (nErr || eErr || mErr) {
-      toast.error(nErr || eErr || mErr);
+    if (nErr || mErr) {
+      toast.error(nErr || mErr);
       const target = nErr
         ? firstInputRef.current
-        : formRef.current?.querySelector<HTMLElement>(
-            eErr ? "#conf-email" : "#conf-micro"
-          );
+        : formRef.current?.querySelector<HTMLElement>("#conf-micro");
       target?.scrollIntoView({ block: "center", behavior: "smooth" });
       return;
     }
@@ -306,34 +299,11 @@ export function ConfirmacaoPage({ texts, event }: ConfirmacaoPageProps) {
           <details className="group rounded-xl border border-olive/15 px-3 py-2">
             <summary className="cursor-pointer list-none py-2 text-sm font-medium text-brown marker:content-none [&::-webkit-details-marker]:hidden">
               <span className="flex items-center justify-between gap-2">
-                E-mail, acompanhante e recado
+                Acompanhante e recado
                 <span className="text-xs font-normal text-olive">opcional</span>
               </span>
             </summary>
             <div className="space-y-5 pb-3 pt-1">
-              <div className="space-y-2">
-                <Label htmlFor="conf-email">E-mail</Label>
-                <Input
-                  id="conf-email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => {
-                    setFormData((p) => ({ ...p, email: e.target.value }));
-                    if (emailError) setEmailError(null);
-                  }}
-                  placeholder="seu@email.com"
-                  autoComplete="email"
-                  disabled={loading}
-                  className="min-h-11"
-                  aria-invalid={!!emailError}
-                />
-                {emailError && (
-                  <p className="text-sm text-destructive" role="alert">
-                    {emailError}
-                  </p>
-                )}
-              </div>
-
               <div className="space-y-2">
                 <Label htmlFor="conf-acompanhante">
                   Nome do par / acompanhante

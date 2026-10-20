@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { getPublicSiteContent } from "@/lib/content/public";
 import { formatDateLong } from "@/lib/calendar";
+import { SHARE_IMAGE_PATH, shareOpenGraph } from "@/lib/share-metadata";
 
 const playfair = Playfair_Display({
     variable: "--font-playfair",
@@ -47,26 +48,17 @@ export async function generateMetadata(): Promise<Metadata> {
         metadataBase: resolveMetadataBase(),
         title: shareTitle,
         description: shareDescription,
-        openGraph: {
-            type: "website",
-            locale: "pt_BR",
+        openGraph: shareOpenGraph({
             siteName: compartilhamento.nomeSite,
             title: shareTitle,
             description: shareDescription,
-            images: [
-                {
-                    url: "/images/monograma-share.jpeg",
-                    width: 1136,
-                    height: 1600,
-                    alt: `Monograma ${compartilhamento.nomeSite} — ${formatDateLong(evento.inicio)}`,
-                },
-            ],
-        },
+            imageAlt: `Monograma ${compartilhamento.nomeSite} — ${formatDateLong(evento.inicio)}`,
+        }),
         twitter: {
             card: "summary_large_image",
             title: shareTitle,
             description: shareDescription,
-            images: ["/images/monograma-share.jpeg"],
+            images: [SHARE_IMAGE_PATH],
         },
         icons: {
             icon: "/Monograma simples.svg",

@@ -29,6 +29,7 @@ import {
   readTextBlock,
   type CompartilhamentoBlock,
   type ConfirmacaoBlock,
+  type ConviteBlock,
   type EventoBlock,
   type RodapeBlock,
   type RsvpBlock,
@@ -47,6 +48,7 @@ export type PublicSiteContent = {
   secoes: SecoesBlock;
   rsvp: RsvpBlock;
   confirmacao: ConfirmacaoBlock;
+  convite: ConviteBlock;
   rodape: RodapeBlock;
   compartilhamento: CompartilhamentoBlock;
   heroImageUrls: string[];
@@ -92,6 +94,7 @@ function assemble(
     secoes: texts.secoes,
     rsvp: texts.rsvp,
     confirmacao: texts.confirmacao,
+    convite: texts.convite,
     rodape: texts.rodape,
     compartilhamento: texts.compartilhamento,
     ...rest,

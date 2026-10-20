@@ -1,9 +1,7 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
-import { ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { isSiteMediaUrl } from "@/lib/site-media";
 import {
     Dialog,
@@ -17,107 +15,105 @@ export interface HonorPerson {
     nome: string;
     foto: string;
     texto: string;
-    /** Escala da foto no avatar circular (padrão 1.75). */
     fotoZoom?: number;
     /** object-position CSS (ex.: "center 35%"). */
     fotoObjectPosition?: string;
-    /** Deslocamento vertical em % após o zoom (positivo = abaixa a imagem). */
     fotoOffsetY?: number;
 }
 
-function HonorAvatar({
-    person,
-    onPhotoOpen,
-}: {
-    person: HonorPerson;
-    onPhotoOpen?: () => void;
-}) {
+function ArchPortrait({ person }: { person: HonorPerson }) {
     const [imgError, setImgError] = useState(false);
-
-    if (imgError || !person.foto) {
-        return (
-            <div className="flex size-24 items-center justify-center rounded-full border-2 border-sage/30 bg-sage/20 font-heading text-2xl font-semibold text-sage">
-                {person.nome.charAt(0)}
-            </div>
-        );
-    }
-
-    const fotoZoom = person.fotoZoom ?? 1.75;
-    const fotoOffsetY = person.fotoOffsetY ?? 0;
-    const fotoObjectPosition = person.fotoObjectPosition ?? "center center";
-
-    const frameClass =
-        "relative size-24 overflow-hidden rounded-full border-2 border-sage/30";
-
-    const imgEl = (
-        <div
-            className="size-full origin-center"
-            style={{
-                transform: `scale(${fotoZoom}) translateY(${fotoOffsetY}%)`,
-            }}
-        >
-            <Image
-                src={person.foto}
-                alt={onPhotoOpen ? "" : person.nome}
-                width={96}
-                height={96}
-                sizes="96px"
-                className="size-full object-cover"
-                style={{ objectPosition: fotoObjectPosition }}
-                unoptimized={isSiteMediaUrl(person.foto)}
-                onError={() => setImgError(true)}
-            />
-        </div>
-    );
-
-    if (onPhotoOpen) {
-        return (
-            <button
-                type="button"
-                onClick={onPhotoOpen}
-                className={cn(
-                    frameClass,
-                    "cursor-pointer transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 focus-visible:ring-offset-white",
-                )}
-                aria-label={`Ver foto completa de ${person.nome}`}
-            >
-                {imgEl}
-            </button>
-        );
-    }
-
-    return <div className={frameClass}>{imgEl}</div>;
-}
-
-function HonorPersonText({
-    texto,
-    collapsible,
-}: {
-    texto: string;
-    collapsible: boolean;
-}) {
-    const body = (
-        <p className="w-full text-center text-pretty text-sm leading-relaxed text-olive whitespace-pre-line">
-            {texto}
-        </p>
-    );
-
-    if (!collapsible) {
-        return <div className="mt-2 w-full">{body}</div>;
-    }
+    const hasPhoto = Boolean(person.foto) && !imgError;
 
     return (
-        <details className="group mt-2 w-full">
-            <summary className="mx-auto flex w-fit cursor-pointer list-none items-center justify-center gap-1 rounded-md py-2 text-sm font-medium text-sage transition-colors hover:text-olive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage focus-visible:ring-offset-2 marker:content-none [&::-webkit-details-marker]:hidden">
-                <span className="group-open:hidden">Saiba mais</span>
-                <span className="hidden group-open:inline">Fechar</span>
-                <ChevronDown
-                    className="size-4 shrink-0 transition-transform duration-200 group-open:rotate-180"
-                    aria-hidden
-                />
-            </summary>
-            <div className="mt-1">{body}</div>
-        </details>
+        <div className="rounded-t-full border border-brown/30 p-1.5 transition-colors group-hover:border-brown/60 sm:p-2">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-t-full bg-sage/15">
+                {hasPhoto ? (
+                    <Image
+                        src={person.foto}
+                        alt=""
+                        fill
+                        sizes="(max-width: 640px) 45vw, 240px"
+                        className="object-cover"
+                        style={{
+                            objectPosition:
+                                person.fotoObjectPosition ?? "center 30%",
+                        }}
+                        unoptimized={isSiteMediaUrl(person.foto)}
+                        onError={() => setImgError(true)}
+                    />
+                ) : (
+                    <span
+                        className="absolute inset-0 flex items-center justify-center font-heading text-4xl italic text-sage"
+                        aria-hidden
+                    >
+                        {person.nome.charAt(0)}
+                    </span>
+                )}
+            </div>
+        </div>
+    );
+}
+
+function HonorLetter({
+    person,
+    assinatura,
+    onOpenChange,
+}: {
+    person: HonorPerson | null;
+    assinatura: string;
+    onOpenChange: (open: boolean) => void;
+}) {
+    const paragrafos = person
+        ? person.texto
+              .split(/\n+/)
+              .map((p) => p.trim())
+              .filter(Boolean)
+        : [];
+
+    return (
+        <Dialog open={person !== null} onOpenChange={onOpenChange}>
+            <DialogContent
+                showCloseButton
+                className="max-h-[92dvh] max-w-[min(94vw,58rem)] gap-0 overflow-y-auto bg-cream p-0 sm:max-w-[min(94vw,58rem)] md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] md:overflow-hidden"
+            >
+                {person && (
+                    <>
+                        {person.foto && (
+                            <div className="relative flex items-center justify-center bg-olive/10 p-4 md:p-6">
+                                <Image
+                                    src={person.foto}
+                                    alt={person.nome}
+                                    width={720}
+                                    height={900}
+                                    sizes="(max-width: 768px) 94vw, 26rem"
+                                    unoptimized={isSiteMediaUrl(person.foto)}
+                                    className="max-h-[42dvh] w-auto max-w-full object-contain shadow-[0_12px_30px_-18px_rgba(61,23,0,0.7)] md:max-h-[80dvh]"
+                                />
+                            </div>
+                        )}
+                        <article className="px-6 py-8 sm:px-10 md:max-h-[92dvh] md:overflow-y-auto md:py-12">
+                            <DialogHeader className="gap-0">
+                                <DialogTitle className="font-heading text-2xl leading-snug font-normal italic text-brown sm:text-3xl">
+                                    Para {person.nome},
+                                </DialogTitle>
+                                <DialogDescription className="sr-only">
+                                    Carta de Suelen e Marcelo para {person.nome}.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <div className="mt-6 max-w-[34rem] space-y-4 text-[0.95rem] leading-7 text-pretty text-olive">
+                                {paragrafos.map((p, i) => (
+                                    <p key={i}>{p}</p>
+                                ))}
+                            </div>
+                            <p className="mt-10 text-right font-heading text-xl italic text-brown">
+                                {assinatura}
+                            </p>
+                        </article>
+                    </>
+                )}
+            </DialogContent>
+        </Dialog>
     );
 }
 
@@ -125,59 +121,19 @@ interface HonorSectionProps {
     title: string;
     subtitle?: string;
     data: HonorPerson[];
-    /** Recolhe o texto de cada card atrás de “Saiba mais”. */
-    collapsibleText?: boolean;
+    assinatura: string;
 }
 
 export function HonorSection({
     title,
     subtitle,
     data,
-    collapsibleText = false,
+    assinatura,
 }: HonorSectionProps) {
-    const sectionRef = useRef<HTMLElement>(null);
-    const [isVisible, setIsVisible] = useState(false);
-    const [lightbox, setLightbox] = useState<HonorPerson | null>(null);
-
-    useEffect(() => {
-        const el = sectionRef.current;
-        if (!el) return;
-
-        const reveal = () => setIsVisible(true);
-
-        const rect = el.getBoundingClientRect();
-        if (rect.top < window.innerHeight && rect.bottom > 0) {
-            reveal();
-        }
-
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) reveal();
-            },
-            { threshold: 0.05, rootMargin: "0px 0px -5% 0px" },
-        );
-
-        observer.observe(el);
-
-        const onHashChange = () => {
-            requestAnimationFrame(() => {
-                const next = el.getBoundingClientRect();
-                if (next.top < window.innerHeight && next.bottom > 0) {
-                    reveal();
-                }
-            });
-        };
-
-        window.addEventListener("hashchange", onHashChange);
-
-        return () => {
-            observer.disconnect();
-            window.removeEventListener("hashchange", onHashChange);
-        };
-    }, []);
+    const [aberto, setAberto] = useState<HonorPerson | null>(null);
 
     return (
-        <section ref={sectionRef} className="mx-auto max-w-7xl">
+        <section className="mx-auto max-w-5xl">
             <div className="mb-12 text-center">
                 <h2 className="font-heading text-3xl font-semibold text-brown md:text-4xl">
                     {title}
@@ -185,69 +141,39 @@ export function HonorSection({
                 {subtitle && <p className="mt-4 text-olive">{subtitle}</p>}
             </div>
 
-            <div className="flex flex-wrap justify-center gap-8">
-                {data.map((person, i) => (
-                    <div
+            <ul className="flex flex-wrap justify-center gap-x-5 gap-y-12 sm:gap-x-10 sm:gap-y-14">
+                {data.map((person) => (
+                    <li
                         key={person.nome}
-                        className={cn(
-                            "flex w-full max-w-md shrink-0 flex-col items-center rounded-xl border border-olive/20 bg-white p-6 shadow-sm transition-all duration-500",
-                            isVisible
-                                ? "translate-y-0 opacity-100"
-                                : "translate-y-4 opacity-100",
-                        )}
-                        style={{ transitionDelay: `${i * 100}ms` }}
+                        className="w-[calc(50%-0.625rem)] max-w-60 sm:w-52 md:w-60"
                     >
-                        <HonorAvatar
-                            person={person}
-                            onPhotoOpen={() => setLightbox(person)}
-                        />
-                        <h3 className="mt-4 font-heading text-lg font-semibold text-brown">
-                            {person.nome}
-                        </h3>
-                        <HonorPersonText
-                            texto={person.texto}
-                            collapsible={collapsibleText}
-                        />
-                    </div>
+                        <button
+                            type="button"
+                            onClick={() => setAberto(person)}
+                            className="group block w-full cursor-pointer text-center focus-visible:outline-none"
+                            aria-label={`Ler a carta para ${person.nome}`}
+                        >
+                            <span className="block rounded-t-full group-focus-visible:ring-2 group-focus-visible:ring-sage group-focus-visible:ring-offset-4 group-focus-visible:ring-offset-cream">
+                                <ArchPortrait person={person} />
+                            </span>
+                            <span className="mt-4 block font-heading text-base leading-snug font-medium italic text-balance text-brown sm:text-lg">
+                                {person.nome}
+                            </span>
+                            <span className="mt-1 inline-block text-sm text-sage underline decoration-sage/40 underline-offset-4 transition-colors group-hover:text-olive group-hover:decoration-olive">
+                                Ler carta
+                            </span>
+                        </button>
+                    </li>
                 ))}
-            </div>
+            </ul>
 
-            <Dialog
-                open={lightbox !== null}
+            <HonorLetter
+                person={aberto}
+                assinatura={assinatura}
                 onOpenChange={(open) => {
-                    if (!open) setLightbox(null);
+                    if (!open) setAberto(null);
                 }}
-            >
-                <DialogContent
-                    showCloseButton
-                    className="max-h-[92dvh] max-w-[min(96vw,56rem)] gap-3 overflow-y-auto border-olive/20 bg-cream p-3 sm:max-w-[min(96vw,56rem)] sm:p-4"
-                >
-                    {lightbox && (
-                        <>
-                            <DialogHeader className="space-y-1">
-                                <DialogTitle className="font-heading text-center text-lg text-brown sm:text-xl">
-                                    {lightbox.nome}
-                                </DialogTitle>
-                                <DialogDescription className="sr-only">
-                                    Foto em tamanho ampliado. Feche o diálogo para
-                                    voltar à página.
-                                </DialogDescription>
-                            </DialogHeader>
-                            <div className="relative flex min-h-0 w-full max-w-full justify-center">
-                                <Image
-                                    src={lightbox.foto}
-                                    alt={lightbox.nome}
-                                    width={896}
-                                    height={1200}
-                                    sizes="(max-width: 768px) 96vw, 56rem"
-                                    unoptimized={isSiteMediaUrl(lightbox.foto)}
-                                    className="max-h-[min(78dvh,80vh)] w-auto max-w-full rounded-lg object-contain"
-                                />
-                            </div>
-                        </>
-                    )}
-                </DialogContent>
-            </Dialog>
+            />
         </section>
     );
 }

@@ -4,7 +4,6 @@ export type RsvpForm = {
   nome: string;
   guestId: string | null;
   presenca: Presenca;
-  email: string;
   nomeAcompanhante: string;
   microonibus: "" | "sim" | "nao";
   mensagem: string;
@@ -16,13 +15,6 @@ export function validateRsvpName(nome: string): string | null {
   const parts = trimmed.split(/\s+/).filter(Boolean);
   if (parts.length < 2) return "Por favor, informe nome e sobrenome.";
   return null;
-}
-
-export function validateRsvpEmail(email: string): string | null {
-  if (!email.trim()) return null;
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
-    ? null
-    : "Informe um e-mail válido.";
 }
 
 export async function submitRsvp(
@@ -37,7 +29,6 @@ export async function submitRsvp(
         nome: form.nome.trim(),
         guestId: form.guestId,
         presenca: form.presenca,
-        email: form.email.trim() || null,
         nomeAcompanhante: vai ? form.nomeAcompanhante.trim() || null : null,
         microonibus: vai ? form.microonibus || null : null,
         mensagem: form.mensagem.trim() || null,
