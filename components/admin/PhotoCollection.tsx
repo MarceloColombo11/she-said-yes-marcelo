@@ -117,7 +117,7 @@ export function PhotoCollection({
           <p className="text-sm text-olive/80">{photoLimitMessage(collection)}</p>
         ) : (
           <p className="text-sm text-olive/60">
-            JPEG, PNG ou WebP, até 4 MB. {photos.length} de {photoLimit(collection)}.
+            JPEG, PNG ou WebP. {photos.length} de {photoLimit(collection)}.
           </p>
         )}
       </div>

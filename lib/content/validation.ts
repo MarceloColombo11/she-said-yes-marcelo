@@ -4,7 +4,6 @@ export const SITE_IMAGE_MIMES = [
   "image/webp",
 ] as const;
 
-export const MAX_SITE_IMAGE_BYTES = 4 * 1024 * 1024;
 export const HERO_PHOTO_LIMIT = 6;
 export const HISTORIA_PHOTO_LIMIT = 12;
 
@@ -88,12 +87,6 @@ export function validateSiteImageFile(input: {
   }
   if (!Number.isFinite(input.size) || input.size <= 0) {
     return { ok: false, error: "Arquivo inválido." };
-  }
-  if (input.size > MAX_SITE_IMAGE_BYTES) {
-    return {
-      ok: false,
-      error: "A foto pode ter no máximo 4 MB.",
-    };
   }
   return { ok: true };
 }

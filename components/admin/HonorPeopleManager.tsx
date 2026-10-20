@@ -172,7 +172,7 @@ function HonorPersonForm({ category, categories, person, onDone }: HonorPersonFo
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="honor-photo">Foto (opcional, até 4 MB)</Label>
+        <Label htmlFor="honor-photo">Foto (opcional)</Label>
         <Input
           id="honor-photo"
           ref={fileRef}
