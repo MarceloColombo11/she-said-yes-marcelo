@@ -70,16 +70,18 @@ export function EventDetailsCard({ variant = "form", event }: EventDetailsCardPr
       className="mx-auto w-full max-w-lg px-5 py-10"
       aria-labelledby="detalhes-titulo"
     >
-      <div className="mb-5 flex justify-center">
-        <Image
-          src="/illustrations/wedding.svg"
-          alt=""
-          width={220}
-          height={191}
-          className="h-auto w-[min(58%,220px)]"
-          unoptimized
-        />
-      </div>
+      {isSuccess ? null : (
+        <div className="mb-5 flex justify-center">
+          <Image
+            src="/illustrations/wedding.svg"
+            alt=""
+            width={220}
+            height={191}
+            className="h-auto w-[min(58%,220px)]"
+            unoptimized
+          />
+        </div>
+      )}
 
       <h2
         id="detalhes-titulo"

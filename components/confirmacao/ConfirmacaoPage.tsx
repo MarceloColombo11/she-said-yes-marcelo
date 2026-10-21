@@ -109,15 +109,11 @@ export function ConfirmacaoPage({ texts, event }: ConfirmacaoPageProps) {
       <main id="main" className="min-h-dvh bg-cream pb-safe pt-safe">
         <div className="mx-auto flex max-w-lg flex-col items-center px-5 pt-12 text-center animate-in fade-in-0 zoom-in-95 duration-300">
           <Image
-            src={
-              isVou
-                ? "/illustrations/a-caminho.svg"
-                : "/illustrations/lista-da-obra.svg"
-            }
+            src="/illustrations/wedding.svg"
             alt=""
-            width={280}
-            height={193}
-            className="mb-6 h-auto w-[min(72%,280px)]"
+            width={524}
+            height={456}
+            className="mb-6 h-auto w-[min(62%,240px)]"
             unoptimized
           />
           <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-sage/20 text-sage">
@@ -202,7 +198,7 @@ export function ConfirmacaoPage({ texts, event }: ConfirmacaoPageProps) {
         aria-labelledby="form-titulo"
       >
         <h2 id="form-titulo" className="sr-only">
-          Assina a lista da obra
+          Confirma sua presença
         </h2>
 
         <div
@@ -336,7 +332,7 @@ export function ConfirmacaoPage({ texts, event }: ConfirmacaoPageProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="conf-mensagem">Recado pra obra</Label>
+                <Label htmlFor="conf-mensagem">Um recadinho</Label>
                 <textarea
                   id="conf-mensagem"
                   value={formData.mensagem}
