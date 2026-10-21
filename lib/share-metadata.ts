@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const SHARE_IMAGE_PATH = "/images/monograma-share.jpeg";
+export const SHARE_IMAGE_PATH = "/images/monograma-share.webp";
 
 type ShareOpenGraphInput = {
   siteName: string;

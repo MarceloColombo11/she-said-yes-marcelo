@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
+import sharp from "sharp";
 import {
   ADMIN_SESSION_COOKIE,
   verifySessionToken,
@@ -9,6 +10,18 @@ import { siteMedia } from "@/lib/db/schema";
 import { isAllowedOrigin } from "@/lib/request-origin";
 import { publicMediaUrl } from "@/lib/site-media";
 import { validateSiteImageFile } from "@/lib/content/validation";
+
+async function toWebp(bytes: Buffer): Promise<Buffer> {
+  return sharp(bytes)
+    .rotate()
+    .webp({
+      quality: 90,
+      effort: 6,
+      smartSubsample: true,
+      alphaQuality: 100,
+    })
+    .toBuffer();
+}
 
 export async function POST(request: NextRequest) {
   const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
@@ -53,14 +66,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    const bytes = Buffer.from(await file.arrayBuffer());
+    const webp = await toWebp(Buffer.from(await file.arrayBuffer()));
     const [row] = await db
       .insert(siteMedia)
       .values({
         source: "db",
-        mime: mimeType,
-        byteSize: bytes.length,
-        bytes: sql`decode(${bytes.toString("base64")}, 'base64')`,
+        mime: "image/webp",
+        byteSize: webp.length,
+        bytes: sql`decode(${webp.toString("base64")}, 'base64')`,
       })
       .returning({ id: siteMedia.id });
 

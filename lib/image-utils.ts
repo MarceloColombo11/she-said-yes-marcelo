@@ -6,7 +6,7 @@
 import { isImageMime, validateMediaFileFromFile } from "@/lib/media-utils";
 
 const MAX_DIMENSION = 2560;
-const JPEG_QUALITY = 0.92;
+const WEBP_QUALITY = 0.9;
 
 export type ImageValidationResult =
   | { valid: true }
@@ -24,7 +24,7 @@ export function validateImageFile(file: File): ImageValidationResult {
 }
 
 /**
- * Comprime e redimensiona a imagem (max 2560px, JPEG quality 0.92).
+ * Converte para WebP e redimensiona (máx. 2560px, qualidade 0.9).
  * Reduz tempo de upload em redes móveis; não é exigido pelo body da Vercel.
  */
 export async function compressImage(file: File): Promise<File> {
@@ -65,7 +65,7 @@ export async function compressImage(file: File): Promise<File> {
       ctx.drawImage(img, 0, 0, width, height);
 
       const baseName = file.name.replace(/\.[^.]+$/, "") || "foto";
-      const outputFilename = `${baseName}-${Date.now()}.jpg`;
+      const outputFilename = `${baseName}-${Date.now()}.webp`;
 
       canvas.toBlob(
         (blob) => {
@@ -73,10 +73,10 @@ export async function compressImage(file: File): Promise<File> {
             reject(new Error("Erro ao comprimir a imagem."));
             return;
           }
-          resolve(new File([blob], outputFilename, { type: "image/jpeg" }));
+          resolve(new File([blob], outputFilename, { type: "image/webp" }));
         },
-        "image/jpeg",
-        JPEG_QUALITY
+        "image/webp",
+        WEBP_QUALITY
       );
     };
 

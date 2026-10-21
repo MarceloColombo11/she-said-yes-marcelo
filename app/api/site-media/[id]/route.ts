@@ -6,6 +6,18 @@ import { getDb } from "@/lib/db/client";
 import { siteMedia } from "@/lib/db/schema";
 import { isSafeStaticPath, isUuid } from "@/lib/content/validation";
 
+function resolveStaticMedia(staticPath: string): string | null {
+  const webp = staticPath.replace(/\.(jpe?g|png)$/i, ".webp");
+  const candidates = webp === staticPath ? [staticPath] : [staticPath, webp];
+
+  for (const candidate of candidates) {
+    if (!isSafeStaticPath(candidate)) continue;
+    const abs = path.join(process.cwd(), "public", candidate.replace(/^\//, ""));
+    if (existsSync(abs)) return candidate;
+  }
+  return null;
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -31,11 +43,11 @@ export async function GET(
     }
 
     if (row.source === "static" && row.staticPath && isSafeStaticPath(row.staticPath)) {
-      const abs = path.join(process.cwd(), "public", row.staticPath.replace(/^\//, ""));
-      if (!existsSync(abs)) {
+      const resolved = resolveStaticMedia(row.staticPath);
+      if (!resolved) {
         return new NextResponse(null, { status: 404 });
       }
-      return NextResponse.redirect(new URL(row.staticPath, request.url), 302);
+      return NextResponse.redirect(new URL(resolved, request.url), 302);
     }
 
     if (row.source === "db" && row.bytes) {

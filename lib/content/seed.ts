@@ -26,7 +26,7 @@ import {
 
 const SEED_ID = "v1";
 
-export const HERO_STATIC = ["/images/casal/1.jpeg"];
+export const HERO_STATIC = ["/images/casal/1.webp"];
 
 type JsonGift = {
   id: string;
@@ -64,7 +64,7 @@ export const JSON_HONOR: Record<"padrinhos" | "honra" | "damas", JsonHonorPerson
 export const JSON_SCHEDULE = programacaoData as JsonScheduleItem[];
 
 export function giftStaticImage(id: string): string {
-  return `/imagensPresentes/${id}.jpeg`;
+  return `/imagensPresentes/${id}.webp`;
 }
 
 type Db = NonNullable<ReturnType<typeof getDb>>;

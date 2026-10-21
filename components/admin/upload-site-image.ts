@@ -19,16 +19,15 @@ async function shrinkIfLarge(file: File): Promise<File> {
   canvas.getContext("2d")?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   bitmap.close();
 
-  let blob =
-    file.type === "image/png" ? await toBlob(canvas, "image/png") : null;
+  let blob = await toBlob(canvas, "image/webp", 0.9);
   if (!blob || blob.size > SHRINK_ABOVE_BYTES) {
-    blob = await toBlob(canvas, "image/jpeg", 0.85);
+    const smaller = await toBlob(canvas, "image/webp", 0.75);
+    if (smaller && (!blob || smaller.size < blob.size)) blob = smaller;
   }
   if (!blob) return file;
 
   const name = (file.name || "foto").replace(/\.[^.]+$/, "");
-  const extension = blob.type === "image/png" ? "png" : "jpg";
-  return new File([blob], `${name}.${extension}`, { type: blob.type });
+  return new File([blob], `${name}.webp`, { type: "image/webp" });
 }
 
 export async function uploadSiteImage(original: File): Promise<string> {
@@ -42,7 +41,7 @@ export async function uploadSiteImage(original: File): Promise<string> {
 
   const file = await shrinkIfLarge(original);
   const form = new FormData();
-  form.set("file", file, file.name || "foto.jpg");
+  form.set("file", file, file.name || "foto.webp");
 
   const response = await fetch("/api/admin/media/upload", {
     method: "POST",

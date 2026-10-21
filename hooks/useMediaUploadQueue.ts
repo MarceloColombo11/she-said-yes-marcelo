@@ -77,12 +77,8 @@ async function prepareFile(file: File): Promise<File> {
     return file;
   }
 
-  // HEIC/HEIF/GIF: canvas pode falhar — envia original
-  if (
-    file.type === "image/heic" ||
-    file.type === "image/heif" ||
-    file.type === "image/gif"
-  ) {
+  // GIF animado perde os quadros no canvas; HEIC segue e, se o navegador não abrir, volta o original.
+  if (file.type === "image/gif") {
     return file;
   }
 

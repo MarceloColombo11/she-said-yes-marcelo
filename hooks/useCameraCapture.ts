@@ -14,7 +14,7 @@ const SCREEN_FLASH_PHOTO_MS = 150;
 /** Bitrate de áudio (~voz/ambiente nítidos em mobile). */
 const AUDIO_BITS_PER_SECOND = 192_000;
 const VIDEO_BITS_PER_SECOND = 8_000_000;
-const PHOTO_JPEG_QUALITY = 0.95;
+const PHOTO_WEBP_QUALITY = 0.9;
 
 /** Constraints de mic otimizadas para voz (casamento / ambiente). */
 const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
@@ -549,16 +549,16 @@ export function useCameraCapture(onCapture: (file: File) => void) {
           toast.error("Erro ao capturar a foto.");
           return;
         }
-        const file = new File([blob], `foto-${Date.now()}.jpg`, {
-          type: "image/jpeg",
+        const file = new File([blob], `foto-${Date.now()}.webp`, {
+          type: "image/webp",
         });
         const previewUrl = URL.createObjectURL(blob);
         setCapturedKind("photo");
         setCapturedPreview(previewUrl);
         setCapturedFile(file);
       },
-      "image/jpeg",
-      PHOTO_JPEG_QUALITY
+      "image/webp",
+      PHOTO_WEBP_QUALITY
     );
   }, []);
 
