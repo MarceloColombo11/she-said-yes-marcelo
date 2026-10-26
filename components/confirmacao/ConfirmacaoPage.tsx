@@ -198,7 +198,7 @@ export function ConfirmacaoPage({ texts, event }: ConfirmacaoPageProps) {
         aria-labelledby="form-titulo"
       >
         <h2 id="form-titulo" className="sr-only">
-          Confirma sua presença
+          Confirme sua presença
         </h2>
 
         <div
@@ -339,7 +339,7 @@ export function ConfirmacaoPage({ texts, event }: ConfirmacaoPageProps) {
                   onChange={(e) =>
                     setFormData((p) => ({ ...p, mensagem: e.target.value }))
                   }
-                  placeholder="Manda um abraço, uma piada, o que quiser…"
+                  placeholder="Mande um abraço, uma piada, o que quiser…"
                   disabled={loading}
                   rows={3}
                   className="border-input bg-background placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 flex min-h-22 w-full rounded-lg border px-3 py-2 text-sm outline-none focus-visible:ring-3 disabled:opacity-50"

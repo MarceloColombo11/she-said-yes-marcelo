@@ -188,13 +188,13 @@ export function CameraModal({
                 controls
                 playsInline
                 className="h-full w-full object-contain"
-                aria-label="Preview do vídeo gravado"
+                aria-label="Prévia do vídeo gravado"
               />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={capturedPreview!}
-                alt="Preview da foto capturada"
+                alt="Prévia da foto capturada"
                 className="h-full w-full object-contain"
               />
             )

@@ -46,7 +46,7 @@ export function EventDetailsCard({ variant = "form", event }: EventDetailsCardPr
       );
       toast.success("Endereço copiado!");
     } catch {
-      toast.error("Não deu pra copiar. Tenta de novo?");
+      toast.error("Não deu para copiar. Tente de novo?");
     }
   };
 
@@ -87,12 +87,12 @@ export function EventDetailsCard({ variant = "form", event }: EventDetailsCardPr
         id="detalhes-titulo"
         className="text-center font-heading text-2xl font-semibold text-brown md:text-3xl"
       >
-        {isSuccess ? "Agora salva na agenda" : "Pra não se perder no caminho"}
+        {isSuccess ? "Agora salve na agenda" : "Para não se perder no caminho"}
       </h2>
       <p className="mt-3 text-center text-olive leading-relaxed">
         {isSuccess
           ? "Data, hora e endereço — um toque e fica no celular."
-          : "Depois de confirmar, salva a data e o endereço."}
+          : "Depois de confirmar, salve a data e o endereço."}
       </p>
 
       <div className="mt-6 space-y-3 text-center">

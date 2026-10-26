@@ -2,7 +2,7 @@
   {
     "hora": "16:00",
     "titulo": "Recepção dos Convidados",
-    "resumo": "Chegue cedo, pegue uma bebida e vem matar a saudade!",
+    "resumo": "Chegue cedo, pegue uma bebida e venha matar a saudade!",
     "descricao": "Cheguem com calma e com o coração aberto — estaremos no Mirante Garden, em Fazendinha (Biguaçu/SC), esperando por vocês.\n\nMeia hora antes da cerimônia, abrimos os braços para recebê-los: conversa boa, abraço apertado e bebidas sem álcool à disposição. É nosso jeitinho de dizer \"que bom que vocês chegaram\" antes do grande \"sim\".",
     "icone": "coffee",
     "local": "Mirante Garden — Fazendinha, Biguaçu/SC",
@@ -19,9 +19,9 @@
   },
   {
     "hora": "17:30",
-    "titulo": "Cocktail",
-    "resumo": "Drinks liberados e entradinhas circulando.",
-    "descricao": "Logo depois da cerimônia, a festa ganha outro ritmo: recepção, brinde e aquele respiro depois do \"sim\".\n\nO bar de drinks e as entradas estarão à disposição — é hora de celebrar com calma, sorriso no rosto e copo na mão.",
+    "titulo": "Coquetel",
+    "resumo": "Bebidas liberadas e entradinhas circulando.",
+    "descricao": "Logo depois da cerimônia, a festa ganha outro ritmo: recepção, brinde e aquele respiro depois do \"sim\".\n\nO bar e as entradas estarão à disposição — é hora de celebrar com calma, sorriso no rosto e copo na mão.",
     "icone": "wine"
   },
   {
@@ -34,7 +34,7 @@
   {
     "hora": "20:30",
     "titulo": "Festa",
-    "resumo": "Pista aberta. Vem dançar!",
+    "resumo": "Pista aberta. Venha dançar!",
     "descricao": "20h30: pista liberada! A gente abre o chão, liga o som e dá o pontapé na celebração de verdade.\n\nSapato confortável (ou descalço, sem julgamentos), sorriso largo e vontade de dançar — o resto a gente resolve na pista.",
     "icone": "music"
   }

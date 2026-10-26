@@ -25,7 +25,7 @@ export function PhotoUploadZone({
     <div
       className="flex min-h-[160px] flex-col items-center justify-center"
       role="region"
-      aria-label="Área de upload de fotos e vídeos da galeria"
+      aria-label="Área para enviar fotos e vídeos da galeria"
     >
       <div className="flex flex-col items-center gap-4 p-6">
         <Upload className="size-10 text-olive/60" aria-hidden />

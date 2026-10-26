@@ -215,7 +215,7 @@ export const TEXT_BLOCKS: Record<TextBlockKey, BlockDef> = {
       microonibusAviso: "O microônibus será por conta dos noivos.",
       sucessoTitulo: "Resposta recebida!",
       sucessoDescricao:
-        "Obrigado por nos responder! Sua resposta é muito importante para nós.",
+        "Agradecemos por responder! Sua resposta é muito importante para nós.",
       sucessoMensagem: "Mal podemos esperar para celebrar com você!",
     },
   },
@@ -234,15 +234,15 @@ export const TEXT_BLOCKS: Record<TextBlockKey, BlockDef> = {
       t("sucessoNaoVouTexto", "Texto quando não vai", { max: 300 }),
     ],
     defaults: {
-      titulo: "Confirma presença",
+      titulo: "Confirme sua presença",
       subtitulo: "A gente tá contando os dias — e a festa fica mais bonita com você.",
       prazo: "Até 15 de novembro de 2026",
       vouDica: "Que alegria. Te esperamos de coração aberto.",
-      naoVouDica: "Tudo bem. Obrigado por avisar com carinho.",
+      naoVouDica: "Tudo bem. Agradecemos por avisar com carinho.",
       sucessoVouTitulo: "Que alegria. Você vem!",
       sucessoVouTexto: "Nos vemos na festa. Vai ser ainda mais especial com você.",
       sucessoNaoVouTitulo: "Recebido com carinho.",
-      sucessoNaoVouTexto: "Vai fazer falta, mas a gente entende. Obrigado por avisar.",
+      sucessoNaoVouTexto: "Vai fazer falta, mas a gente entende. Agradecemos por avisar.",
     },
   },
   convite: {

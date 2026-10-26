@@ -74,7 +74,7 @@ export function RsvpModal({ open, onOpenChange, texts }: RsvpModalProps) {
     const nErr = validateRsvpName(formData.nome);
     const mErr =
       presenca === "vou" && !formData.microonibus
-        ? "Por favor, informe se deseja microônibus."
+        ? "Por favor, informe se deseja ir de microônibus."
         : null;
     const cErr =
       presenca === "vou" ? validateCompanionName(formData.nomeAcompanhante) : null;
@@ -199,7 +199,7 @@ export function RsvpModal({ open, onOpenChange, texts }: RsvpModalProps) {
             {presenca === "vou" ? (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="rsvp-microonibus">Deseja microônibus? *</Label>
+                  <Label htmlFor="rsvp-microonibus">Deseja ir de microônibus? *</Label>
                   <Select
                     value={formData.microonibus}
                     onValueChange={(v) => {

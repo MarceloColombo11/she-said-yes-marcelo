@@ -26,7 +26,7 @@ export function ComoChegarCard({ event, mapaEmbedUrl }: ComoChegarCardProps) {
       await navigator.clipboard.writeText(`${event.venueName}\n${event.address}`);
       toast.success("Endereço copiado!");
     } catch {
-      toast.error("Não deu pra copiar. Tenta de novo?");
+      toast.error("Não deu para copiar. Tente de novo?");
     }
   };
 

@@ -32,7 +32,7 @@ const NAV_LINKS_DESKTOP = [
 ];
 
 const NAV_LINKS_MOBILE_BEFORE_COMITIVA = [
-    { href: "#home", label: "Home", sectionId: "home" },
+    { href: "#home", label: "Início", sectionId: "home" },
     { href: "#sobre-nos", label: "Sobre Nós", sectionId: "sobre-nos" },
 ];
 const NAV_LINKS_MOBILE_AFTER_COMITIVA = [
