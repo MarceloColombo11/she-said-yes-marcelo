@@ -1,5 +1,6 @@
 export const ADMIN_AREAS = [
   { href: "/admin/convidados", label: "Convidados", hint: "Lista e confirmações" },
+  { href: "/admin/microonibus", label: "Microônibus", hint: "Quem pediu o ônibus" },
   { href: "/admin/presentes", label: "Presentes", hint: "Lista e Pix" },
   { href: "/admin/fotos", label: "Fotos", hint: "Capa e Sobre Nós" },
   {
