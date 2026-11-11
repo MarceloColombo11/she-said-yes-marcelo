@@ -35,6 +35,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { adminFieldClass } from "@/components/admin/field-classes";
+import { downloadConfirmedGuestsCsv } from "@/lib/content/confirmed-guests-csv";
 
 const tableFieldClass =
   "h-11 min-h-11 w-full min-w-0 rounded-md border border-sage/30 bg-white px-2 text-sm text-olive outline-none placeholder:text-olive/40 focus-visible:border-sage focus-visible:ring-3 focus-visible:ring-sage/40";
@@ -217,6 +218,15 @@ export function GuestPanel({ board }: GuestPanelProps) {
               </option>
             ))}
           </select>
+          <Button
+            type="button"
+            disabled={busy}
+            variant="outline"
+            className="h-11 min-h-11 shrink-0 border-sage/60 text-olive"
+            onClick={() => downloadConfirmedGuestsCsv(board.guests, board.groups)}
+          >
+            Exportar confirmados
+          </Button>
           <Button
             type="button"
             disabled={busy}
